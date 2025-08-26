@@ -1,0 +1,92 @@
+import { Component, inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { ShareServiceService } from '../../../shared/share-service.service';
+import { BaseChartDirective } from 'ng2-charts';
+import {ChartConfiguration, ChartData, ChartEvent} from 'chart.js';
+
+@Component({
+  selector: 'app-dashbord',
+  standalone: true,
+  imports: [
+   BaseChartDirective
+  ],
+  templateUrl: './dashbord.component.html',
+  styleUrl: './dashbord.component.scss'
+})
+export class DashbordComponent implements OnInit {
+
+  @ViewChild(BaseChartDirective) chart: BaseChartDirective<'bar'> | undefined;
+
+  public barChartOptions: ChartConfiguration['options'] = {
+    // We use these empty structures as placeholders for dynamic theming.
+    scales: {
+      x: {},
+      y: {
+        min: 10,
+      },
+    },
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+      },
+      title: {
+          display: true,
+          text: 'Evolution du Chiffre d\'Affair'
+        }
+    }
+  };
+
+  public barChartType = 'bar' as const;
+
+  public barChartData: ChartData<'bar'> = {
+    labels: ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'],
+    datasets: [
+      { data: [65, 59, 80, 81, 56, 55, 40], label: '2025' },
+      { data: [28, 48, 40, 19, 86, 27, 90], label: '2026' },
+    ],
+  };
+
+  public chartClicked({
+    event,
+    active,
+  }: {
+    event?: ChartEvent;
+    active?: object[];
+  }): void {
+    console.log(event, active);
+  }
+
+  public chartHovered({
+    event,
+    active,
+  }: {
+    event?: ChartEvent;
+    active?: object[];
+  }): void {
+    console.log(event, active);
+  }
+
+  public randomize(): void {
+    // Only Change 3 values
+    this.barChartData.datasets[0].data = [
+      Math.round(Math.random() * 100),
+      59,
+      80,
+      Math.round(Math.random() * 100),
+      56,
+      Math.round(Math.random() * 100),
+      40,
+    ];
+
+    this.chart?.update();
+  }
+
+
+
+  constructor(private shareService: ShareServiceService) { }
+
+  ngOnInit(): void {
+    this.shareService.setLoadingStatus(true);
+  }
+
+}

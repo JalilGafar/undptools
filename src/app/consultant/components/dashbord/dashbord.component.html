@@ -1,0 +1,17 @@
+<div class="content">
+    <div style="display: block;" class="chart">
+        <canvas
+        baseChart
+        [data]="barChartData"
+        [options]="barChartOptions"
+        [type]="barChartType"
+        (chartHover)="chartHovered($event)"
+        (chartClick)="chartClicked($event)"
+      >
+      </canvas>
+    
+      <button type="button" class="btn btn-primary" (click)="randomize()">
+        Update
+      </button>
+    </div>
+</div>
