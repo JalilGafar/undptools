@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
       // Ici, vous intégreriez normalement votre service d'authentification
       console.log('Connexion réussie', this.loginForm.value);
       this.loading = false;
-      this.router.navigate(['/consultant']); // Redirection après connexion
+      this.router.navigate(['/program']); // Redirection après connexion
     }, 1500);
   }
 

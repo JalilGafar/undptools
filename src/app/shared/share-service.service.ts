@@ -8,14 +8,25 @@ export class ShareServiceService {
 
   private _menuVisible = new BehaviorSubject<boolean>(false);
   menuVisible$ = this._menuVisible.asObservable();
+  
+  private _manMenuVisible = new BehaviorSubject<boolean>(false);
+  manMenuVisible$ = this._manMenuVisible.asObservable();
 
   showMenu() {
     this._menuVisible.next(true);
     console.log('menu visible')
   }
+  showManMenu() {
+    this._manMenuVisible.next(true);
+    console.log('manmenu visible')
+  }
 
   hideMenu() {
     this._menuVisible.next(false);
+    console.log('menu caché')
+  }
+  hideManMenu() {
+    this._manMenuVisible.next(false);
     console.log('menu caché')
   }
 

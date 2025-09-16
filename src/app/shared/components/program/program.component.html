@@ -1,0 +1,116 @@
+<div class="main">
+
+    <header>
+        <nav class="navig">
+            <button class="btn btn-outline-danger mx-2 mt-2" routerLink=""> <i
+                    class="bi bi-door-closed"></i>Deconnexion</button>
+        </nav>
+    </header>
+    
+    <div class="container">
+        @if (showAlert) {
+            <div class="alert alert-{{alertType}} mx-5" role="alert">
+                <i class="bi bi-exclamation-triangle-fill px-4"></i>
+                <strong>{{ alertMessage }}</strong>
+                
+                @if(dismissible){
+                    <button type="button" class="btn-close ps-5"  (click)="hideAlert()" aria-label="Close"></button>
+                }
+            </div>
+        }
+        <div class="row row-cols-1 row-cols-md-2 g-2 m-1">
+            <div class="col">
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0 program" (click)="showAlertMessage()">
+                        <div class="col-md-4">
+                            <img src="../../../../assets/images/inmo.png" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">INMOTION</h5>
+                                <p class="card-text">
+                                    <strong>Objectif : </strong> Renforcer le marché, les conditions financières,
+                                    administratives et productives des PME
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card mb-3" style="max-width: 540px;" (click)="showAlertMessage()">
+                    <div class="row g-0 program">
+                        <div class="col-md-4">
+                            <img src="../../../../assets/images/digitinmo.png" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">DIGITAL INMOTION</h5>
+                                <p class="card-text">
+                                    <strong>Objectif : </strong> Renforcer le marché, les conditions financières,
+                                    administratives et productives des PME
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card mb-3" style="max-width: 540px;" (click)="showAlertMessage()">
+                    <div class="row g-0 program">
+                        <div class="col-md-4">
+                            <img src="../../../../assets/images/syb.png" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">SYB</h5>
+                                <p class="card-text">
+                                    <strong>Objectif : </strong> Renforcer le marché, les conditions financières,
+                                    administratives et productives des PME
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0 program" routerLink="/consultant">
+                        <div class="col-md-4">
+                            <img src="../../../../assets/images/gyb.png" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">GYB</h5>
+                                <p class="card-text">
+                                    <strong>Objectif : </strong> Renforcer le marché, les conditions financières,
+                                    administratives et productives des PME
+                                </p>
+                                <p class="card-text"><small class="text-muted">Last use 3 days ago</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card mb-3" style="max-width: 540px;" (click)="showAlertMessage()">
+                    <div class="row g-0 program">
+                        <div class="col-md-4">
+                            <img src="../../../../assets/images/sdp1.png" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">SDP</h5>
+                                <p class="card-text">
+                                    <strong>Objectif : </strong> Renforcer le marché, les conditions financières,
+                                    administratives et productives des PME
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+</div>

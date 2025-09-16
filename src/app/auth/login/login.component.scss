@@ -1,12 +1,14 @@
 // login.component.scss
 .login-container {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #82f69e 0%, #c3cfe2 100%);
   min-height: 100vh;
 }
 
 .card {
   border: none;
-  margin-left: 33%;
+  margin-left: 37%;
+  margin-top: 50px;
+  height: fit-content;
 }
 
 .form-control {

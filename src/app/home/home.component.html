@@ -4,26 +4,30 @@
         <!-- Partie gauche : Contenu textuel et boutons -->
         <div class="col-lg-6 col-md-12 d-flex flex-col justify-center px-8 py-6">
             <div class="text-content mx-3">
-                <div class="logo">
-                    <img src="../../assets/images/sdg.webp" alt="sgd">
+                <div class="row logo">
+                    <div class="col">
+                        <img src="../../assets/images/sdg.webp" alt="sgd">
+                    </div>
+                    <div class="col">
+                        <img src="../../assets/images/Programme ACP.png" style="width: 20rem;" alt="sgd">
+                    </div>
                 </div>
-                <h1 class="display-4 fw-bold text-primary mb-4">MonApp</h1>
-                <h2 class="fs-3 text-secondary mb-6">Votre solution tout-en-un pour une productivité maximale</h2>
+                <h1 class="display-4 fw-bold text-primary mb-4">SDG Value Chains Tools</h1>
+                <h2 class="fs-3 text-secondary mb-6">Votre boîte à outils interactive</h2>
                 <p class="lead mb-8">
-                    Bienvenue sur MonApp, la plateforme innovante qui révolutionne votre façon de travailler.
-                    Accédez à tous vos outils en un seul endroit, collaborez avec votre équipe et boostez votre
-                    efficacité
-                    grâce à nos fonctionnalités avancées et notre interface intuitive.
+                    Bienvenue dans la plate-forme de travail conçue pour accompagner le développement des chaines de
+                    valeur
+                    aligné avec les ODD/SDG.
                 </p>
 
                 <div class="d-flex flex-wrap gap-4">
-                    <a routerLink="/login"> 
+                    <a routerLink="/login">
                         <!-- <p-button label="Consultant" icon="pi pi-user" /> -->
                         <button pButton pRipple type="button" label="Consultant" icon="pi pi-user"
                             class="p-button-primary p-button-lg">
                         </button>
                     </a>
-                    <a routerLink="/login" > 
+                    <a routerLink="/manLogin">
                         <!-- <p-button  pButton pRipple label="Manager" class="p-button-outlined p-button-primary p-button-lg" icon="pi pi-sitemap" /> -->
                         <button pButton pRipple type="button" label="Manager" icon="pi pi-sitemap"
                             class="p-button-outlined p-button-primary p-button-lg">
@@ -31,6 +35,10 @@
                     </a>
 
                 </div>
+                <div class="by">
+                    <p>By Jalil FONDA & Nawfal NJOUPOUE</p>
+                </div>
+                
             </div>
         </div>
 

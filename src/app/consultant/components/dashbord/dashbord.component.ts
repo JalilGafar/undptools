@@ -1,13 +1,13 @@
 import { Component, inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ShareServiceService } from '../../../shared/share-service.service';
 import { BaseChartDirective } from 'ng2-charts';
-import {ChartConfiguration, ChartData, ChartEvent} from 'chart.js';
+import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-dashbord',
   standalone: true,
   imports: [
-   BaseChartDirective
+    BaseChartDirective
   ],
   templateUrl: './dashbord.component.html',
   styleUrl: './dashbord.component.scss'
@@ -30,9 +30,9 @@ export class DashbordComponent implements OnInit {
         display: true,
       },
       title: {
-          display: true,
-          text: 'Evolution du Chiffre d\'Affair'
-        }
+        display: true,
+        text: 'Evolution du Chiffre d\'Affair'
+      }
     }
   };
 
@@ -80,6 +80,44 @@ export class DashbordComponent implements OnInit {
 
     this.chart?.update();
   }
+
+
+  // Radar
+  public radarChartOptions: ChartConfiguration['options'] = {
+    plugins: {
+      legend: {
+        display: true,
+      },
+      title: {
+        display: true,
+        text: 'Diagnostique intégrale'
+      }
+    }
+  };
+  public radarChartLabels: string[] = [
+    'Juridique et fiscale',
+    'Leadership et Organisation',
+    'Structuration de l\'entreprise',
+    'Finance & Comptabilité',
+    'Planification Stratégique',
+    'Production et Opération',
+    'Assurance Qualité',
+    'Commercialisation',
+  ];
+
+  public radarChartData: ChartData<'radar'> = {
+    labels: this.radarChartLabels,
+    datasets: [
+      { data: [80, 95, 40, 10, 56, 75, 40, 60], label: 'Moi 1' },
+      { data: [80, 95, 70, 60, 30, 75, 70, 80], label: 'Moi 6' },
+    ],
+  };
+
+  public radarChartType: ChartType = 'radar';
+
+
+  // events
+
 
 
 

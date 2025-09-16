@@ -1,4 +1,7 @@
 @if (menuVisible$ | async) {
     <app-header/>
 }
+@if (manMenuVisible$ | async) {
+    <app-man-header/>
+}
 <router-outlet />

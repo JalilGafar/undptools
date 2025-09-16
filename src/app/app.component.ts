@@ -5,6 +5,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
 import { ShareServiceService } from './shared/share-service.service';
 import { filter, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { ManHeaderComponent } from './shared/components/man-header/man-header.component';
 
 
 @Component({
@@ -14,7 +15,8 @@ import { CommonModule } from '@angular/common';
       RouterOutlet, 
       PrimengModule,
       HeaderComponent,
-      CommonModule
+      CommonModule,
+      ManHeaderComponent
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
@@ -22,6 +24,7 @@ import { CommonModule } from '@angular/common';
 export class AppComponent implements OnInit {
 
   menuVisible$!: Observable<boolean>;
+  manMenuVisible$!: Observable<boolean>;
   loading$!: Observable<boolean>;
   
   constructor(private menuService: ShareServiceService, private router: Router) {
@@ -30,7 +33,11 @@ export class AppComponent implements OnInit {
       .subscribe((event: any) => {
         if (event.url.startsWith('/consultant/')) {
           this.menuService.showMenu();
-        } else {
+        } else if(event.url.startsWith('/manager')){
+          this.menuService.showManMenu();
+        }
+         else {
+          this.menuService.hideManMenu();
           this.menuService.hideMenu();
         }
       });
@@ -38,9 +45,10 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.loading$ = this.menuService.loading$;
+   
     
     this.menuVisible$ = this.menuService.menuVisible$;
+    this.manMenuVisible$ = this.menuService.manMenuVisible$;
 
   }
   
