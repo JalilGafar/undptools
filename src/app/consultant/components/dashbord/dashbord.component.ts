@@ -2,6 +2,10 @@ import { Component, inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core
 import { ShareServiceService } from '../../../shared/share-service.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConsultantService } from '../../consultant.service';
+import { Company } from '../../../core/model/company';
+import { switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-dashbord',
@@ -119,12 +123,24 @@ export class DashbordComponent implements OnInit {
   // events
 
 
+  company!: Company
 
 
-  constructor(private shareService: ShareServiceService) { }
+
+  constructor(
+    private shareService: ShareServiceService,
+    private router : Router,
+    private route: ActivatedRoute,
+    private ConsultantServices: ConsultantService,
+  ) { }
 
   ngOnInit(): void {
     this.shareService.setLoadingStatus(true);
+
+    this.route.params.pipe(
+      switchMap(params => this.ConsultantServices.getCompanyById(+params['id'])),
+      tap(company=>this.company = company)
+    ).subscribe();
   }
 
 }

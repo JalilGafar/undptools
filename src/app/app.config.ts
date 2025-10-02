@@ -6,11 +6,16 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { provideAnimations } from '@angular/platform-browser/animations'; 
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideHttpClient } from '@angular/common/http';
+import { httpInterceptorProviders } from './_helpers/http.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideCharts(withDefaultRegisterables()),
-    provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
+    provideHttpClient(),
+    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes),
+    httpInterceptorProviders,
     provideAnimationsAsync("animations"),
         providePrimeNG({
             theme: {

@@ -1,55 +1,62 @@
 import { Component, OnInit } from '@angular/core';
 import { PrimengModule } from '../../shared/primeng.module';
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../_services/auth.service';
+import { StorageService } from '../../_services/storage.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    PrimengModule,
-    ReactiveFormsModule, 
+    FormsModule,
+    CommonModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
 
-  loginForm!: FormGroup;
-  submitted = false;
-  loading = false;
+  form: any = {
+    username: null,
+    password: null
+  };
+  isLoggedIn = false;
+  isLoginFailed = false;
+  errorMessage = '';
+  roles: string[] = [];
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router
-  ) { }
+  constructor(private authService: AuthService, private storageService: StorageService) { }
 
   ngOnInit(): void {
-    this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+    if (this.storageService.isLoggedIn()) {
+      this.isLoggedIn = true;
+      this.roles = this.storageService.getUser().roles;
+    }
+  }
+
+  onSubmit(): void {
+    const { username, password } = this.form;
+
+    this.authService.login(username, password).subscribe({
+      next: data => {
+        this.storageService.saveUser(data);
+
+        this.isLoginFailed = false;
+        this.isLoggedIn = true;
+        this.roles = this.storageService.getUser().roles;
+        this.reloadPage();
+      },
+      error: err => {
+        this.errorMessage = err.error.message;
+        this.isLoginFailed = true;
+      }
     });
   }
 
-  get f() { return this.loginForm.controls; }
-
-  onSubmit() {
-    this.submitted = true;
-
-    // Arrêtez-vous si le formulaire est invalide
-    if (this.loginForm.invalid) {
-      return;
-    }
-
-    this.loading = true;
-
-    // Simulation d'une connexion réussie
-    setTimeout(() => {
-      // Ici, vous intégreriez normalement votre service d'authentification
-      console.log('Connexion réussie', this.loginForm.value);
-      this.loading = false;
-      this.router.navigate(['/program']); // Redirection après connexion
-    }, 1500);
+  reloadPage(): void {
+    window.location.reload();
   }
 
 }

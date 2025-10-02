@@ -1,9 +1,3 @@
-<header>
-  <nav class="navig">
-    <button class="btn btn-outline-danger mx-2 mt-2" routerLink=""> <i
-        class="bi bi-door-closed"></i>Deconnexion</button>
-  </nav>
-</header>
 <h1 class="display-4 fw-bold text-primary mb-4 mt-1">Ecpace Consultant GYB</h1>
 
 <h2 class="fs-3 text-secondary mb-6">Sur quel entreprise souhaitez vous travailler ?</h2>
@@ -12,85 +6,33 @@
   <div class="row">
     <div class="col-9 company">
       <div class="row row-cols-1 row-cols-md-2 g-2 m-1">
-        <div class="col">
-          <div class="card" routerLink="dashbord">
-            <div class="row g-0 align-items-center">
-              <div class="col-md-4">
-                <img src="../../../../assets/images/logo.png" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
-              </div>
-              <div class="col-md-8">
-                <div class="card-body">
-                  <h5 class="card-title">TRALORMAT</h5>
-                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de Carreaux en
-                    matériaux locaux</p>
+        @if(companies$ | async; as data){
+          @for (item of data; track $index) {
+            <div class="col">
+              <div class="card"  (click)="companySelect(item.id)">
+                <div class="row g-0 align-items-center">
+                  <div class="col-md-4">
+                    <img [src]="'../../../../assets/images/'+item.logo" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title"> {{item.name}} </h5>
+                      <p class="card-text">Rérion {{item.region}} Situè à {{item.ville}}, {{item.description}} </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" routerLink="dashbord">
-            <div class="row g-0 align-items-center">
-              <div class="col-md-4">
-                <img src="../../../../assets/images/chips.png" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
-              </div>
-              <div class="col-md-8">
-                <div class="card-body">
-                  <h5 class="card-title">CHIPSCAM</h5>
-                  <p class="card-text">Situè à Bertoua, cette entreprise est spécialisée dans la production de chips de plantain</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" routerLink="dashbord">
-            <div class="row g-0 align-items-center">
-              <div class="col-md-4">
-                <img src="../../../../assets/images/fruit.webp" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
-              </div>
-              <div class="col-md-8">
-                <div class="card-body">
-                  <h5 class="card-title">FRUITCAM</h5>
-                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de jus de fruit</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" routerLink="dashbord">
-            <div class="row g-0 align-items-center">
-              <div class="col-md-4">
-                <img src="../../../../assets/images/champignon.jpg" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
-              </div>
-              <div class="col-md-8">
-                <div class="card-body">
-                  <h5 class="card-title">CHAMPIGNONCAM</h5>
-                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de champignon</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card" routerLink="dashbord">
-            <div class="row g-0 align-items-center">
-              <div class="col-md-4">
-                <img src="../../../../assets/images/company.jpg" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
-              </div>
-              <div class="col-md-8">
-                <div class="card-body">
-                  <h5 class="card-title">ENTREPRISECAM</h5>
-                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de jus de fruit</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          }
+        }
+       
 
-        <button class="addCons btn btn-primary"> Ajouter une Eentreprise</button>
+        <button class="addCons btn btn-primary" routerLink="/consultant/newcompany" > Ajouter une Eentreprise</button>
+
       </div>
+      
+
+      
     </div>
     <div class="col-3 profil">
       <div class="card">
@@ -101,7 +43,7 @@
         </div>
         <hr>
         <div class="card-body">
-          <h4 class="card-title">FONDA Jalil</h4>
+          <h4 class="card-title">{{ currentUser.username }}</h4>
           <table class="table">
             <!-- <thead>
               <tr>

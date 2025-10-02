@@ -1,3 +1,7 @@
+<header class="jumbotron">
+    <p>{{ content }}</p>
+</header>
+
 <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button"
@@ -9,57 +13,28 @@
 <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
         <div class="row justify-content-end">
-            <button class="addCons btn btn-primary"> Ajouter un consultant</button>
+            <button class="addCons btn btn-primary" routerLink="/register"> Ajouter un Profil</button>
         </div>
-        <div class="row">
-            <div class="card m-5 col shadow p-3 mb-5 bg-body rounded" style="width: 18rem;">
-                <img src="../../../../assets/images/user1.jpg"  class="card-img-top"
-                    alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">FONDA Jalil</h5>
-                    <p class="card-text">
-                        Ingénieur des mines spécialisé dans l'accompagnement des artisants miniers.
-                    </p>
-                    <a routerLink="manOneConsult" class="btn btn-primary">Voir les travaux</a>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    Minéraux de Développement <i class="bi bi-minecart-loaded"
-                        style="font-size: 2rem; color: rgb(221, 80, 37);"></i>
-                </div>
-            </div>
-            <div class="card m-5 col shadow p-3 mb-5 bg-body rounded" style="width: 18rem;">
-                <img src="../../../../assets/images/user2.webp"  class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Nawfal NJOUPOUE</h5>
-                    <p class="card-text">Ingénieur agronome spécialisé en Economie et sociologie rurale.</p>
-                    <a routerLink="manOneConsult" class="btn btn-primary">Voir les travaux</a>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    Minéraux de Développement <i class="bi bi-minecart-loaded"
-                        style="font-size: 2rem; color: rgb(221, 80, 37);"></i>
-                </div>
-            </div>
-            <div class="card m-5 col shadow p-3 mb-5 bg-body rounded" style="width: 18rem;">
-                <img src="../../../../assets/images/user3.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Cendrine Elouga</h5>
-                    <p class="card-text">Expert en entreprenariat et accompagnement des Star-up.</p>
-                    <a routerLink="manOneConsult" class="btn btn-primary">Voir les travaux</a>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
-                </div>
-            </div>
-            <div class="card m-5 col shadow p-3 mb-5 bg-body rounded" style="width: 18rem;">
-                <img src="../../../../assets/images/user4.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">William Daouada</h5>
-                    <p class="card-text">Economiste et expert en analyse et suivie financier.</p>
-                    <a routerLink="manOneConsult" class="btn btn-primary">Voir les travaux</a>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
-                </div>
+        <div class="container">
+            <div class="row  row-cols-1 row-cols-sm-2 row-cols-md-4 justify-content-around">
+                @if (user$; as data) {
+                    @for (item of user$ |async; track $index) {
+                        <div class="card  col me-3 mb-3 shadow p-3 bg-body rounded">
+                            <img src="../../../../assets/images/user1.jpg" class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">{{item.username}}</h5>
+                                <p class="card-text">
+                                    {{item.email}}
+                                </p>
+                                <a routerLink="manOneConsult" class="btn btn-primary">Voir les travaux</a>
+                            </div>
+                            <div class="card-footer text-muted text-center">
+                                {{item.name}} <i class="bi bi-minecart-loaded"
+                                    style="font-size: 2rem; color: rgb(221, 80, 37);"></i>
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>
@@ -116,7 +91,8 @@
                             <div class="col"><a routerLink="manOneCompany" class="btn btn-primary mt-4">Détails de
                                     l'entreprise</a></div>
                             <div class="col domi">
-                                AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
+                                AgriBusiness <i class="bi bi-leaf-fill"
+                                    style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
                             </div>
                         </div>
                     </div>
@@ -143,7 +119,8 @@
                             <div class="col"><a routerLink="manOneCompany" class="btn btn-primary mt-4">Détails de
                                     l'entreprise</a></div>
                             <div class="col domi">
-                                AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
+                                AgriBusiness <i class="bi bi-leaf-fill"
+                                    style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
                             </div>
                         </div>
                     </div>
@@ -170,7 +147,8 @@
                             <div class="col"><a routerLink="manOneCompany" class="btn btn-primary mt-4">Détails de
                                     l'entreprise</a></div>
                             <div class="col domi">
-                                AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
+                                AgriBusiness <i class="bi bi-leaf-fill"
+                                    style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
                             </div>
                         </div>
                     </div>
@@ -202,7 +180,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
             <div class="col-sm-6">
@@ -249,11 +227,12 @@
                         <p class="prog pt-2">
                             <strong>Nombr de livrable : </strong> 2/5
                         </p>
-                       <div class="row">
+                        <div class="row">
                             <div class="col"><a routerLink="manOneCompany" class="btn btn-primary mt-4">Détails de
                                     l'entreprise</a></div>
                             <div class="col domi">
-                                AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
+                                AgriBusiness <i class="bi bi-leaf-fill"
+                                    style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
                             </div>
                         </div>
                     </div>
@@ -280,7 +259,8 @@
                             <div class="col"><a routerLink="manOneCompany" class="btn btn-primary mt-4">Détails de
                                     l'entreprise</a></div>
                             <div class="col domi">
-                                AgriBusiness <i class="bi bi-leaf-fill" style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
+                                AgriBusiness <i class="bi bi-leaf-fill"
+                                    style="font-size: 2rem; color: rgb(56, 209, 72);"></i>
                             </div>
                         </div>
                     </div>

@@ -24,10 +24,14 @@ import { T2dComponent } from './components/tools/t2d/t2d.component';
 import { T2eComponent } from './components/tools/t2e/t2e.component';
 import { T2fComponent } from './components/tools/t2f/t2f.component';
 import { T2gComponent } from './components/tools/t2g/t2g.component';
+import { ConsulHomeComponent } from './components/consul-home/consul-home.component';
+import { AddCompanyComponent } from './components/add-company/add-company.component';
 
 const routes: Routes = [
-  {path: '', component: EntreprisesComponent},
-  {path: 'dashbord', component: DashbordComponent},
+  {path: '', component: ConsulHomeComponent},
+  {path: 'companies', component: EntreprisesComponent},
+  {path: 'newcompany', component: AddCompanyComponent},
+  {path: 'dashbord/:id', component: DashbordComponent},
   {path: 'documentation', component: DocumentaionComponent},
   
   {path: 'tool/inmotion', component: InmotionComponent},
