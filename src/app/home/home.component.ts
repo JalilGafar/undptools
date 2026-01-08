@@ -31,4 +31,5 @@ export class HomeComponent implements OnInit {
             }
         });
     }
+    currentYear = new Date().getFullYear();
 }

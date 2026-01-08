@@ -1,9 +1,9 @@
 <!-- home.component.html -->
 
 <div class="container">
-  <header class="jumbotron">
-    <p>{{ content }}</p>
-  </header>
+    <header class="jumbotron">
+        <!-- <p>{{ content }}</p> -->
+    </header>
 </div>
 
 <div class="container-fluid min-vh-100 d-flex items-center">
@@ -19,33 +19,38 @@
                         <img src="../../assets/images/Programme ACP.png" style="width: 20rem;" alt="sgd">
                     </div>
                 </div>
-                <h1 class="display-4 fw-bold text-primary mb-4">SDG Value Chains Tools</h1>
-                <h2 class="fs-3 text-secondary mb-6">Votre boîte à outils interactive</h2>
+                <h1 class="display-4 fw-bold text-primary mb-4">SDG Value Chains Digital Platform</h1>
+                <h2 class="fs-3 text-secondary mb-6"></h2>
                 <p class="lead mb-8">
-                    Bienvenue dans la plate-forme de travail conçue pour accompagner le développement des chaines de
-                    valeur
-                    aligné avec les ODD/SDG.
+                    Bienvenue dans la plate-forme de travail conçue pour accompagner le développement des chaînes de valeur aligné avec les ODD/SDG.
+                </p>
+                <h2 class="fs-3 text-secondary mb-6" style="font-style: italic;">Your interactive digital toolbox.</h2>
+                <p class="lead mb-8" style="font-style: italic;">
+                    Welcome to the work platform designed to support the development of value chains aligned with the SDGs.
                 </p>
 
-                <div class="d-flex flex-wrap gap-4">
-                    <a routerLink="/login">
-                        <!-- <p-button label="Consultant" icon="pi pi-user" /> -->
-                        <button pButton pRipple type="button" label="Get Started" icon="pi pi-user"
-                            class="p-button-primary p-button-lg">
-                        </button>
-                    </a>
-
+                <div class="row">
+                    <div class="d-flex flex-wrap gap-4">
+                        <a routerLink="/login">
+                            <!-- <p-button label="Consultant" icon="pi pi-user" /> -->
+                            <button pButton pRipple type="button" label="Get Started" icon="pi pi-user"
+                                class="p-button-primary p-button-lg">
+                            </button>
+                        </a>
+    
+                    </div>
                 </div>
-                <div class="by">
-                    <p>By Jalil FONDA & Nawfal NJOUPOUE</p>
+                <div class="row by mt-3">
+                    <p>© {{ currentYear }} ACP-EU  UNDP  Cameroon. All rights reserved.</p>
                 </div>
-                
             </div>
         </div>
 
         <!-- Partie droite : Image -->
         <div class="col-lg-6 col-md-12  d-lg-flex image-section p-0">
-            <img src="../../assets/images/relation2.png" alt="Application interface"
+            <!-- <img src="../../assets/images/relation2.png" alt="Application interface"
+                class="img-fluid h-100 w-100 object-fit-cover"> -->
+            <img src="../../assets/images/lord.webp" alt="Application interface"
                 class="img-fluid h-100 w-100 object-fit-cover">
         </div>
     </div>

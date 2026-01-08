@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 const USER_KEY = 'auth-user';
 
@@ -6,10 +7,29 @@ const USER_KEY = 'auth-user';
   providedIn: 'root'
 })
 export class StorageService {
-  constructor() {}
+  
+  constructor() { }
+
+  CompanyId!: number;
+
+  private _visibleTools$ = new BehaviorSubject<boolean>(false);
+  get visibleTools$(): Observable<boolean> {
+    return this._visibleTools$.asObservable();
+  }
+
+  public setVisibleToolsTrue() {
+    this._visibleTools$.next(true)
+    console.log('tools to visible')
+  }
+
+  public setVisibleToolsFalse() {
+    this._visibleTools$.next(false)
+        console.log('Hide tools')
+  }
 
   clean(): void {
     window.sessionStorage.clear();
+    console.log('clear the window.sessionStorage')
   }
 
   public saveUser(user: any): void {
@@ -34,5 +54,17 @@ export class StorageService {
 
     return false;
   }
-  
+
+  public showtools(): boolean {
+    return true
+  }
+
+  public hidetools(): boolean {
+    return false
+  }
+
+  public setIdComp (id:number){
+    this.CompanyId = id;
+  }
+
 }

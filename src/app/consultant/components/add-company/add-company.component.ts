@@ -20,13 +20,16 @@ export class AddCompanyComponent implements OnInit {
   companyForm!: FormGroup;
   idUser!: number;
 
+ 
+
+
 
   constructor(
     private formBuilder: FormBuilder,
-    private storageService: StorageService ,
+    private storageService: StorageService,
     private consultantService: ConsultantService,
-    private appRout : Router
-  ){}
+    private appRout: Router
+  ) { }
 
   ngOnInit(): void {
     this.companyForm = this.formBuilder.group({
@@ -45,16 +48,21 @@ export class AddCompanyComponent implements OnInit {
       commune: [''],
       quartier: [''],
       lieu: [''],
+      x: [''],
+      y: [''],
       idUser: [null]
 
     });
 
     this.idUser = this.storageService.getUser().id;
-  
+
+
   }
 
-  onSubmitForm(){
-        if (this.companyForm.invalid) {
+
+
+  onSubmitForm() {
+    if (this.companyForm.invalid) {
       return;
     }
 
@@ -69,7 +77,7 @@ export class AddCompanyComponent implements OnInit {
 
   }
 
-  onGoBack(){
+  onGoBack() {
 
   }
 

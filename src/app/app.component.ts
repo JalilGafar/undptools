@@ -1,9 +1,9 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AfterContentChecked, Component, HostListener, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { PrimengModule } from './shared/primeng.module';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { ShareServiceService } from './shared/share-service.service';
-import { filter, Observable } from 'rxjs';
+import { filter, lastValueFrom, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ManHeaderComponent } from './shared/components/man-header/man-header.component';
 import { StorageService } from './_services/storage.service';
@@ -33,11 +33,11 @@ interface MenuItem {
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterContentChecked {
 
   menuVisible$!: Observable<boolean>;
   manMenuVisible$!: Observable<boolean>;
-  loading$!: Observable<boolean>;
+  visibleTools$!: Observable<boolean>;
 
   visible: boolean = false;
   items: MegaMenuItem[] | undefined;
@@ -57,14 +57,14 @@ export class AppComponent implements OnInit {
       label: 'Pré-diagnostic',
       icon: 'bi-0-circle-fill',
       children: [
-        {
-          label: ' Le recensement "In Motion"',
-          route: 'inmotion'
-        },
-        {
-          label: 'outil d\'évaluation intégrale',
-          route: 'evaluation'
-        },
+        // {
+        //   label: ' Le recensement "In Motion"',
+        //   route: 'inmotion'
+        // },
+        // {
+        //   label: 'outil d\'évaluation intégrale',
+        //   route: 'evaluation'
+        // },
         {
           label: 'matrice de critères et d\'attributs',
           route: 'attribut'
@@ -145,7 +145,7 @@ export class AppComponent implements OnInit {
 
         {
           label: '2B Minutes de réunion',
-          route: 't2b'
+          route: 't1b'
         },
 
         {
@@ -181,37 +181,37 @@ export class AppComponent implements OnInit {
       children: [
         {
           label: '3A Rapport Final',
-          route: 't3a'
+          route: 'onbuild'
         },
 
         {
           label: '3B Minutes de réunion',
-          route: 't3b'
+          route: 'onbuild'
         },
 
         {
           label: '3C Suivi des activités',
-          route: 't3c'
+          route: 'onbuild'
         },
 
         {
           label: '3D Rapport de Formation',
-          route: 't3d'
+          route: 'onbuild'
         },
 
         {
           label: '3E Cartographie des institutions de soutien',
-          route: 't3e'
+          route: 'onbuild'
         },
 
         {
           label: '3G SyECFo_Evaluation des fournisseurs',
-          route: 't3g'
+          route: 'onbuild'
         },
 
         {
           label: '3H Analyse financière basique',
-          route: 't3h'
+          route: 'onbuild'
         },
 
 
@@ -223,37 +223,37 @@ export class AppComponent implements OnInit {
       children: [
         {
           label: '4A Rapport Final',
-          route: 't4a'
+          route: 'onbuild'
         },
 
         {
           label: '4B Minutes de réunion',
-          route: 't4b'
+          route: 'onbuild'
         },
 
         {
           label: '4C Suivi des activités',
-          route: 't4c'
+          route: 'onbuild'
         },
 
         {
           label: '4D Rapport de Formation',
-          route: 't4d'
+          route: 'onbuild'
         },
 
         {
           label: '4E Intérêt d\'achat-vente des participants-clients',
-          route: 't4e'
+          route: 'onbuild'
         },
 
         {
           label: '4F Plan de travail détaillé (GANTT)',
-          route: 't4f'
+          route: 'onbuild'
         },
 
         {
           label: '4G Fiche projet',
-          route: 't4g'
+          route: 'onbuild'
         },
 
 
@@ -265,42 +265,42 @@ export class AppComponent implements OnInit {
       children: [
         {
           label: '5A Rapport Final',
-          route: 't5a'
+          route: 'onbuild'
         },
 
         {
           label: '5B Minutes de réunion',
-          route: 't5b'
+          route: 'onbuild'
         },
 
         {
           label: '5C Suivi des activités',
-          route: 't5c'
+          route: 'onbuild'
         },
 
         {
           label: '5D Intérêt d\'achat-vente des participants-clients',
-          route: 't5d'
+          route: 'onbuild'
         },
 
         {
           label: '5E Ligne de base - Capture finale',
-          route: 't5e'
+          route: 'onbuild'
         },
 
         {
           label: '5F Formulaire de livraison de matériel',
-          route: 't5f'
+          route: 'onbuild'
         },
 
         {
           label: '5G Photos de l\'entreprise',
-          route: 't5g'
+          route: 'onbuild'
         },
 
         {
           label: '5H Évaluation du programme',
-          route: 't5h'
+          route: 'onbuild'
         },
 
 
@@ -331,6 +331,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
 
+
+    // this.storageService.setVisibleToolsFalse()
+
     this.menuVisible$ = this.menuService.menuVisible$;
     this.manMenuVisible$ = this.menuService.manMenuVisible$;
 
@@ -356,21 +359,38 @@ export class AppComponent implements OnInit {
 
   }
 
+  ngAfterContentChecked() {
+    this.visibleTools$ = this.storageService.visibleTools$;
+
+  }
+
   logout(): void {
     this.authService.logout().subscribe({
       next: res => {
         console.log(res);
         this.storageService.clean();
 
-        window.location.reload();
+         window.location.reload();
 
-        this.router.navigate(['/home']);
+        // this.router.navigate(['/home']);
       },
       error: err => {
         console.log(err);
       }
     });
   }
+
+  // async logout(): Promise<void> {
+  //   try {
+  //     // await this.authService.logout().toPromise();
+  //     await lastValueFrom(this.authService.logout())
+  //     this.storageService.clean();
+  //     document.cookie = 'bezkoder-session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  //     // window.location.reload();
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
@@ -399,13 +419,13 @@ export class AppComponent implements OnInit {
     const targetElement = event.target as HTMLElement;
     const sidebar = document.getElementById('sidebar-wrapper');
     const toolsLink = document.querySelector('.nav-link[routerLink="consultant"]');
-    
+
     // Vérifier si le clic est en dehors de la sidebar et du lien Tools
-    if (this.isSidebarOpen && 
-        !sidebar?.contains(targetElement) && 
-        !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
+    if (this.isSidebarOpen &&
+      !sidebar?.contains(targetElement) &&
+      !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
       this.isSidebarOpen = false;
-      
+
       // Fermer tous les sous-menus
       this.menu.forEach(item => {
         item.expanded = false;

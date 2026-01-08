@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../../../_services/user.service';
+import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-consul-home',
@@ -18,9 +19,14 @@ export class ConsulHomeComponent implements OnInit {
 
   content?: string;
 
-  constructor(private userService: UserService) { }
+  constructor(
+    private userService: UserService,
+    private storageService: StorageService,
+  ) { }
 
   ngOnInit(): void {
+
+    this.storageService.setVisibleToolsFalse();
     // this.showAlertMessage();
     this.userService.getUserBoard().subscribe({
       next: data => {

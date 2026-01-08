@@ -26,6 +26,7 @@ import { T2fComponent } from './components/tools/t2f/t2f.component';
 import { T2gComponent } from './components/tools/t2g/t2g.component';
 import { ConsulHomeComponent } from './components/consul-home/consul-home.component';
 import { AddCompanyComponent } from './components/add-company/add-company.component';
+import { OnconstructionComponent } from '../shared/components/onconstruction/onconstruction.component';
 
 const routes: Routes = [
   {path: '', component: ConsulHomeComponent},
@@ -38,25 +39,27 @@ const routes: Routes = [
   {path: 'tool/evaluation', component: EvaluationComponent},
   {path: 'tool/attribut', component: AttributComponent},
 
-  {path: 'tool/t1a', component: T1aComponent},
+  {path: 'tool/t1a', component: OnconstructionComponent},
   {path: 'tool/t1b', component: T1bComponent},
   {path: 'tool/t1c', component: T1cComponent},
   {path: 'tool/t1d', component: T1dComponent},
-  {path: 'tool/t1ea', component: T1eaComponent},
-  {path: 'tool/t1eb', component: T1ebComponent},
-  {path: 'tool/t1f', component: T1fComponent},
-  {path: 'tool/t1g', component: T1gComponent},
-  {path: 'tool/t1h', component: T1hComponent},
-  {path: 'tool/t1i', component: T1iComponent},
-  {path: 'tool/t1l', component: T1lComponent},
+  {path: 'tool/t1ea', component: OnconstructionComponent},
+  {path: 'tool/t1eb', component: OnconstructionComponent},
+  {path: 'tool/t1f', component: OnconstructionComponent},
+  {path: 'tool/t1g', component: OnconstructionComponent},
+  {path: 'tool/t1h', component: OnconstructionComponent},
+  {path: 'tool/t1i', component: OnconstructionComponent},
+  {path: 'tool/t1l', component: OnconstructionComponent},
   
-  {path: 'tool/t2a', component: T2aComponent},
-  {path: 'tool/t2b', component: T2bComponent},
-  {path: 'tool/t2c', component: T2cComponent},
-  {path: 'tool/t2d', component: T2dComponent},
-  {path: 'tool/t2e', component: T2eComponent},
-  {path: 'tool/t2f', component: T2fComponent},
-  {path: 'tool/t2g', component: T2gComponent},
+  {path: 'tool/t2a', component: OnconstructionComponent},
+  {path: 'tool/t2b', component: OnconstructionComponent},
+  {path: 'tool/t2c', component: OnconstructionComponent},
+  {path: 'tool/t2d', component: OnconstructionComponent},
+  {path: 'tool/t2e', component: OnconstructionComponent},
+  {path: 'tool/t2f', component: OnconstructionComponent},
+  // {path: 'tool/t2g', component: T2gComponent},
+  {path: 'tool/t2g', component: OnconstructionComponent},
+  {path: 'tool/onbuild', component: OnconstructionComponent},
 
 ];
 

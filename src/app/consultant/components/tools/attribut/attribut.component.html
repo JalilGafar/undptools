@@ -1,4 +1,16 @@
 <div class="container">
+
+    @if (showAlert) {
+    <div class="alert alert-{{alertType}} mx-5 mt-5 text-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill px-4"></i>
+        <strong>{{ alertMessage }}</strong>
+
+        @if(dismissible){
+        <!-- <button type="button" class="btn-close ps-5" (click)="hideAlert()" aria-label="Close"></button> -->
+        }
+    </div>
+    }
+
     <div class="row">
         <div class="col-12 text-center">
             <h3>
@@ -6,8 +18,11 @@
             </h3>
         </div>
 
+        
+
         <div class="col-12 text-center mt-4">
-            <button type="button" class="btn btn-secondary me-2">
+            <button type="button" class="btn btn-secondary me-2" data-bs-toggle="collapse"
+                data-bs-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">
                 <i class="bi bi-journal-text"></i> Consulter la matrice
             </button>
 
@@ -18,81 +33,368 @@
 
         </div>
 
-        <div class="collapse mt-4" id="collapseExample">
-            <div class="card text-center" >
-                <form action="" class="row g-3" [formGroup]="matAttribForm">
-                <div class="card-header">
-                </div>
-                <div class="card-body"  style="min-height: 450px;">
-                    <!-- <h5 class="card-title"></h5> -->
-
-                        @for (item of ponderation; track $index; let i = $index) {
-                            <div class="ponderation-item" [class.active]="currentIndex === i">
-                                <!-- Ressources oppérationelles -->
-                                <h5 class="mt-0 mb-2 card-title"> {{item.critere}} </h5>
+        <div id="collapseGroup">
+            <div class="row">
+                <div class="collapse mt-4" id="collapseExample" data-bs-parent="#collapseGroup">
+                    <div class="card text-center">
+                        <form action="" class="row g-3" [formGroup]="matAttribForm">
+                            <div class="card-header">
+                            </div>
+                            <div class="card-body" style="min-height: 450px;">
+                                @if (matPrediaLabel ; as ponder) {
+                                    @for (item of ponder; track $index; let i = $index) {
+                                    <div class="ponderation-item" [class.active]="currentIndex === i">
+                                        <!-- Ressources oppérationelles -->
+                                        <h5 class="mt-0 mb-2 card-title"> {{item.critere}} </h5>
     
-                                <h6 class="mt-3" >
-                                    {{item.attribut}} 
-                                </h6>
-                                <div class="col-12">
-                                    <div class="row justify-content-md-center px-3">
+                                        <h6 class="mt-3">
+                                            {{item.attribut}}
+                                        </h6>
                                         <div class="col-12">
-                                            <!-- <label for="customRange3" class="form-label fw-bold">
-                                                Note : {{matAttribForm.value[$index] }}
-                                                
-                                            </label> -->
-        
-                                            <!-- Graduations -->
-                                            <div class="d-flex justify-content-between px-1 mt-2">
-                                                @for (it of ticks; track $index) {
-                                                <span>{{ it }}</span>
-                                                }
-                                            </div>
-        
-                                            <!-- Range input lié au FormControl -->
-                                            <input type="range" class="form-range" min="0" max="10" step="0.5" id="customRange3"
-                                                [formControlName]="'note_'+ ($index+1)" />
-                                        </div>
+                                            <div class="row justify-content-md-center px-3">
+                                                <div class="col-12">
+                                                    <!-- <label for="customRange3" class="form-label fw-bold">
+                                                            Note : {{matAttribForm.value[$index] }}
+                                                            
+                                                        </label> -->
     
-                                        @for (itex of item.children; track $index) {
-                                            <div class="col plage">
-                                                {{itex.label}}
+                                                    <!-- Graduations -->
+                                                    <div class="d-flex justify-content-between px-1 mt-2">
+                                                        @for (it of ticks; track $index) {
+                                                        <span>{{ it }}</span>
+                                                        }
+                                                    </div>
+    
+                                                    <!-- Range input lié au FormControl -->
+                                                    <input type="range" class="form-range" min="0" max="10" step="0.5"
+                                                        id="customRange3" [formControlName]="'note_'+ ($index+1)" />
+                                                </div>
+    
+                                                @for (itex of item.children; track $index) {
+                                                <div class="col plage">
+                                                    {{itex.label}}
+                                                </div>
+                                                }
+    
+                                                <hr>
+                                                <div class="col-9">
+                                                    <label for="" class="form-label">Commentaire</label>
+                                                    <textarea class="form-control"
+                                                        placeholder="Ecrivez ici les raisons de cette note."
+                                                        [formControlName]="'comment_'+ ($index+1)" rows="2"></textarea>
+                                                </div>
                                             </div>
-                                        }
-                                        
-                                        <hr>
-                                        <div class="col-9">
-                                            <label for="" class="form-label">Commentaire</label>
-                                            <textarea class="form-control" [formControlName]="'comment_'+ ($index+1)"  rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    }
+                                }
+
+
+                            </div>
+                        </form>
+                        <div class="card-footer text-muted">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-outline-primary" (click)="previousItem()"
+                                    [disabled]="currentIndex === 0">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </button>
+
+                                <span class="fw-bold">
+                                    Élément {{ currentIndex + 1 }} / {{ matPrediaLabel.length }}
+                                </span>
+
+                                <button type="button" class="btn btn-outline-primary" (click)="nextItem()"
+                                    [disabled]="currentIndex === matPrediaLabel.length - 1">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            @if (currentIndex + 1 === matPrediaLabel.length) {
+                            <button type="submit" (click)="saveTool()" class="btn btn-success">
+                                Enregistrer l'outil
+                            </button>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="collapse show" id="collapseExample2" data-bs-parent="#collapseGroup">
+                    @if (matAttribData$|async; as data ) {
+                    @if (data.length > 0) {
+                    @for (item of data; track $index) {
+                    <ng-container>
+                        <div class="row resum">
+                            <div class="col-7">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Evaluation de l'entreprise ___________ sur les critères pondérés
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-7">
+                                                        Ressources opérationnelles
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                [style]="'width:'+crit_1+'%'" [aria-valuenow]=""
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 text-center ps-0">
+                                                        {{crit_1}} %
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-7">
+                                                        Compétences techniques
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                [style]="'width:'+crit_2+'%'" aria-valuenow="25"
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 text-center ps-0">
+                                                        {{crit_2}} %
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-7">
+                                                        Potentiel de l'entreprise
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                [style]="'width:'+crit_3+'%'" aria-valuenow="25"
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 text-center ps-0">
+                                                        {{crit_3}} %
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-7">
+                                                        Marketing
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                [style]="'width:'+crit_4+'%'" aria-valuenow="25"
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 text-center ps-0">
+                                                        {{crit_4}} %
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <div class="row align-items-center">
+                                                    <div class="col-7">
+                                                        Stratégie du PNUD
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar"
+                                                                [style]="'width:'+crit_5+'%'" aria-valuenow="25"
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2 text-center ps-0">
+                                                        {{crit_5}} %
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <div class="d-grid gap-2 col-6 mx-auto">
+                                            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseExample3" aria-expanded="false"
+                                                aria-controls="collapseExample3">Consulter en détail</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        }
+                            <div class="col-5">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Score Total pondéré
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="container">
 
+                                            <ngx-charts-gauge [results]="single" [tooltipDisabled]=false
+                                                [legend]="legend" [scheme]="colorScheme" [showAxis]=true
+                                                [tooltipDisabled]=false>
+                                            </ngx-charts-gauge>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="row full">
+
+                        </div>
+                        <div class="card">
+                            id du use : {{item.cons_id}}
+                        </div> -->
+                    </ng-container>
+                    }
+                    }@else {
+                    <div class="text-center">
+                        aucune données enregistrée
                     </div>
-                </form>
-                <div class="card-footer text-muted">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button type="button" class="btn btn-outline-primary" (click)="previousItem()" [disabled]="currentIndex === 0">
-                            <i class="bi bi-chevron-left"></i> Previous
-                        </button>
-                        
-                        <span class="fw-bold">
-                            Élément {{ currentIndex + 1 }} / {{ ponderation.length }}
-                        </span>
-                        
-                        <button type="button" class="btn btn-outline-primary" (click)="nextItem()" [disabled]="currentIndex === ponderation.length - 1">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </button>
+                    }
+                    } @else {
+                    <div class="text-center">
+                        aucune données enregistrée
                     </div>
-                    <button type="button" (click)="logAll()" class="btn btn-success">
-                        getAll
-                    </button>
+                    }
+
                 </div>
+                <div class="collapse" id="collapseExample3">
+                    @if (matAttribData$|async; as data) {
+                    @for (item of data; track $index) {
+                    <div class="card mt-3">
+                        <div class="card-header text-center">
+                            Evaluation non pondéré
+                        </div>
+                        <div class="card-body">
 
+                            <table class="table table-bordered table-dark mt-1">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">Critères</th>
+                                        <th scope="col">Attributs</th>
+                                        <th scope="col">Note </th>
+                                        <th scope="col">Total</th>
+                                        <th scope="col">Commentaires</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                    <tr>
+                                        <!-- La cellule du # fusionne les 2 premières lignes -->
+                                        <th scope="row" rowspan="3" class="text-center">Ressources Opérationelles
+                                            Disponibles</th>
+                                        <td>Équipements et installations disponibles pour maintenir les opérations.</td>
+                                        <td> {{item.note_1}}/10 </td>
+                                        <td scope="row" rowspan="3" class="text-center">
+                                            {{((item.note_1+item.note_2+item.note_3)/3).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_1}} </td>
+                                    </tr>
+                                    <tr>
+                                        <!-- On supprime la cellule du # ici -->
+                                        <td>Nombre d'employés</td>
+                                        <td>{{item.note_2}}/10</td>
+                                        <td> {{item.comment_2}} </td>
+                                    </tr>
+                                    <tr>
+                                        <!-- On supprime la cellule du # ici -->
+                                        <td>Disponibilité des fonds personnels pour l'opération </td>
+                                        <td>{{item.note_3}}/10</td>
+                                        <td> {{item.comment_3}} </td>
+                                    </tr>
+                                    <!-- $$$$$$$$$$$$$$$$$ -->
+                                    <tr>
+                                        <th scope="row" rowspan="3" class="text-center">Compétences Techniques</th>
+                                        <td>Gestion d'entreprise</td>
+                                        <td> {{item.note_4}}/10 </td>
+                                        <td scope="row" rowspan="3" class="text-center">
+                                            {{((item.note_4+item.note_5+item.note_6)/3).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_4}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Expérience technique</td>
+                                        <td>{{item.note_5}}/10</td>
+                                        <td> {{item.comment_5}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Expérience dans les affaires</td>
+                                        <td>{{item.note_6}}/10</td>
+                                        <td> {{item.comment_6}} </td>
+                                    </tr>
+                                    <!-- $$$$$$$$$$$$$$$$$ -->
+                                    <tr>
+                                        <th scope="row" rowspan="3" class="text-center">Potentiel de l'Entreprise</th>
+                                        <td>L'entreprise opère depuis les 2 dernières années, est active et est prête à
+                                            se développer</td>
+                                        <td> {{item.note_7}}/10 </td>
+                                        <td scope="row" rowspan="3" class="text-center">
+                                            {{((item.note_7+item.note_8+item.note_9)/3).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_7}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>L'entreprise a une liste de clients</td>
+                                        <td>{{item.note_8}}/10</td>
+                                        <td> {{item.comment_8}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Potentiel de valeur ajoutée </td>
+                                        <td>{{item.note_9}}/10</td>
+                                        <td> {{item.comment_9}} </td>
+                                    </tr>
+                                    <!-- $$$$$$$$$$$$$$$$$ -->
+                                    <tr>
+                                        <th scope="row" rowspan="2" class="text-center">Marketing</th>
+                                        <td>Canaux de vente</td>
+                                        <td> {{item.note_10}}/10 </td>
+                                        <td scope="row" rowspan="2" class="text-center">
+                                            {{((item.note_10+item.note_11)/2).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_10}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Stratégies commerciales </td>
+                                        <td>{{item.note_11}}/10</td>
+                                        <td> {{item.comment_11}} </td>
+                                    </tr>
+                                    <!-- $$$$$$$$$$$$$$$$$ -->
+                                    <tr>
+                                        <th scope="row" rowspan="2" class="text-center">Stratégie du PNUD</th>
+                                        <td>Inclusion de genre</td>
+                                        <td> {{item.note_12}}/10 </td>
+                                        <td scope="row" rowspan="2" class="text-center">
+                                            {{((item.note_12+item.note_13)/2).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_12}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Secteur stratégique </td>
+                                        <td>{{item.note_13}}/10</td>
+                                        <td> {{item.comment_13}} </td>
+                                    </tr>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    }
+                    }
+
+                </div>
             </div>
         </div>
+
+
+
+
 
     </div>
 

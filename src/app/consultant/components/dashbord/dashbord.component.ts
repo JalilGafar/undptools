@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ShareServiceService } from '../../../shared/share-service.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultantService } from '../../consultant.service';
 import { Company } from '../../../core/model/company';
 import { switchMap, tap } from 'rxjs';
+import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-dashbord',
@@ -16,7 +17,7 @@ import { switchMap, tap } from 'rxjs';
   templateUrl: './dashbord.component.html',
   styleUrl: './dashbord.component.scss'
 })
-export class DashbordComponent implements OnInit {
+export class DashbordComponent implements OnInit, OnDestroy {
 
   @ViewChild(BaseChartDirective) chart: BaseChartDirective<'bar'> | undefined;
 
@@ -129,18 +130,28 @@ export class DashbordComponent implements OnInit {
 
   constructor(
     private shareService: ShareServiceService,
-    private router : Router,
-    private route: ActivatedRoute,
     private ConsultantServices: ConsultantService,
+    private storageService: StorageService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
-    this.shareService.setLoadingStatus(true);
+
+    // this.storageService.setVisibleToolsTrue();
+    setTimeout(() => {
+      this.storageService.setVisibleToolsTrue();
+    });
 
     this.route.params.pipe(
-      switchMap(params => this.ConsultantServices.getCompanyById(+params['id'])),
-      tap(company=>this.company = company)
+      switchMap(params =>  this.ConsultantServices.getCompanyById(+params['id'])),
+      tap(company => this.company = company),
+      tap(company => this.storageService.setIdComp(company.id))
     ).subscribe();
+  };
+
+  ngOnDestroy(): void {
+    // this.storageService.setVisibleToolsFalse();
   }
 
 }

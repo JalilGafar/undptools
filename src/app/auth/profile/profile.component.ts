@@ -16,5 +16,9 @@ export class ProfileComponent implements OnInit{
 
   ngOnInit(): void {
     this.currentUser = this.storageService.getUser();
+        
+    setTimeout(() => {
+      this.storageService.setVisibleToolsFalse();
+    });
   }
 }

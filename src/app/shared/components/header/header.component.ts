@@ -3,6 +3,7 @@ import { PrimengModule } from '../../primeng.module';
 import { MegaMenuItem } from 'primeng/api';
 import { ConsultantRoutingModule } from "../../../consultant/consultant-routing.module";
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { OnconstructionComponent } from '../onconstruction/onconstruction.component';
 
 interface MenuItem {
     label: string;
@@ -17,7 +18,8 @@ interface MenuItem {
     standalone: true,
     imports: [
         PrimengModule,
-        ConsultantRoutingModule
+        ConsultantRoutingModule,
+        OnconstructionComponent
     ],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'

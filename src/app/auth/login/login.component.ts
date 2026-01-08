@@ -10,6 +10,7 @@ import { StorageService } from '../../_services/storage.service';
   selector: 'app-login',
   standalone: true,
   imports: [
+    RouterLink,
     FormsModule,
     CommonModule
   ],

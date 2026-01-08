@@ -1,9 +1,10 @@
-<h1 class="display-4 fw-bold text-primary mb-4 mt-1">Ecpace Consultant GYB</h1>
+<h1 class="display-4 fw-bold text-primary mb-4 mt-1">Ecpace Consultant GYB / <span style="font-style: italic;"> GYB consultants'Workspace </span> </h1>
 
 <h2 class="fs-3 text-secondary mb-6">Sur quel entreprise souhaitez vous travailler ?</h2>
+<h2 class="fs-3 text-secondary mb-6" style="font-style: italic; font-size: larger !important;">Which company would you like to work on ?</h2>
 
 <div class="container">
-  <div class="row">
+  <div class="row mt-5">
     <div class="col-9 company">
       <div class="row row-cols-1 row-cols-md-2 g-2 m-1">
         @if(companies$ | async; as data){
@@ -39,7 +40,8 @@
 
         <div class="rounded-circle border d-flex justify-content-center align-items-center"
           style="width:100px;height:100px" alt="Avatar">
-          <i class="bi bi-person-fill" style="font-size: 5rem; color: cornflowerblue;"></i>
+          <img src="../../../../assets/images/user.png" alt="" style="width: 120px;">
+          <!-- <i class="bi bi-person-fill" style="font-size: 5rem; color: cornflowerblue;"></i> -->
         </div>
         <hr>
         <div class="card-body">

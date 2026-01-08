@@ -1,0 +1,32 @@
+export class ToolAttrib {
+    attr_id!: number;
+    cons_id!: number;
+    comp_id!: number;
+    date!: Date;
+    note_1!: number;
+    comment_1!: string;
+    note_2!: number;
+    comment_2!: string;
+    note_3!: number;
+    comment_3!: string;
+    note_4!: number;
+    comment_4!: string;
+    note_5!: number;
+    comment_5!: string;
+    note_6!: number;
+    comment_6!: string;
+    note_7!: number;
+    comment_7!: string;
+    note_8!: number;
+    comment_8!: string;
+    note_9!: number;
+    comment_9!: string;
+    note_10!: number;
+    comment_10!: string;
+    note_11!: number;
+    comment_11!: string;
+    note_12!: number;
+    comment_12!: string;
+    note_13!: number;
+    comment_13!: string;
+}

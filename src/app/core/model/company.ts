@@ -15,6 +15,8 @@ export class Company {
     commune!: string;
     quartier!: string;
     lieu!: string;
+    x!: number;
+    y!: number;
     idUser!: number;
     logo!: string
 }

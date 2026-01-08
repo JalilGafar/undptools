@@ -13,11 +13,10 @@ export class AuthGuard implements CanActivate {
      ){}
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-        const user = this.storageService.getUser();
-         if (user && user.roles && user.roles.includes('ROLE_USER')) {
+         if (this.storageService.isLoggedIn()) {
             return true;
          }else {
-            this.router.navigateByUrl(' ');
+            this.router.navigateByUrl('/login');
             return false;
          }
     }

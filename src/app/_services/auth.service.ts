@@ -8,9 +8,9 @@ import { User } from '../core/model/user';
 const AUTH_API = `${environment.apiUrl}/api/auth/`;
 
 
-
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  withCredentials: true
 };
 
 
@@ -18,7 +18,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(username: string, password: string): Observable<any> {
     return this.http.post(
@@ -31,7 +31,7 @@ export class AuthService {
     );
   }
 
-  register(username: string, email: string, password: string, roles:number): Observable<any> {
+  register(username: string, email: string, password: string, roles: number): Observable<any> {
     console.log(roles)
     return this.http.post(
       AUTH_API + 'signup',
@@ -46,6 +46,6 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    return this.http.post(AUTH_API + 'signout', { }, httpOptions);
+    return this.http.post(AUTH_API + 'signout', {}, httpOptions);
   }
 }

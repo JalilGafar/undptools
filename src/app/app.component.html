@@ -6,7 +6,7 @@
 } -->
 <div id="app">
   <nav class="navbar navbar-expand navbar-dark bg-dark">
-    <a href="#" class="navbar-brand mx-4"> <strong>SGD</strong>VC | UNDP </a>
+    <a href="#" class="navbar-brand mx-4"> <strong>SGD</strong>VC | UNDP Cameroon</a>
     <ul class="navbar-nav mr-auto" routerLinkActive="active">
       <!-- <li class="nav-item">
         <a class="nav-link" routerLink="home">Home </a>
@@ -25,11 +25,16 @@
         <!-- <li class="nav-item">
           <a class="nav-link" routerLink="consultant">Consultant Board</a>
         </li> -->
-        <li class="nav-item" style="cursor: pointer;" (click)="toggleSidebar()">
-          <a class="nav-link" >Tools</a>
-        </li>
+        @if (visibleTools$ |async) {
+          <li class="nav-item" style="cursor: pointer;" (click)="toggleSidebar()">
+            <a class="nav-link" >Tools</a>
+          </li>
+        }
         <li class="nav-item">
           <a class="nav-link" routerLink="consultant">Program</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="consultant/companies">Entreprises</a>
         </li>
       }
     </ul>
@@ -49,7 +54,8 @@
           <a  class="nav-link" routerLink="profile">{{ username }}</a>
         </li>
         <li class="nav-item">
-          <a href class="nav-link" (click)="logout()">LogOut</a>
+          <button class="btn btn-secondary" (click)="logout()">LogOut</button>
+          <!-- <a href class="nav-link" >LogOut</a> -->
         </li>
       </ul>
     }

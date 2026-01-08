@@ -3,8 +3,45 @@
         <h5 class="card-title text-center"> {{toolName}} </h5>
     </div>
     <div class="card-body">
-        <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, itaque! Inventore iste iusto iure dicta dolor quaerat consequatur modi tempora accusamus ab, corporis, debitis voluptate odit, dolorem et sapiente. Placeat?
-        </p>
+        <div class="table-responsive">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Etape</th>
+                        <th>Activités</th>
+                        <th>Commentaires / Sous-activités</th>
+                        <th>Responsable</th>
+                        <th>Domaine de l'entreprise</th>
+                        <th>Statuts</th>
+                        <th>% Complété</th>
+                        <th>Date de début</th>
+                        <th>Date limite prévue</th>
+                        <th>Date de Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="fiche"></td>
+                        <td><input type="text" class="fiche"></td>
+                        <td><input type="text" class="fiche"></td>
+                        <td><input type="text" class="fiche"></td>
+                        <td><input type="text" class="fiche"></td>
+                        <td>
+                            <select class="form-select" aria-label="Default select example">
+                                <option value="1">Non débuté</option>
+                                <option value="2">En cours de réalisation</option>
+                                <option value="3">Terminé</option>
+                            </select>
+                        </td>
+                        <td><input type="number" class="fiche"></td>
+                        <td><input type="date" class="fiche"></td>
+                        <td><input type="date" class="fiche"></td>
+                        <td><input type="date" class="fiche"></td>
+
+                    </tr>
+                    <!-- More rows as needed -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
