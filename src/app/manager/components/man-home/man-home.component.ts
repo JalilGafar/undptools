@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
 import { UserService } from '../../../_services/user.service';
 import { ManagerService } from '../../manager.service';
 import { Observable } from 'rxjs';
@@ -19,11 +19,15 @@ import { User } from '../../../core/model/user';
 export class ManHomeComponent implements OnInit {
 
   content?: string;
-  user$!: Observable<User[]>
+  user$!: Observable<User[]>;
+
+
+  // private router = inject(Router);
 
   constructor(
     private userService: UserService,
-    private managerService: ManagerService
+    private managerService: ManagerService, 
+    private router: Router   
   ) { }
 
   ngOnInit(): void {
@@ -48,5 +52,15 @@ export class ManHomeComponent implements OnInit {
     this.managerService.getUserFromServer();
 
     this.user$ = this.managerService.persona$;
+  }
+
+  seeConsultants(){
+    this.router.navigateByUrl('manager/listconsult');
+  }
+  seeCompanies(){
+    this.router.navigateByUrl('manager/listcompany/'+999999);
+  }
+  seeGlobal(){
+    this.router.navigateByUrl('manager/global');
   }
 }

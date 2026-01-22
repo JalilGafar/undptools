@@ -27,7 +27,7 @@ interface MenuItem {
     PrimengModule,
     HeaderComponent,
     CommonModule,
-    ManHeaderComponent,
+    // ManHeaderComponent,
     ConsultantRoutingModule
   ],
   templateUrl: './app.component.html',

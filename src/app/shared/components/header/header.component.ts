@@ -1,9 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { PrimengModule } from '../../primeng.module';
 import { MegaMenuItem } from 'primeng/api';
 import { ConsultantRoutingModule } from "../../../consultant/consultant-routing.module";
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { OnconstructionComponent } from '../onconstruction/onconstruction.component';
+import { filter, Observable } from 'rxjs';
+import { ShareServiceService } from '../../share-service.service';
+import { StorageService } from '../../../_services/storage.service';
+import { AuthService } from '../../../_services/auth.service';
+import { NavigationEnd, Router } from '@angular/router';
 
 interface MenuItem {
     label: string;
@@ -19,32 +24,41 @@ interface MenuItem {
     imports: [
         PrimengModule,
         ConsultantRoutingModule,
-        OnconstructionComponent
     ],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
 export class HeaderComponent implements OnInit {
 
+    menuVisible$!: Observable<boolean>;
+    manMenuVisible$!: Observable<boolean>;
     visible: boolean = false;
     items: MegaMenuItem[] | undefined;
+    visibleTools$!: Observable<boolean>;
 
     isSidebarOpen = false;
     isSidebarMini = false;
+
+    private roles: string[] = [];
+    isLoggedIn = false;
+    showAdminBoard = false;
+    showModeratorBoard = false;
+    showUserBoard = false;
+    username?: string;
 
     menu: MenuItem[] = [
         {
             label: 'Pré-diagnostic',
             icon: 'bi-0-circle-fill',
             children: [
-                {
-                    label: ' Le recensement "In Motion"',
-                    route: 'inmotion'
-                },
-                {
-                    label: 'outil d\'évaluation intégrale',
-                    route: 'evaluation'
-                },
+                // {
+                //   label: ' Le recensement "In Motion"',
+                //   route: 'inmotion'
+                // },
+                // {
+                //   label: 'outil d\'évaluation intégrale',
+                //   route: 'evaluation'
+                // },
                 {
                     label: 'matrice de critères et d\'attributs',
                     route: 'attribut'
@@ -125,7 +139,7 @@ export class HeaderComponent implements OnInit {
 
                 {
                     label: '2B Minutes de réunion',
-                    route: 't2b'
+                    route: 't1b'
                 },
 
                 {
@@ -161,37 +175,37 @@ export class HeaderComponent implements OnInit {
             children: [
                 {
                     label: '3A Rapport Final',
-                    route: 't3a'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3B Minutes de réunion',
-                    route: 't3b'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3C Suivi des activités',
-                    route: 't3c'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3D Rapport de Formation',
-                    route: 't3d'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3E Cartographie des institutions de soutien',
-                    route: 't3e'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3G SyECFo_Evaluation des fournisseurs',
-                    route: 't3g'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '3H Analyse financière basique',
-                    route: 't3h'
+                    route: 'onbuild'
                 },
 
 
@@ -203,37 +217,37 @@ export class HeaderComponent implements OnInit {
             children: [
                 {
                     label: '4A Rapport Final',
-                    route: 't4a'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4B Minutes de réunion',
-                    route: 't4b'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4C Suivi des activités',
-                    route: 't4c'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4D Rapport de Formation',
-                    route: 't4d'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4E Intérêt d\'achat-vente des participants-clients',
-                    route: 't4e'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4F Plan de travail détaillé (GANTT)',
-                    route: 't4f'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '4G Fiche projet',
-                    route: 't4g'
+                    route: 'onbuild'
                 },
 
 
@@ -245,42 +259,42 @@ export class HeaderComponent implements OnInit {
             children: [
                 {
                     label: '5A Rapport Final',
-                    route: 't5a'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5B Minutes de réunion',
-                    route: 't5b'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5C Suivi des activités',
-                    route: 't5c'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5D Intérêt d\'achat-vente des participants-clients',
-                    route: 't5d'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5E Ligne de base - Capture finale',
-                    route: 't5e'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5F Formulaire de livraison de matériel',
-                    route: 't5f'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5G Photos de l\'entreprise',
-                    route: 't5g'
+                    route: 'onbuild'
                 },
 
                 {
                     label: '5H Évaluation du programme',
-                    route: 't5h'
+                    route: 'onbuild'
                 },
 
 
@@ -288,6 +302,57 @@ export class HeaderComponent implements OnInit {
         }
     ];
 
+    constructor(
+        private menuService: ShareServiceService,
+        private router: Router,
+        private storageService: StorageService,
+        private authService: AuthService
+    ) {
+        this.router.events
+            .pipe(filter(e => e instanceof NavigationEnd))
+            .subscribe((event: any) => {
+                if (event.url.startsWith('/consultant/')) {
+                    this.menuService.showMenu();
+                } else if (event.url.startsWith('/manager')) {
+                    this.menuService.showManMenu();
+                }
+                else {
+                    this.menuService.hideManMenu();
+                    this.menuService.hideMenu();
+                }
+            });
+    }
+
+    ngOnInit(): void {
+        this.menuVisible$ = this.menuService.menuVisible$;
+        this.manMenuVisible$ = this.menuService.manMenuVisible$;
+
+        this.isLoggedIn = this.storageService.isLoggedIn();
+        if (this.isLoggedIn) {
+            const user = this.storageService.getUser();
+            this.roles = user.roles;
+
+            this.showAdminBoard = this.roles.includes('ROLE_ADMIN');
+            this.showModeratorBoard = this.roles.includes('ROLE_MODERATOR');
+            this.showUserBoard = this.roles.includes('ROLE_USER');
+
+            this.username = user.username;
+
+            if (this.showAdminBoard) {
+                this.router.navigate(['/manager']);
+            } else {
+                this.router.navigate(['/consultant']);
+            }
+
+
+        }
+
+    }
+
+    ngAfterContentChecked() {
+        this.visibleTools$ = this.storageService.visibleTools$;
+
+    }
     toggleSidebar() {
         this.isSidebarOpen = !this.isSidebarOpen;
         this.isSidebarMini = false;
@@ -310,8 +375,40 @@ export class HeaderComponent implements OnInit {
         item.expanded = !item.expanded;
     }
 
-    ngOnInit(): void {
 
+    logout(): void {
+        this.authService.logout().subscribe({
+            next: res => {
+                console.log(res);
+                this.storageService.clean();
+
+                window.location.reload();
+
+                // this.router.navigate(['/home']);
+            },
+            error: err => {
+                console.log(err);
+            }
+        });
     }
+
+     @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const targetElement = event.target as HTMLElement;
+    const sidebar = document.getElementById('sidebar-wrapper');
+    const toolsLink = document.querySelector('.nav-link[routerLink="consultant"]');
+
+    // Vérifier si le clic est en dehors de la sidebar et du lien Tools
+    if (this.isSidebarOpen &&
+      !sidebar?.contains(targetElement) &&
+      !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
+      this.isSidebarOpen = false;
+
+      // Fermer tous les sous-menus
+      this.menu.forEach(item => {
+        item.expanded = false;
+      });
+    }
+  }
 
 }

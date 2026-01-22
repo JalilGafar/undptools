@@ -23,6 +23,7 @@ export const routes: Routes = [
     { path: 'program', component: ProgramComponent },
     { path: 'consultant', loadChildren: () => import('./consultant/consultant.module').then(m => m.ConsultantModule), canActivate: [AuthGuard]  },
     { path: 'manager', loadChildren: () => import('./manager/manager.module').then(m => m.ManagerModule), canActivate: [AdminGuard]  },
+    { path: 'mintoul', loadChildren: () => import('./mintoul/mintoul.module').then(m => m.MintoulModule), canActivate: []   },
     { path: 'home', component: HomeComponent },
     { path: '', component: HomeComponent },
     { path:'**', redirectTo:''}

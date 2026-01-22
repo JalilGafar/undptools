@@ -11,7 +11,8 @@
 }
 
 .card{
-    width: 300px;
+    // width: 300px;
+    text-align: center;
     img{
         height: 200px;
     }
@@ -24,4 +25,21 @@
         font-size: small;
         text-align: center;
     }
+}
+
+.loki{
+    .card {
+        cursor: pointer;
+        height: 15rem;
+        color: #006eb5;
+        background-color:#fff;
+        border: 1px solid #5c5c5c ;
+    }
+    .card:hover{
+        border: none;
+        color: white;
+        background-color:#006eb5;
+        
+    }
+    
 }

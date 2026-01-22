@@ -1,3 +1,17 @@
+#wrapper {
+   padding-left: 0;
+   -webkit-transition: all 0.5s ease;
+   -moz-transition: all 0.5s ease;
+   -o-transition: all 0.5s ease;
+   transition: all 0.5s ease;
+   overflow: hidden;
+}
+
+#wrapper.toggled {
+   padding-left: 250px;
+   overflow: hidden;
+}
+
 .no-margin {
   margin: 0;
 }
@@ -116,4 +130,8 @@
   color: #fff;
   background: rgba(255, 255, 255, 0.2);
   border-left: red 2px solid;
+}
+
+.gogo{
+   margin-left: auto;
 }
