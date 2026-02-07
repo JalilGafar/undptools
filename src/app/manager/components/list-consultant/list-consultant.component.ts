@@ -37,7 +37,7 @@ export class ListConsultantComponent implements OnInit {
   }
  
   consultantLivrable(id: number) {
-    this.router.navigateByUrl('/manager/listcompany/' + id);
+    this.router.navigateByUrl('/manager/listLivrable/' + id+'?sujet=user');
   }
 
 }

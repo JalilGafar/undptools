@@ -3,13 +3,14 @@ import { Observable, tap } from 'rxjs';
 import { Company } from '../../../core/model/company';
 import { ManagerService } from '../../manager.service';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-list-company',
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
+    RouterLink
   ],
   templateUrl: './list-company.component.html',
   styleUrl: './list-company.component.scss'

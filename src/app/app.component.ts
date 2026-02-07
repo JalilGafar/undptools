@@ -317,15 +317,15 @@ export class AppComponent implements OnInit, AfterContentChecked {
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((event: any) => {
-        if (event.url.startsWith('/consultant/')) {
-          this.menuService.showMenu();
-        } else if (event.url.startsWith('/manager')) {
-          this.menuService.showManMenu();
-        }
-        else {
-          this.menuService.hideManMenu();
-          this.menuService.hideMenu();
-        }
+        // if (event.url.startsWith('/consultant/')) {
+        //   this.menuService.showMenu();
+        // } else if (event.url.startsWith('/manager')) {
+        //   this.menuService.showManMenu();
+        // }
+        // else {
+        //   this.menuService.hideManMenu();
+        //   this.menuService.hideMenu();
+        // }
       });
   }
 

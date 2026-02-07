@@ -30,6 +30,9 @@ export class AttributComponent implements OnInit {
   alertMessage: string = '';
   dismissible: boolean = true;
 
+  consultanId!: number;
+  userId!: number;
+
   OutputItem = {
     label: '',
     plage: ''
@@ -96,49 +99,87 @@ export class AttributComponent implements OnInit {
       comment_3: [null],
       note_4: [0],
       comment_4: [null],
+
       note_5: [0],
       comment_5: [null],
       note_6: [0],
       comment_6: [null],
+
       note_7: [0],
       comment_7: [null],
       note_8: [0],
       comment_8: [null],
       note_9: [0],
       comment_9: [null],
+
       note_10: [0],
       comment_10: [null],
       note_11: [0],
       comment_11: [null],
       note_12: [0],
       comment_12: [null],
+
       note_13: [0],
       comment_13: [null],
+      note_14: [0],
+      comment_14: [null],
+      note_15: [0],
+      comment_15: [null],
+      note_16: [0],
+      comment_16: [null],
+      note_17: [0],
+      comment_17: [null],
+      note_18: [0],
+      comment_18: [null],
+      note_19: [0],
+      comment_19: [null],
+
       cons_id: [null],
       comp_id: [null]
     });
 
+    this.consultanId = this.storageService.ConsultantId;
+    this.userId = this.storageService.getUser().id
+
     this.matAttribForm.patchValue({
       cons_id: this.storageService.getUser().id,
       comp_id: this.storageService.CompanyId
-    }); 
+    });
 
-    this.toolService.getAttribDataById(this.storageService.getUser().id, this.storageService.CompanyId);
+    if (this.consultanId == 0) {
+      this.toolService.getAttribDataById(this.storageService.getUser().id, this.storageService.CompanyId);
+    } else {
+      this.toolService.getAttribDataById(this.consultanId, this.storageService.CompanyId);
+    }
+
     this.matAttribData$ = this.toolService.ToolAttribData$;
 
     // ******************get mat predia label 
     this.toolService.getMatPrediaLabel();
     this.matPrediaLabel$ = this.toolService.MatPrediaLabel$;
     this.toolService.MatPrediaLabel$.pipe(
-      map(data => {
-        data.forEach(element => {
-         this.matPrediaLabel.push(this.parseChildren(element)) 
-        
-          // JSON.parse(element.children).forEach(e => { })
-          // element.children = JSON.parse(element.children)
-        });
-      })
-    ).subscribe()
+      // map(items =>
+      //   [...items].sort((a, b) => a.reper - b.reper)
+      // ),
+      // tap(data => {
+      //   data.forEach(element => {
+      //    this.matPrediaLabel.push(this.parseChildren(element)) 
+
+      //     // JSON.parse(element.children).forEach(e => { })
+      //     // element.children = JSON.parse(element.children)
+      //   });
+      // })
+      map(items =>
+        items
+          .slice()
+          .sort((a, b) => a.reper - b.reper)
+          .map(element => this.parseChildren(element))
+      )
+    ).subscribe(
+      parsed => {
+        this.matPrediaLabel = parsed;
+      }
+    )
 
 
 
@@ -148,13 +189,20 @@ export class AttributComponent implements OnInit {
         this.matAttribData = data;
         if (this.matAttribData) {
           this.matAttribData.forEach(element => {
-            this.crit_1 = (element.note_1 * 3) + (element.note_2 * 4) + (element.note_3 * 3);
-            this.crit_2 = (element.note_4 * 3) + (element.note_5 * 3.5) + (element.note_6 * 3.5);
+            this.crit_1 = (element.note_1 * 3) + (element.note_2 * 2) + (element.note_3 * 3) + (element.note_4 * 2);
+            this.crit_2 = (element.note_5 * 5) + (element.note_6 * 5);
             this.crit_3 = (element.note_7 * 3) + (element.note_8 * 3) + (element.note_9 * 4);
-            this.crit_4 = (element.note_10 * 5) + (element.note_11 * 5);
-            this.crit_5 = (element.note_12 * 5) + (element.note_13 * 5);
+            this.crit_4 = (element.note_10 * 3) + (element.note_11 * 4) + (element.note_12 * 3);
+            this.crit_5 = (element.note_13 * 2) + (element.note_14 * 2) + (element.note_15 * 2) + (element.note_16 * 1) + (element.note_17 * 1) + (element.note_18 * 1) + (element.note_19 * 1);
             this.eval_total = ((this.crit_1 * 25) + (this.crit_2 * 20) + (this.crit_3 * 20) + (this.crit_4 * 25) + (this.crit_5 * 10)) / 100
-            this.single[0].value = this.eval_total
+            // this.single[0].value = this.eval_total
+            this.single = [
+              {
+                name: 'Score total',
+                value: this.eval_total
+              }
+            ];
+
           });
 
         }
@@ -185,6 +233,8 @@ export class AttributComponent implements OnInit {
     }
 
     return {
+      reper: obj.reper,
+      question: obj.question,
       critere: obj.critere,
       attribut: obj.attribut,
       children: childrenArray

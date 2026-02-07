@@ -11,6 +11,7 @@ export class StorageService {
   constructor() { }
 
   CompanyId!: number;
+  ConsultantId:number = 0;
 
   private _visibleTools$ = new BehaviorSubject<boolean>(false);
   get visibleTools$(): Observable<boolean> {
@@ -65,6 +66,10 @@ export class StorageService {
 
   public setIdComp (id:number){
     this.CompanyId = id;
+  }
+
+  public setIdConsultant (id:number) {
+    this.ConsultantId = id
   }
 
 }

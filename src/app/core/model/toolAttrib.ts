@@ -29,4 +29,16 @@ export class ToolAttrib {
     comment_12!: string;
     note_13!: number;
     comment_13!: string;
+    note_14!: number;
+    comment_14!: string;
+    note_15!: number;
+    comment_15!: string;
+    note_16!: number;
+    comment_16!: string;
+    note_17!: number;
+    comment_17!: string;
+    note_18!: number;
+    comment_18!: string;
+    note_19!: number;
+    comment_19!: string;
 }

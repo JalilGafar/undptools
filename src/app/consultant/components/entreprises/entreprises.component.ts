@@ -54,12 +54,14 @@ export class EntreprisesComponent implements OnInit {
     this.companies$ = this.ConsultantServices.company$;
     this.convertJson();
 
+    this.storageService.setIdConsultant(this.currentUser.id);
+
   }
 
   //////CONVERT ARRAY TO MYSQL JSON DATA
   convertJson() {
     this.converted = this.ConsultantServices.transformToMysqlJsonString(this.rawData);
-    console.log(this.converted);
+    // console.log(this.converted);
   }
 
   ngOnDestroy(): void {

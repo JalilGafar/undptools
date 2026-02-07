@@ -1,9 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { User } from '../core/model/user';
 import { environment } from '../../environment/environment';
 import { Company } from '../core/model/company';
+import { Livrable } from '../core/model/livrable';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,11 @@ export class ManagerService {
   get company$(): Observable<Company[]> {
     return this._company$.asObservable()
   }
+  
+  private _librables$ = new BehaviorSubject<Livrable[]>([]);
+  get livrable$(): Observable<Livrable[]> {
+    return this._librables$.asObservable()
+  }
 
   getUserFromServer() {
     this.http.get<User[]>(`${environment.apiUrl}/api/manager/user`).pipe(
@@ -28,6 +34,13 @@ export class ManagerService {
         this._persona$.next(user);
       })
     ).subscribe();
+  }
+
+  getUserById(id:number): Observable<User>{
+    this.getCompanyFromServer();
+    return this.persona$.pipe(
+      map(personas => personas.filter(persona => persona.id === id)[0])
+    );
   }
 
   getCompanyFromServer() {
@@ -57,6 +70,19 @@ export class ManagerService {
     commune: string, quartier: string, lieu: string, x: number, y: number, idUser: number
   }): Observable<Company> {
     return this.http.post<Company>(`${environment.apiUrl}/api/manager/newCompany`, newCompany);
+  }
+
+  //Liste des livrables
+  getLivrableFromUserId(id: number) {
+    let Id = new HttpParams();
+    Id = Id.append('idUser', id);
+    this.http.get<Livrable[]>(`${environment.apiUrl}/api/manager/livrables`, { params: Id }).pipe(
+      tap(livrables => {
+        this._librables$.next(livrables);
+        //    this.setLoadingStatus(false);
+      })
+    ).subscribe();
+
   }
 
 }

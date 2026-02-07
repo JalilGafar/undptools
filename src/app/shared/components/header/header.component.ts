@@ -8,7 +8,7 @@ import { filter, Observable } from 'rxjs';
 import { ShareServiceService } from '../../share-service.service';
 import { StorageService } from '../../../_services/storage.service';
 import { AuthService } from '../../../_services/auth.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 interface MenuItem {
     label: string;
@@ -306,7 +306,8 @@ export class HeaderComponent implements OnInit {
         private menuService: ShareServiceService,
         private router: Router,
         private storageService: StorageService,
-        private authService: AuthService
+        private authService: AuthService,
+        private route: ActivatedRoute
     ) {
         this.router.events
             .pipe(filter(e => e instanceof NavigationEnd))
@@ -324,6 +325,13 @@ export class HeaderComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
+        this.route.params.subscribe(params => {
+            console.log('params changed', params);
+            this.visibleTools$ = this.storageService.visibleTools$;
+        });
+
+
         this.menuVisible$ = this.menuService.menuVisible$;
         this.manMenuVisible$ = this.menuService.manMenuVisible$;
 
@@ -349,10 +357,12 @@ export class HeaderComponent implements OnInit {
 
     }
 
-    ngAfterContentChecked() {
-        this.visibleTools$ = this.storageService.visibleTools$;
+    // ngAfterContentChecked() {
+    //     this.visibleTools$ = this.storageService.visibleTools$;
+    // }
 
-    }
+
+
     toggleSidebar() {
         this.isSidebarOpen = !this.isSidebarOpen;
         this.isSidebarMini = false;
@@ -392,23 +402,23 @@ export class HeaderComponent implements OnInit {
         });
     }
 
-     @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const targetElement = event.target as HTMLElement;
-    const sidebar = document.getElementById('sidebar-wrapper');
-    const toolsLink = document.querySelector('.nav-link[routerLink="consultant"]');
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: Event): void {
+        const targetElement = event.target as HTMLElement;
+        const sidebar = document.getElementById('sidebar-wrapper');
+        const toolsLink = document.querySelector('.nav-link[routerLink="consultant"]');
 
-    // Vérifier si le clic est en dehors de la sidebar et du lien Tools
-    if (this.isSidebarOpen &&
-      !sidebar?.contains(targetElement) &&
-      !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
-      this.isSidebarOpen = false;
+        // Vérifier si le clic est en dehors de la sidebar et du lien Tools
+        if (this.isSidebarOpen &&
+            !sidebar?.contains(targetElement) &&
+            !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
+            this.isSidebarOpen = false;
 
-      // Fermer tous les sous-menus
-      this.menu.forEach(item => {
-        item.expanded = false;
-      });
+            // Fermer tous les sous-menus
+            this.menu.forEach(item => {
+                item.expanded = false;
+            });
+        }
     }
-  }
 
 }

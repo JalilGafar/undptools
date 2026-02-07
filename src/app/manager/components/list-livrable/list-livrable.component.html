@@ -1,0 +1,38 @@
+<div class="container">
+    @if (user$ |async; as data) {
+        <h3> Liste des Livrabre du consultant  {{data.username}} </h3>
+    }
+    @if (librables$ |async; as data) {
+        @if (data.length) {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#ID</th>
+                        <th scope="col">livrable</th>
+                        <th scope="col">Entreprise</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">comp_id</th>
+                        <th scope="col">cons_id</th>
+        
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of data; track $index) {
+                        <tr (click)="viewLivrable(item.comp_id, item.tool_code)" >
+                            <th scope="row"> {{item.id}} </th>
+                            <td> {{item.livrable}} </td>
+                            <td> {{item.company}} </td>
+                            <td> {{item.date | date:'medium'}} </td>
+                            <td> {{item.comp_id}} </td>
+                            <td> {{userId}} </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        } @else {
+            <div class="empty">
+                Aucun livrable disponible pour le moment
+            </div>
+        }
+    }
+</div>

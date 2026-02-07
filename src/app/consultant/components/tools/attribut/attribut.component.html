@@ -30,6 +30,7 @@
                 aria-expanded="false" aria-controls="collapseExample">
                 <i class="bi bi-pencil"></i> Remplir la matrice
             </button>
+            
 
         </div>
 
@@ -42,13 +43,16 @@
                             </div>
                             <div class="card-body" style="min-height: 450px;">
                                 @if (matPrediaLabel ; as ponder) {
-                                    @for (item of ponder; track $index; let i = $index) {
+                                    @for (item of ponder; track item.reper; let i = $index) {
                                     <div class="ponderation-item" [class.active]="currentIndex === i">
                                         <!-- Ressources oppérationelles -->
-                                        <h5 class="mt-0 mb-2 card-title"> {{item.critere}} </h5>
+                                        <h4 class="mt-0 mb-2 card-title"> {{item.critere}} </h4>
     
-                                        <h6 class="mt-3">
+                                        <h5 class="mt-3">
                                             {{item.attribut}}
+                                        </h5>
+                                        <h6 class="fst-italic">
+                                            {{item.question}}
                                         </h6>
                                         <div class="col-12">
                                             <div class="row justify-content-md-center px-3">
@@ -67,7 +71,7 @@
     
                                                     <!-- Range input lié au FormControl -->
                                                     <input type="range" class="form-range" min="0" max="10" step="0.5"
-                                                        id="customRange3" [formControlName]="'note_'+ ($index+1)" />
+                                                        id="customRange3" [formControlName]="'note_'+ (item.reper)" />
                                                 </div>
     
                                                 @for (itex of item.children; track $index) {
@@ -81,7 +85,7 @@
                                                     <label for="" class="form-label">Commentaire</label>
                                                     <textarea class="form-control"
                                                         placeholder="Ecrivez ici les raisons de cette note."
-                                                        [formControlName]="'comment_'+ ($index+1)" rows="2"></textarea>
+                                                        [formControlName]="'comment_'+ (item.reper)" rows="2"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -109,9 +113,13 @@
                                 </button>
                             </div>
                             @if (currentIndex + 1 === matPrediaLabel.length) {
-                            <button type="submit" (click)="saveTool()" class="btn btn-success">
-                                Enregistrer l'outil
-                            </button>
+                                @if (consultanId != userId) {
+                                    <button type="button" class="btn btn-lg btn-danger" data-bs-toggle="popover" title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?">Seul les consultants peuvent enregistrer les outils</button>
+                                } @else {
+                                    <button type="submit" (click)="saveTool()" class="btn btn-success">
+                                        Enregistrer l'outil
+                                    </button>
+                                }
                             }
                         </div>
 
@@ -291,17 +299,17 @@
                                 <tbody class="align-middle">
                                     <tr>
                                         <!-- La cellule du # fusionne les 2 premières lignes -->
-                                        <th scope="row" rowspan="3" class="text-center">Ressources Opérationelles
+                                        <th scope="row" rowspan="4" class="text-center">Ressources Opérationelles
                                             Disponibles</th>
-                                        <td>Équipements et installations disponibles pour maintenir les opérations.</td>
+                                        <td>Nombre d'employés</td>
                                         <td> {{item.note_1}}/10 </td>
-                                        <td scope="row" rowspan="3" class="text-center">
-                                            {{((item.note_1+item.note_2+item.note_3)/3).toFixed(1)}}/10 </td>
+                                        <td scope="row" rowspan="4" class="text-center">
+                                            {{((item.note_1+item.note_2+item.note_3+item.note_4)/4).toFixed(1)}}/10 </td>
                                         <td> {{item.comment_1}} </td>
                                     </tr>
                                     <tr>
                                         <!-- On supprime la cellule du # ici -->
-                                        <td>Nombre d'employés</td>
+                                        <td>Équipements et installations disponibles pour maintenir les opérations</td>
                                         <td>{{item.note_2}}/10</td>
                                         <td> {{item.comment_2}} </td>
                                     </tr>
@@ -311,37 +319,37 @@
                                         <td>{{item.note_3}}/10</td>
                                         <td> {{item.comment_3}} </td>
                                     </tr>
-                                    <!-- $$$$$$$$$$$$$$$$$ -->
                                     <tr>
-                                        <th scope="row" rowspan="3" class="text-center">Compétences Techniques</th>
-                                        <td>Gestion d'entreprise</td>
-                                        <td> {{item.note_4}}/10 </td>
-                                        <td scope="row" rowspan="3" class="text-center">
-                                            {{((item.note_4+item.note_5+item.note_6)/3).toFixed(1)}}/10 </td>
+                                        <!-- On supprime la cellule du # ici -->
+                                        <td>Disponibilité de fonds externes pour l'opération</td>
+                                        <td>{{item.note_4}}/10</td>
                                         <td> {{item.comment_4}} </td>
                                     </tr>
+                                    <!-- $$$$$$$$$$$$$$$$$ -->
                                     <tr>
-                                        <td>Expérience technique</td>
-                                        <td>{{item.note_5}}/10</td>
+                                        <th scope="row" rowspan="2" class="text-center">Compétences Techniques</th>
+                                        <td>Gestion d'entreprise</td>
+                                        <td> {{item.note_5}}/10 </td>
+                                        <td scope="row" rowspan="2" class="text-center">
+                                            {{((item.note_5+item.note_6)/2).toFixed(1)}}/10 </td>
                                         <td> {{item.comment_5}} </td>
                                     </tr>
                                     <tr>
-                                        <td>Expérience dans les affaires</td>
+                                        <td>Expérience technique (Capacité collective)</td>
                                         <td>{{item.note_6}}/10</td>
                                         <td> {{item.comment_6}} </td>
                                     </tr>
                                     <!-- $$$$$$$$$$$$$$$$$ -->
                                     <tr>
                                         <th scope="row" rowspan="3" class="text-center">Potentiel de l'Entreprise</th>
-                                        <td>L'entreprise opère depuis les 2 dernières années, est active et est prête à
-                                            se développer</td>
+                                        <td>Croissance de l'entreprise (basée sur 2022 comme année de référence)</td>
                                         <td> {{item.note_7}}/10 </td>
                                         <td scope="row" rowspan="3" class="text-center">
                                             {{((item.note_7+item.note_8+item.note_9)/3).toFixed(1)}}/10 </td>
                                         <td> {{item.comment_7}} </td>
                                     </tr>
                                     <tr>
-                                        <td>L'entreprise a une liste de clients</td>
+                                        <td>Dossiers d'entreprise (Registres d'affaires)</td>
                                         <td>{{item.note_8}}/10</td>
                                         <td> {{item.comment_8}} </td>
                                     </tr>
@@ -352,31 +360,61 @@
                                     </tr>
                                     <!-- $$$$$$$$$$$$$$$$$ -->
                                     <tr>
-                                        <th scope="row" rowspan="2" class="text-center">Marketing</th>
-                                        <td>Canaux de vente</td>
+                                        <th scope="row" rowspan="3" class="text-center">Marketing</th>
+                                        <td>Compréhension du marché et focalisation sur le client</td>
                                         <td> {{item.note_10}}/10 </td>
-                                        <td scope="row" rowspan="2" class="text-center">
-                                            {{((item.note_10+item.note_11)/2).toFixed(1)}}/10 </td>
+                                        <td scope="row" rowspan="3" class="text-center">
+                                            {{((item.note_10+item.note_11++item.note_12)/3).toFixed(1)}}/10 </td>
                                         <td> {{item.comment_10}} </td>
                                     </tr>
                                     <tr>
-                                        <td>Stratégies commerciales </td>
+                                        <td>Promotion et visibilité </td>
                                         <td>{{item.note_11}}/10</td>
                                         <td> {{item.comment_11}} </td>
                                     </tr>
+                                    <tr>
+                                        <td>Pratiques de vente et gestion des relations</td>
+                                        <td>{{item.note_12}}/10</td>
+                                        <td> {{item.comment_12}} </td>
+                                    </tr>
                                     <!-- $$$$$$$$$$$$$$$$$ -->
                                     <tr>
-                                        <th scope="row" rowspan="2" class="text-center">Stratégie du PNUD</th>
+                                        <th scope="row" rowspan="7" class="text-center">Stratégie du PNUD</th>
                                         <td>Inclusion de genre</td>
-                                        <td> {{item.note_12}}/10 </td>
-                                        <td scope="row" rowspan="2" class="text-center">
-                                            {{((item.note_12+item.note_13)/2).toFixed(1)}}/10 </td>
-                                        <td> {{item.comment_12}} </td>
+                                        <td> {{item.note_13}}/10 </td>
+                                        <td scope="row" rowspan="7" class="text-center">
+                                            {{((item.note_13+item.note_14+item.note_15+item.note_16+item.note_17+item.note_18+item.note_19)/7).toFixed(1)}}/10 </td>
+                                        <td> {{item.comment_13}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Inclusion des jeunes </td>
+                                        <td>{{item.note_14}}/10</td>
+                                        <td> {{item.comment_14}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Inclusion des personnes handicapées</td>
+                                        <td>{{item.note_15}}/10</td>
+                                        <td> {{item.comment_15}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pratiques durables/écologiques.</td>
+                                        <td>{{item.note_16}}/10</td>
+                                        <td> {{item.comment_16}} </td>
                                     </tr>
                                     <tr>
                                         <td>Secteur stratégique </td>
-                                        <td>{{item.note_13}}/10</td>
-                                        <td> {{item.comment_13}} </td>
+                                        <td>{{item.note_17}}/10</td>
+                                        <td> {{item.comment_17}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Localisation</td>
+                                        <td>{{item.note_18}}/10</td>
+                                        <td> {{item.comment_18}} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Structure productive (ENTREPRISES AGRICOLES UNIQUEMENT)</td>
+                                        <td>{{item.note_19}}/10</td>
+                                        <td> {{item.comment_19}} </td>
                                     </tr>
 
 

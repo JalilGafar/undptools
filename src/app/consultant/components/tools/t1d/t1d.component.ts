@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Color, NgxChartsModule, ScaleType, LegendPosition } from '@swimlane/ngx-charts';
 import { map, Observable, tap } from 'rxjs';
@@ -10,6 +10,7 @@ import { ConsultantService } from '../../../consultant.service';
 import { IntegLabel } from '../../../../core/model/mat_integ_label';
 import { ToolMatDiagInteg } from '../../../../core/model/tool1D';
 import { curveLinearClosed } from 'd3-shape';
+
 
 @Component({
   selector: 'app-t1d',
@@ -23,12 +24,15 @@ import { curveLinearClosed } from 'd3-shape';
   templateUrl: './t1d.component.html',
   styleUrl: './t1d.component.scss'
 })
-export class T1dComponent implements OnInit {
+export class T1dComponent implements OnInit,  OnDestroy {
 
   showAlert: boolean = false;
   alertType: string = 'info'; // e.g., 'success', 'danger', 'warning'
   alertMessage: string = '';
   dismissible: boolean = true;
+
+  consultanId!: number;
+  userId!: number;
 
 
   // ********* NGX CHART
@@ -413,12 +417,20 @@ private _: any;
       comp_id: [null]
     });
 
+    this.consultanId = this.storageService.ConsultantId;
+    this.userId = this.storageService.getUser().id
+
     this.matIntegForm.patchValue({
       cons_id: this.storageService.getUser().id,
       comp_id: this.storageService.CompanyId
     });
 
-    this.toolService.getMatIntegDataById(this.storageService.getUser().id, this.storageService.CompanyId);
+    if (this.consultanId == 0) {  
+      this.toolService.getMatIntegDataById(this.storageService.getUser().id, this.storageService.CompanyId);
+    } else {
+      this.toolService.getMatIntegDataById(this.consultanId , this.storageService.CompanyId);
+    }
+
     this.matDiagIntegData$ = this.toolService.ToolMatDiagIntegData$;
 
     //*****************Get mat Integ Label */
@@ -427,7 +439,7 @@ private _: any;
       tap(arr => {
         this.matIntegLabel = arr.sort((a, b) => a.reper - b.reper);
          this.matIntegLength = arr.length;
-         console.log(arr);
+        //  console.log(arr);
          
       }),
       map(items => items.sort((a, b) => a.reper - b.reper))
@@ -611,11 +623,10 @@ private _: any;
     ).subscribe();
 
     this.convertJson()
+  }
 
-
-
-
-
+  ngOnDestroy() {
+    this.storageService.setIdConsultant(0);
   }
 
   // getItemsStartingWith(a:string) { return this.matIntegLabel.filter(el => el.reper && el.reper.startsWith(a)); }

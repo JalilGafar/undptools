@@ -93,7 +93,11 @@ export class ConsultantService {
     note_7: number, comment_7: string, note_8: number, comment_8: string,
     note_9: number, comment_9: string, note_10: number, comment_10: string,
     note_11: number, comment_11: string, note_12: number, comment_12: string,
-    note_13: number, comment_13: string, cons_id: number, comp_id: number
+    note_13: number, comment_13: string, note_14: number, comment_14: string,
+    note_15: number, comment_15: string, note_16: number, comment_16: string,
+    note_17: number, comment_17: string, note_18: number, comment_18: string,
+    note_19: number, comment_19: string, 
+    cons_id: number, comp_id: number
   }): Observable<ToolAttrib> {
     console.log(attribForm)
     return this.http.post<ToolAttrib>(`${environment.apiUrl}/api/tools/attribut`, attribForm);

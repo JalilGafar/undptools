@@ -1,5 +1,6 @@
 <header class="jumbotron">
-    <p>{{ content }}</p>
+    <!-- <p>{{ content }}</p> -->
+
 </header>
 
 <div class="container">
@@ -9,29 +10,41 @@
         </div>
     </div>
     <div class="row gy-4 justify-content-around">
-        <div class="col loki">
+        <div class="col-6 loki">
             <div class="card p-3 cible-card">
                 <div class="card-body" (click)="seeConsultants()">
                     <h5 class="card-title">Parcourir par consultant</h5>
-                    <p class="card-text">Consultez les informations et livrables d'unu consultant en particulier</p>
+                    <p class="card-text">Consulter les informations et livrables d'un consultant en particulier</p>
+                    <i class="bi bi-person" style="font-size: 4rem; color: cornflowerblue;"></i>
                 </div>
                 <!-- <a routerLink="listconsult">
                 </a> -->
             </div>
         </div>
-        <div class="col loki">
+        <div class="col-6 loki">
             <div class="card p-3 cible-card">
                 <div class="card-body" (click)="seeCompanies()">
                     <h5 class="card-title">Parcourir les Entreprises du programme</h5>
-                    <p class="card-text">Consultez les informations et livrables d'une entreprise en particulier.</p>
+                    <p class="card-text">Consulter les informations et livrables d'une entreprise en particulier.</p>
+                    <i class="bi bi-building" style="font-size: 4rem; color: cornflowerblue;"></i>
                 </div>
             </div>
         </div>
-        <div class="col loki">
+        <div class="col-6 loki">
             <div class="card p-3 cible-card">
                 <div class="card-body" (click)="seeGlobal()">
                     <h5 class="card-title">Observation Globale</h5>
-                    <p class="card-text">Consultez les statistiques du programme.</p>
+                    <p class="card-text">Consulter les statistiques du programme.</p>
+                    <i class="bi bi-speedometer2" style="font-size: 4rem; color: cornflowerblue;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 loki">
+            <div class="card p-3 cible-card">
+                <div class="card-body" (click)="seeTools()">
+                    <h5 class="card-title">Parcourir les Outils du Programme</h5>
+                    <p class="card-text">Consulter la version digital des outils du programme.</p>
+                    <i class="bi bi-tools" style="font-size: 4rem; color: cornflowerblue;"></i>
                 </div>
             </div>
         </div>
