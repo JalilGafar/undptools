@@ -425,6 +425,8 @@ private _: any;
       comp_id: this.storageService.CompanyId
     });
 
+    this.toolService.clearMatDiagInteg();
+
     if (this.consultanId == 0) {  
       this.toolService.getMatIntegDataById(this.storageService.getUser().id, this.storageService.CompanyId);
     } else {
@@ -461,7 +463,7 @@ private _: any;
             this.single[0].series[1].value = this.crit_2
             this.crit_3 = (element.note_13 + element.note_14 + element.note_15 + element.note_16 + element.note_17 + element.note_18 + element.note_19 + element.note_20) * 10 / 8;
             this.single[0].series[2].value = this.crit_3
-            this.crit_4 = (element.note_21 + element.note_21 + element.note_23 + element.note_24 + element.note_25 + element.note_26 + element.note_27 + element.note_28) * 10 / 8;
+            this.crit_4 = (element.note_21 + element.note_22 + element.note_23 + element.note_24 + element.note_25 + element.note_26 + element.note_27 + element.note_28) * 10 / 8;
             this.single[0].series[3].value = this.crit_4
             this.crit_5 = (element.note_29 + element.note_30 + element.note_31 + element.note_32 + element.note_33 + element.note_34 + element.note_35) * 10 / 7;
             this.single[0].series[4].value = this.crit_5
@@ -472,7 +474,7 @@ private _: any;
             this.crit_8 = (element.note_52 + element.note_53 + element.note_54 + element.note_55 + element.note_56 + element.note_57 + element.note_58 + element.note_59 + element.note_60 + element.note_61 + element.note_62) * 10 / 11;
             
             this.single[0].series[7].value = this.crit_8
-            this.eval_total = ((this.crit_1 * 25) + (this.crit_2 * 20) + (this.crit_3 * 20) + (this.crit_4 * 25) + (this.crit_5 * 10)) / 100
+            // this.eval_total = ((this.crit_1 * 25) + (this.crit_2 * 20) + (this.crit_3 * 20) + (this.crit_4 * 25) + (this.crit_5 * 10)) / 100
 
             this.matIntegForm.patchValue({
               note_1: element.note_1,

@@ -146,6 +146,9 @@ export class AttributComponent implements OnInit {
       comp_id: this.storageService.CompanyId
     });
 
+/////Le but est de donner la possibilité au manager de visualier
+/////les données d'un consultant empruntant son ID
+    this.toolService.clearAttrib();
     if (this.consultanId == 0) {
       this.toolService.getAttribDataById(this.storageService.getUser().id, this.storageService.CompanyId);
     } else {

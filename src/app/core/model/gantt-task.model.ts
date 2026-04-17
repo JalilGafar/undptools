@@ -1,9 +1,16 @@
 // gantt-task.model.ts
-export interface GanttTask {
-  id: string;
-  name: string;
-  start: string;   // YYYY-MM-DD
-  end: string;     // YYYY-MM-DD
-  progress: number;
-  custom_class: string;
+export class GanttTask {
+  id!: string;
+  name!: string;
+  details!: string;
+  start!: string;   // YYYY-MM-DD
+  end!: string;     // YYYY-MM-DD
+  progress!: number;
+  status!: string;
+  dependencies!: string;
+  close!: string;
+  responsable!: string;
+  comments!: string;
+  cons_id!: number;
+  comp_id!: number
 }

@@ -1,47 +1,130 @@
-<div class="card mx-5 mt-4">
-    <div class="card-header">
-        <h5 class="card-title text-center"> {{toolName}} </h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Etape</th>
-                        <th>Activités</th>
-                        <th>Commentaires / Sous-activités</th>
-                        <th>Responsable</th>
-                        <th>Domaine de l'entreprise</th>
-                        <th>Statuts</th>
-                        <th>% Complété</th>
-                        <th>Date de début</th>
-                        <th>Date limite prévue</th>
-                        <th>Date de Fin</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" class="fiche"></td>
-                        <td><input type="text" class="fiche"></td>
-                        <td><input type="text" class="fiche"></td>
-                        <td><input type="text" class="fiche"></td>
-                        <td><input type="text" class="fiche"></td>
-                        <td>
-                            <select class="form-select" aria-label="Default select example">
-                                <option value="1">Non débuté</option>
-                                <option value="2">En cours de réalisation</option>
-                                <option value="3">Terminé</option>
-                            </select>
-                        </td>
-                        <td><input type="number" class="fiche"></td>
-                        <td><input type="date" class="fiche"></td>
-                        <td><input type="date" class="fiche"></td>
-                        <td><input type="date" class="fiche"></td>
+<section class="t1ea-container">
 
-                    </tr>
-                    <!-- More rows as needed -->
-                </tbody>
-            </table>
+  <!-- ===== HEADER ===== -->
+  <header class="t1ea-header">
+    <h2>Suivi des activités – T1EA</h2>
+    <p>
+      Enregistrement et suivi temporel des activités via diagramme de Gantt
+    </p>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="t1ea-content">
+
+    <!-- ===== FORM CARD ===== -->
+    <article class="card form-card">
+      <h3>Nouvelle activité</h3>
+
+      <form [formGroup]="activityForm" (ngSubmit)="addActivity()">
+
+        <div class="form-grid">
+
+          <!-- Activité -->
+          <div class="form-group full">
+            <label for="name">Nom de l’activité</label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="Ex : Formation des partenaires"
+            />
+          </div>
+          <!-- Details Activité -->
+          <div class="form-group full">
+            <label for="details">Détails de l’activité</label>
+            <input
+              id="details"
+              type="text"
+              formControlName="details"
+              placeholder="En quoi consistera cette activité ?"
+            />
+          </div>
+
+          <!-- Dates -->
+          <div class="form-group">
+            <label for="start">Date de début</label>
+            <input id="start" type="date" formControlName="start" />
+          </div>
+
+          <div class="form-group">
+            <label for="end">Date de fin programmée</label>
+            <input id="end" type="date" formControlName="end" />
+          </div>
+
+          <div class="form-group">
+            <label for="close">Date de fin réelle</label>
+            <input id="close" type="date" formControlName="close" />
+          </div>
+
+          <!-- Responsable -->
+          <div class="form-group">
+            <label for="responsable">Responsable</label>
+            <input
+              id="responsable"
+              type="text"
+              formControlName="responsable"
+              placeholder="Qui est en charge de cette activité au sein de l'entreprise ?"
+            />
+          </div>
+
+          <!-- Progression -->
+          <div class="form-group">
+            <label for="progress">
+              Avancement (%)
+            </label>
+            <input
+              id="progress"
+              type="number"
+              min="0"
+              max="100"
+              formControlName="progress"
+            />
+          </div>
+
+          <!-- État -->
+          <div class="form-group">
+            <label for="status">État de l’activité</label>
+            <select id="status" formControlName="status">
+              <option value="">— Sélectionner —</option>
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Commentaires -->
+          <div class="form-group full">
+            <label for="comments">Commentaires</label>
+            <textarea
+              id="comments"
+              rows="3"
+              formControlName="comments"
+              placeholder="Observations, contraintes, remarques…"
+            ></textarea>
+          </div>
+
         </div>
-    </div>
-</div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="activityForm.invalid"
+          >
+            Enregistrer l’activité
+          </button>
+        </div>
+
+      </form>
+    </article>
+
+    <!-- ===== GANTT CARD ===== -->
+    <article class="card gantt-card">
+      <h3>Planification des activités</h3>
+      <div id="gantt"></div>
+    </article>
+
+  </div>
+
+</section>

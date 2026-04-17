@@ -1,8 +1,13 @@
-export class Activity {
-  id!: string;
-  name!: string;
-  start!: string;   // YYYY-MM-DD
-  end!: string;     // YYYY-MM-DD
-  progress!: number;
-  custom_class!: string;
+// src/app/models/activity.model.ts
+
+export interface Activity {
+  id: number;
+  title: string;
+  startDate: Date;
+  plannedEndDate: Date;
+  actualEndDate?: Date;
+  owner: string;
+  progress: number;
+  status: 'Planifié' | 'En cours' | 'Terminé';
+  comments: string;
 }

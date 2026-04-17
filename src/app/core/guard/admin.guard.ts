@@ -13,11 +13,11 @@ export class AdminGuard implements CanActivate {
      ){}
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-         if (this.storageService.getUser().roles.includes('ROLE_ADMIN')) {
+         const user = this.storageService.getUser();
+         if (user?.roles?.includes('ROLE_ADMIN')) {
             return true;
-         }else {
-            this.router.navigateByUrl('/login');
-            return false;
          }
+         this.router.navigateByUrl('/login');
+         return false;
     }
 }

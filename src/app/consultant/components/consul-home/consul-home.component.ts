@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UserService } from '../../../_services/user.service';
 import { StorageService } from '../../../_services/storage.service';
 
 @Component({
@@ -13,38 +12,14 @@ import { StorageService } from '../../../_services/storage.service';
 export class ConsulHomeComponent implements OnInit {
 
   showAlert: boolean = false;
-  alertType: string = 'info'; // e.g., 'success', 'danger', 'warning'
+  alertType: string = 'info';
   alertMessage: string = '';
   dismissible: boolean = true;
 
-  content?: string;
-
-  constructor(
-    private userService: UserService,
-    private storageService: StorageService,
-  ) { }
+  constructor(private storageService: StorageService) { }
 
   ngOnInit(): void {
-
     this.storageService.setVisibleToolsFalse();
-    // this.showAlertMessage();
-    this.userService.getUserBoard().subscribe({
-      next: data => {
-        this.content = data;
-      },
-      error: err => {
-        if (err.error) {
-          try {
-            const res = JSON.parse(err.error);
-            this.content = res.message;
-          } catch {
-            this.content = `Error with status: ${err.status} - ${err.statusText}`;
-          }
-        } else {
-          this.content = `Error with status: ${err.status}`;
-        }
-      }
-    });
   }
 
   showAlertMessage(): void {

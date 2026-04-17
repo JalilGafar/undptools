@@ -54,7 +54,7 @@ const routes: Routes = [
   {path: 'tool/t2a', component: OnconstructionComponent},
   {path: 'tool/t2b', component: OnconstructionComponent},
   {path: 'tool/t2c', component: OnconstructionComponent},
-  {path: 'tool/t2d', component: OnconstructionComponent},
+  {path: 'tool/t2d', component: T2dComponent},
   {path: 'tool/t2e', component: OnconstructionComponent},
   {path: 'tool/t2f', component: OnconstructionComponent},
   // {path: 'tool/t2g', component: T2gComponent},
