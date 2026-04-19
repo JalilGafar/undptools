@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Color, NgxChartsModule, ScaleType, LegendPosition } from '@swimlane/ngx-charts';
 import { map, Observable, tap } from 'rxjs';
 import { ToolAttrib } from '../../../../core/model/toolAttrib';
@@ -214,6 +214,7 @@ export class T1dComponent implements OnInit,  OnDestroy {
 
 
   matIntegForm!: FormGroup;
+  infoEntrepriseForm!: FormGroup;
   noteControl = new FormControl(0); // valeur par défaut
   ticks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];        // graduations
 
@@ -275,7 +276,34 @@ private _: any;
     Object.assign(this.single)
   }
 
+  get personnelArray(): FormArray<FormGroup> {
+    return this.infoEntrepriseForm.get('personnel') as FormArray<FormGroup>;
+  }
+
+  private createPersonnelRow(): FormGroup {
+    return this.formBuilder.group({
+      nom_poste: [null],
+      nom_personne: [null],
+      temps_poste: [null],
+      activites: [null]
+    });
+  }
+
+  addPersonnel(): void {
+    this.personnelArray.push(this.createPersonnelRow());
+  }
+
+  removePersonnel(index: number): void {
+    if (this.personnelArray.length > 1) {
+      this.personnelArray.removeAt(index);
+    }
+  }
+
   ngOnInit(): void {
+    this.infoEntrepriseForm = this.formBuilder.group({
+      personnel: this.formBuilder.array([this.createPersonnelRow()])
+    });
+
     this.matIntegForm = this.formBuilder.group({
       note_1: [0],
       comt_1: [null],
