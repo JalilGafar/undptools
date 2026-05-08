@@ -1,0 +1,73 @@
+ <div class="container">
+     <button type="button" class="btn btn-primary" onclick="history.back()">
+            ← Retour
+        </button>
+    <div class="dashboard">
+    
+      <h2 class="dashboard-title">Monitoring & Evaluation Dashboard</h2>
+    
+      <!-- ===== CHARTS GRID ===== -->
+      <div class="charts-grid">
+    
+        <!-- BAR CHART -->
+        <div class="card">
+          <h3>Impact Humain global</h3>
+          <ngx-charts-bar-vertical
+            [results]="barData"
+            [view]="view"
+            [xAxis]="true"
+            [yAxis]="true"
+            [roundEdges]="true">
+          </ngx-charts-bar-vertical>
+        </div>
+    
+        <!-- LINE CHART -->
+        <div class="card">
+          <h3>Nombre d'heure global d'échange entre consultants et entreprises</h3>
+          <ngx-charts-line-chart
+            [results]="lineData"
+            [yScaleMin]="yScaleMin"
+            [view]="view"
+            [xAxis]="true"
+            [yAxis]="true"
+            [autoScale]="false">
+          </ngx-charts-line-chart>
+        </div>
+    
+        <!-- PIE CHART -->
+        <div class="card">
+          <h3>Evolution globale des livrables</h3>
+          <ngx-charts-pie-chart
+            [results]="pieData"
+            [view]="view"
+            [legend]="true"
+            [labels]="true">
+          </ngx-charts-pie-chart>
+        </div>
+    
+      </div>
+    
+      <!-- ===== TABLE ===== -->
+      <div class="table-card table-responsive">
+        <h3>Companies Overview</h3>
+    
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Status</th>
+              <th>Progress</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of tableData">
+              <td>{{ row.project }}</td>
+              <td>{{ row.status }}</td>
+              <td>{{ row.progress }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    
+    </div>
+ </div>

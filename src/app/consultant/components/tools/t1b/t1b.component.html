@@ -1,0 +1,131 @@
+<div class="card mx-5 mt-4">
+    <div class="card-header">
+        <h5 class="card-title text-center"> {{toolName}} </h5>
+    </div>
+    <div class="card-body">
+        <form action="" class="row g-3" [formGroup]="MeetForm">
+
+            <table>
+                <tr>
+                    <td class="input-empty">
+                        <textarea class="form-control" placeholder="Etape" formControlName="etape" rows="1">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="input-empty">
+                        <textarea class="form-control" placeholder="Date" formControlName="date" rows="1">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="input-empty">
+                        <textarea class="form-control" placeholder="Lieu" formControlName="lieu" rows="1">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="big-box">
+                        <textarea class="form-control" placeholder="Objectifs de la réunion" formControlName="objectif"
+                            rows="2">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="big-box">
+                        <textarea class="form-control" placeholder="Ordre du jour" formControlName="ordre" rows="2">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="big-box">
+                        <textarea class="form-control" placeholder="Résultats et Engagements"
+                            formControlName="resultats" rows="2">
+                        </textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="big-box">
+                        <textarea class="form-control" placeholder="Remarques" formControlName="remarque" rows="2">
+                        </textarea>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <h3>Fiche de présence</h3>
+        <table class="present">
+            <tr>
+                <th>N.</th>
+                <th>Noms et prénoms</th>
+                <th>Contact</th>
+            </tr>
+
+            <!-- Lignes dynamiques -->
+            <tr>
+                <td class="number">1</td>
+                <td>
+                    <input class="fiche" type="text">
+                </td>
+                <td class="signature">
+                    <input type="text" class="fiche">
+                </td>
+            </tr>
+            <tr>
+                <td class="number">2</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+            <tr>
+                <td class="number">3</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+            <tr>
+                <td class="number">4</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+            <tr>
+                <td class="number">5</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+            <tr>
+                <td class="number">6</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+            <tr>
+                <td class="number">7</td>
+                <td><input type="text" class="fiche"></td>
+                <td class="signature"><input type="text" class="fiche"></td>
+            </tr>
+
+        </table>
+
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Enregistrer</button>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" routerLink="../../companies" >Enregistrer la minute de Réunion</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

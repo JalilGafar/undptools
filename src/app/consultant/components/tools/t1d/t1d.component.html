@@ -1,0 +1,935 @@
+<div class="container">
+    <div class="row">
+
+        <!-- ===== TITRE ===== -->
+        <div class="col-12">
+            <h3 class="mt-2">1D Diagnostic Intégrale de l'Entreprise</h3>
+        </div>
+
+        <!-- ===== BOUTONS ===== -->
+        <div class="col-12">
+            <button type="button" class="btn btn-secondary me-2"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseExample2"
+                aria-expanded="false"
+                aria-controls="collapseExample2">
+                <i class="bi bi-journal-text"></i> Consulter la matrice
+            </button>
+
+            <button type="button" class="btn btn-success"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseExample"
+                aria-expanded="false"
+                aria-controls="collapseExample">
+                <i class="bi bi-pencil"></i> Remplir la matrice
+            </button>
+        </div>
+
+        <!-- ===== SECTION FORMULAIRE (collapse) ===== -->
+        <div id="collapseGroup">
+            <div class="row">
+                <div class="collapse mt-4" id="collapseExample" data-bs-parent="#collapseGroup">
+
+                    <!-- Carte formulaire -->
+                    <div class="card text-center">
+
+                        <!-- Formulaire d'information sur le personnel de l'entreprise -->
+                        <form [formGroup]="infoEntrepriseForm" class="p-3">
+                            <h6 class="text-start fw-bold mb-3">Personnel de l'entreprise</h6>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nom du poste</th>
+                                            <th>Nom de la personne</th>
+                                            <th>Temps passé au poste</th>
+                                            <th>Activités réalisées</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody formArrayName="personnel">
+                                        @for (row of personnelArray.controls; track $index; let i = $index) {
+                                            <tr [formGroupName]="i">
+                                                <td class="text-center text-muted">{{ i + 1 }}</td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        placeholder="Ex : Directeur commercial"
+                                                        formControlName="nom_poste" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        placeholder="Nom et prénom"
+                                                        formControlName="nom_personne" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        placeholder="Ex : 2 ans"
+                                                        formControlName="temps_poste" />
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm"
+                                                        placeholder="Décrivez les activités principales…"
+                                                        formControlName="activites"
+                                                        rows="2">
+                                                    </textarea>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        (click)="removePersonnel(i)"
+                                                        [disabled]="personnelArray.length === 1"
+                                                        title="Supprimer cette ligne">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-primary" (click)="addPersonnel()">
+                                    <i class="bi bi-plus-circle"></i> Ajouter un personnel
+                                </button>
+                            </div>
+                        </form>
+
+                        <form action="" class="row g-3" [formGroup]="matIntegForm">
+                            <div class="card-header"></div>
+
+                            <div class="card-body" style="min-height: 450px;">
+                                @for (item of matIntegLabel$|async; track item.reper; let i = $index) {
+                                    <div class="ponderation-item" [class.active]="currentIndex === i">
+                                        <h5 class="mt-0 mb-2 card-title">{{item.domaine}}</h5>
+                                        <h6 class="mt-3">{{item.libele}}</h6>
+
+                                        <!-- Questions normales (reper 1–62) -->
+                                        @if (item.reper < 63) {
+                                            <div class="col-12">
+                                                <div class="row justify-content-md-center px-3">
+                                                    <div class="col-12">
+                                                        <!-- Graduations -->
+                                                        <div class="d-flex justify-content-between px-1 mt-2">
+                                                            @for (it of ticks; track $index) {
+                                                                <span>{{ it }}</span>
+                                                            }
+                                                        </div>
+
+                                                        <!-- Range lié au FormControl -->
+                                                        <input type="range" class="form-range"
+                                                            min="0" max="10" step="0.5"
+                                                            id="customRange3"
+                                                            [formControlName]="'note_' + ($index + 1)" />
+                                                    </div>
+
+                                                    <hr>
+
+                                                    <div class="col-9">
+                                                        <label for="" class="form-label">Commentaire</label>
+                                                        <textarea class="form-control"
+                                                            placeholder="Ecrivez ici les raisons de cette note."
+                                                            [formControlName]="'comt_' + ($index + 1)"
+                                                            rows="2">
+                                                        </textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <!-- Difficultés (reper 63) -->
+                                        } @else if (item.reper == 63) {
+                                            <div class="col-12">
+                                                <div class="row justify-content-md-center px-3">
+                                                    <div class="col-9">
+                                                        <table class="table table-bordered mt-1">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Difficulté N°1</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="difficult_1" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Difficulté N°2</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="difficult_2" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Difficulté N°3</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="difficult_3" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <!-- Forces (reper 64) -->
+                                        } @else if (item.reper == 64) {
+                                            <div class="col-12">
+                                                <div class="row justify-content-md-center px-3">
+                                                    <div class="col-9">
+                                                        <table class="table table-bordered mt-1">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Force N°1</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="force_1" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Force N°2</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="force_2" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Force N°3</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="force_3" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <!-- Faiblesses (reper 65) -->
+                                        } @else if (item.reper == 65) {
+                                            <div class="col-12">
+                                                <div class="row justify-content-md-center px-3">
+                                                    <div class="col-9">
+                                                        <table class="table table-bordered mt-1">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Faiblesse N°1</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="faiblesse_1" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Faiblesse N°2</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="faiblesse_2" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Faiblesse N°3</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="faiblesse_3" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <!-- Besoins (reper 66) -->
+                                        } @else if (item.reper == 66) {
+                                            <div class="col-12">
+                                                <div class="row justify-content-md-center px-3">
+                                                    <div class="col-9">
+                                                        <table class="table table-bordered mt-1">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Besoin N°1</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="besoin_1" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Besoin N°2</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="besoin_2" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Besoin N°3</th>
+                                                                    <td>
+                                                                        <textarea class="form-control" placeholder="à remplir."
+                                                                            formControlName="besoin_3" rows="2">
+                                                                        </textarea>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </div>
+                                }
+                            </div>
+                            <!-- / card-body -->
+
+                        </form>
+
+                        <div class="card-footer text-muted">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-outline-primary"
+                                    (click)="previousItem()"
+                                    [disabled]="currentIndex === 0">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </button>
+
+                                <span class="fw-bold">
+                                    Élément {{ currentIndex + 1 }} / {{ matIntegLength }}
+                                </span>
+
+                                <button type="button" class="btn btn-outline-primary"
+                                    (click)="nextItem()"
+                                    [disabled]="currentIndex === matIntegLength - 1">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+
+                            @if (currentIndex + 1 === matIntegLength) {
+                                @if (consultanId != userId) {
+                                    <button type="button" class="btn btn-lg btn-danger"
+                                        data-bs-toggle="popover"
+                                        title="Popover title"
+                                        data-bs-content="And here's some amazing content. It's very engaging. Right?">
+                                        Seul les consultants peuvent enregistrer les outils
+                                    </button>
+                                } @else {
+                                    <button type="submit" (click)="saveTool()" class="btn btn-success">
+                                        Enregistrer l'outil
+                                    </button>
+                                }
+                            }
+                        </div>
+                        <!-- / card-footer -->
+
+                    </div>
+                    <!-- / Carte formulaire -->
+
+                </div>
+                <!-- / #collapseExample -->
+            </div>
+        </div>
+        <!-- / #collapseGroup -->
+
+        <!-- ===== SECTION RÉSUMÉ (affiché par défaut) ===== -->
+        <div class="row mt-4">
+
+            <!-- Vue résumé -->
+            <div class="collapse show" id="collapseExample2" data-bs-parent="#collapseGroup">
+                @if (matDiagIntegData$|async; as data) {
+                    @if (data.length > 0) {
+                        @for (item of data; track $index) {
+                            <ng-container>
+                                <div class="row resum">
+
+                                    <!-- Résumé par critère -->
+                                    <div class="col-7">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                Résumé Diagnostic d'entreprise
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="list-group">
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Situation juridique et fiscale</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_1 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_1.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Leadership et Climat Organisationnel</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_2 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_2.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Organisation de l'entreprise</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_3 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_3.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Finance et comptabilité</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_4 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_4.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Planification stratégique</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_5 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_5.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Production et opérations</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_6 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_6.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Assurance qualité</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_7 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_7.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                    <li class="list-group-item">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-7">Commercialisation</div>
+                                                            <div class="col-3">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar" role="progressbar"
+                                                                        [style]="'width:' + crit_8 + '%'"
+                                                                        aria-valuemin="0" aria-valuemax="100">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center ps-0">{{crit_8.toFixed(2)}} %</div>
+                                                        </div>
+                                                    </li>
+
+                                                </ul>
+
+                                                <div class="d-grid gap-2 col-6 mx-auto">
+                                                    <button type="button" class="btn btn-primary mt-3"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#collapseExample3"
+                                                        aria-expanded="false"
+                                                        aria-controls="collapseExample3">
+                                                        Consulter en détail
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <!-- / card-body résumé -->
+                                        </div>
+                                    </div>
+                                    <!-- / col-7 -->
+
+                                    <!-- Diagramme polar -->
+                                    <div class="col-5">
+                                        <div class="card">
+                                            <div class="card-header">Score Total pondéré</div>
+                                            <div class="card-body">
+                                                <div class="container">
+                                                    <ngx-charts-polar-chart
+                                                        [view]="view"
+                                                        [results]="single"
+                                                        [tooltipDisabled]="false"
+                                                        [legend]="legend"
+                                                        [scheme]="colorScheme"
+                                                        [xAxis]="xAxis"
+                                                        [yAxis]="yAxis"
+                                                        [curve]="curveLinearClosed"
+                                                        [labelTrim]="false"
+                                                        [yAxisMinScale]="100"
+                                                        [legendPosition]="legendPosition">
+                                                    </ngx-charts-polar-chart>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- / col-5 -->
+
+                                </div>
+                                <!-- / .row.resum -->
+                            </ng-container>
+                        }
+                    } @else {
+                        <div class="text-center">aucune données enregistrée</div>
+                    }
+                } @else {
+                    <div class="text-center">aucune données enregistrée</div>
+                }
+            </div>
+            <!-- / #collapseExample2 -->
+
+            <!-- ===== SECTION DÉTAIL (collapse) ===== -->
+            <div class="collapse" id="collapseExample3">
+                @if (matDiagIntegData$|async; as data) {
+                    @for (item of data; track $index) {
+                        <div class="card mt-3">
+                            <div class="card-header text-center">Evaluation non pondéré</div>
+                            <div class="card-body">
+
+                                @if (matIntegLabel) {
+                                    <table class="table table-bordered table-dark mt-1">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col">Critères</th>
+                                                <th scope="col">Attributs</th>
+                                                <th scope="col">Évaluation</th>
+                                                <th scope="col">Moyenne</th>
+                                                <th scope="col">Commentaires</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="align-middle">
+
+                                            <!-- Situation Juridique et Fiscale (notes 1–4) -->
+                                            <tr>
+                                                <th scope="row" rowspan="4" class="text-center">Situation Juridique et Fiscale</th>
+                                                <td>{{ getItemsStartingWith(1)[0]?.libele }}</td>
+                                                <td>{{item.note_1}}/10</td>
+                                                <td scope="row" rowspan="4" class="text-center">
+                                                    {{((item.note_1+item.note_2+item.note_3+item.note_4)/4).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_1}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(2)[0]?.libele }}</td>
+                                                <td>{{item.note_2}}/10</td>
+                                                <td>{{item.comt_2}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(3)[0]?.libele }}</td>
+                                                <td>{{item.note_3}}/10</td>
+                                                <td>{{item.comt_3}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(4)[0]?.libele }}</td>
+                                                <td>{{item.note_4}}/10</td>
+                                                <td>{{item.comt_4}}</td>
+                                            </tr>
+
+                                            <!-- Leadership et Climat Organisationnel (notes 5–12) -->
+                                            <tr>
+                                                <th scope="row" rowspan="8" class="text-center">Leadership et Climat Organisationnelle</th>
+                                                <td>{{ getItemsStartingWith(5)[0]?.libele }}</td>
+                                                <td>{{item.note_5}}/10</td>
+                                                <td scope="row" rowspan="8" class="text-center">
+                                                    {{((item.note_5+item.note_6+item.note_7+item.note_8+item.note_9+item.note_10+item.note_11+item.note_12)/8).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_5}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(6)[0]?.libele }}</td>
+                                                <td>{{item.note_6}}/10</td>
+                                                <td>{{item.comt_6}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(7)[0]?.libele }}</td>
+                                                <td>{{item.note_7}}/10</td>
+                                                <td>{{item.comt_7}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(8)[0]?.libele }}</td>
+                                                <td>{{item.note_8}}/10</td>
+                                                <td>{{item.comt_8}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(9)[0]?.libele }}</td>
+                                                <td>{{item.note_9}}/10</td>
+                                                <td>{{item.comt_9}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(10)[0]?.libele }}</td>
+                                                <td>{{item.note_10}}/10</td>
+                                                <td>{{item.comt_10}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(11)[0]?.libele }}</td>
+                                                <td>{{item.note_11}}/10</td>
+                                                <td>{{item.comt_11}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(12)[0]?.libele }}</td>
+                                                <td>{{item.note_12}}/10</td>
+                                                <td>{{item.comt_12}}</td>
+                                            </tr>
+
+                                            <!-- Organisation de l'Entreprise (notes 13–20) -->
+                                            <tr>
+                                                <th scope="row" rowspan="8" class="text-center">Organisation de l'Entreprise</th>
+                                                <td>{{ getItemsStartingWith(13)[0]?.libele }}</td>
+                                                <td>{{item.note_13}}/10</td>
+                                                <td scope="row" rowspan="8" class="text-center">
+                                                    {{((item.note_13+item.note_14+item.note_15+item.note_16+item.note_17+item.note_18+item.note_19+item.note_20)/8).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_13}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(14)[0]?.libele }}</td>
+                                                <td>{{item.note_14}}/10</td>
+                                                <td>{{item.comt_14}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(15)[0]?.libele }}</td>
+                                                <td>{{item.note_15}}/10</td>
+                                                <td>{{item.comt_15}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(16)[0]?.libele }}</td>
+                                                <td>{{item.note_16}}/10</td>
+                                                <td>{{item.comt_16}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(17)[0]?.libele }}</td>
+                                                <td>{{item.note_17}}/10</td>
+                                                <td>{{item.comt_17}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(18)[0]?.libele }}</td>
+                                                <td>{{item.note_18}}/10</td>
+                                                <td>{{item.comt_18}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(19)[0]?.libele }}</td>
+                                                <td>{{item.note_19}}/10</td>
+                                                <td>{{item.comt_19}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(20)[0]?.libele }}</td>
+                                                <td>{{item.note_20}}/10</td>
+                                                <td>{{item.comt_20}}</td>
+                                            </tr>
+
+                                            <!-- Finance et Comptabilité (notes 21–28) -->
+                                            <tr>
+                                                <th scope="row" rowspan="8" class="text-center">Finance et Comptabilité</th>
+                                                <td>{{ getItemsStartingWith(21)[0]?.libele }}</td>
+                                                <td>{{item.note_21}}/10</td>
+                                                <td scope="row" rowspan="8" class="text-center">
+                                                    {{((item.note_21+item.note_22+item.note_23+item.note_24+item.note_25+item.note_26+item.note_27+item.note_28)/8).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_21}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(22)[0]?.libele }}</td>
+                                                <td>{{item.note_22}}/10</td>
+                                                <td>{{item.comt_22}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(23)[0]?.libele }}</td>
+                                                <td>{{item.note_23}}/10</td>
+                                                <td>{{item.comt_23}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(24)[0]?.libele }}</td>
+                                                <td>{{item.note_24}}/10</td>
+                                                <td>{{item.comt_24}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(25)[0]?.libele }}</td>
+                                                <td>{{item.note_25}}/10</td>
+                                                <td>{{item.comt_25}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(26)[0]?.libele }}</td>
+                                                <td>{{item.note_26}}/10</td>
+                                                <td>{{item.comt_26}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(27)[0]?.libele }}</td>
+                                                <td>{{item.note_27}}/10</td>
+                                                <td>{{item.comt_27}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(28)[0]?.libele }}</td>
+                                                <td>{{item.note_28}}/10</td>
+                                                <td>{{item.comt_28}}</td>
+                                            </tr>
+
+                                            <!-- Planification Stratégique (notes 29–35) -->
+                                            <tr>
+                                                <th scope="row" rowspan="7" class="text-center">Planification Stratégique</th>
+                                                <td>{{ getItemsStartingWith(29)[0]?.libele }}</td>
+                                                <td>{{item.note_29}}/10</td>
+                                                <td scope="row" rowspan="7" class="text-center">
+                                                    {{((item.note_29+item.note_30+item.note_31+item.note_32+item.note_33+item.note_34+item.note_35)/7).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_29}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(30)[0]?.libele }}</td>
+                                                <td>{{item.note_30}}/10</td>
+                                                <td>{{item.comt_30}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(31)[0]?.libele }}</td>
+                                                <td>{{item.note_31}}/10</td>
+                                                <td>{{item.comt_31}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(32)[0]?.libele }}</td>
+                                                <td>{{item.note_32}}/10</td>
+                                                <td>{{item.comt_32}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(33)[0]?.libele }}</td>
+                                                <td>{{item.note_33}}/10</td>
+                                                <td>{{item.comt_33}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(34)[0]?.libele }}</td>
+                                                <td>{{item.note_34}}/10</td>
+                                                <td>{{item.comt_34}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(35)[0]?.libele }}</td>
+                                                <td>{{item.note_35}}/10</td>
+                                                <td>{{item.comt_35}}</td>
+                                            </tr>
+
+                                            <!-- Production et Opérations (notes 36–43) -->
+                                            <tr>
+                                                <th scope="row" rowspan="8" class="text-center">Production et Opérations</th>
+                                                <td>{{ getItemsStartingWith(36)[0]?.libele }}</td>
+                                                <td>{{item.note_36}}/10</td>
+                                                <td scope="row" rowspan="8" class="text-center">
+                                                    {{((item.note_36+item.note_37+item.note_38+item.note_39+item.note_40+item.note_41+item.note_42+item.note_43)/8).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_36}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(37)[0]?.libele }}</td>
+                                                <td>{{item.note_37}}/10</td>
+                                                <td>{{item.comt_37}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(38)[0]?.libele }}</td>
+                                                <td>{{item.note_38}}/10</td>
+                                                <td>{{item.comt_38}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(39)[0]?.libele }}</td>
+                                                <td>{{item.note_39}}/10</td>
+                                                <td>{{item.comt_39}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(40)[0]?.libele }}</td>
+                                                <td>{{item.note_40}}/10</td>
+                                                <td>{{item.comt_40}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(41)[0]?.libele }}</td>
+                                                <td>{{item.note_41}}/10</td>
+                                                <td>{{item.comt_41}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(42)[0]?.libele }}</td>
+                                                <td>{{item.note_42}}/10</td>
+                                                <td>{{item.comt_42}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(43)[0]?.libele }}</td>
+                                                <td>{{item.note_43}}/10</td>
+                                                <td>{{item.comt_43}}</td>
+                                            </tr>
+
+                                            <!-- Assurance Qualité (notes 44–51) -->
+                                            <tr>
+                                                <th scope="row" rowspan="8" class="text-center">Assurance Qualité</th>
+                                                <td>{{ getItemsStartingWith(44)[0]?.libele }}</td>
+                                                <td>{{item.note_44}}/10</td>
+                                                <td scope="row" rowspan="8" class="text-center">
+                                                    {{((item.note_44+item.note_45+item.note_46+item.note_47+item.note_48+item.note_49+item.note_50+item.note_51)/8).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_44}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(45)[0]?.libele }}</td>
+                                                <td>{{item.note_45}}/10</td>
+                                                <td>{{item.comt_45}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(46)[0]?.libele }}</td>
+                                                <td>{{item.note_46}}/10</td>
+                                                <td>{{item.comt_46}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(47)[0]?.libele }}</td>
+                                                <td>{{item.note_47}}/10</td>
+                                                <td>{{item.comt_47}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(48)[0]?.libele }}</td>
+                                                <td>{{item.note_48}}/10</td>
+                                                <td>{{item.comt_48}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(49)[0]?.libele }}</td>
+                                                <td>{{item.note_49}}/10</td>
+                                                <td>{{item.comt_49}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(50)[0]?.libele }}</td>
+                                                <td>{{item.note_50}}/10</td>
+                                                <td>{{item.comt_50}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(51)[0]?.libele }}</td>
+                                                <td>{{item.note_51}}/10</td>
+                                                <td>{{item.comt_51}}</td>
+                                            </tr>
+
+                                            <!-- Commercialisation (notes 52–62) -->
+                                            <tr>
+                                                <th scope="row" rowspan="11" class="text-center">Commercialisation</th>
+                                                <td>{{ getItemsStartingWith(52)[0]?.libele }}</td>
+                                                <td>{{item.note_52}}/10</td>
+                                                <td scope="row" rowspan="11" class="text-center">
+                                                    {{((item.note_52+item.note_53+item.note_54+item.note_55+item.note_56+item.note_57+item.note_58+item.note_59+item.note_60+item.note_61+item.note_62)/11).toFixed(1)}}/10
+                                                </td>
+                                                <td>{{item.comt_52}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(53)[0]?.libele }}</td>
+                                                <td>{{item.note_53}}/10</td>
+                                                <td>{{item.comt_53}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(54)[0]?.libele }}</td>
+                                                <td>{{item.note_54}}/10</td>
+                                                <td>{{item.comt_54}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(55)[0]?.libele }}</td>
+                                                <td>{{item.note_55}}/10</td>
+                                                <td>{{item.comt_55}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(56)[0]?.libele }}</td>
+                                                <td>{{item.note_56}}/10</td>
+                                                <td>{{item.comt_56}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(57)[0]?.libele }}</td>
+                                                <td>{{item.note_57}}/10</td>
+                                                <td>{{item.comt_57}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(58)[0]?.libele }}</td>
+                                                <td>{{item.note_58}}/10</td>
+                                                <td>{{item.comt_58}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(59)[0]?.libele }}</td>
+                                                <td>{{item.note_59}}/10</td>
+                                                <td>{{item.comt_59}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(60)[0]?.libele }}</td>
+                                                <td>{{item.note_60}}/10</td>
+                                                <td>{{item.comt_60}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(61)[0]?.libele }}</td>
+                                                <td>{{item.note_61}}/10</td>
+                                                <td>{{item.comt_61}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>{{ getItemsStartingWith(62)[0]?.libele }}</td>
+                                                <td>{{item.note_62}}/10</td>
+                                                <td>{{item.comt_62}}</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                }
+
+                            </div>
+                            <!-- / card-body détail -->
+                        </div>
+                        <!-- / .card -->
+                    }
+                }
+            </div>
+            <!-- / #collapseExample3 -->
+
+        </div>
+        <!-- / .row.mt-4 -->
+
+    </div>
+    <!-- / .row -->
+</div>
+<!-- / .container -->

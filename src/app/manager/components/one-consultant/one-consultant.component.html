@@ -1,0 +1,7 @@
+@if (companies$ |async; as data) {
+    @for (item of data; track $index) {
+        <ul>
+            <li> {{item.name}} </li>
+        </ul>
+    }
+}

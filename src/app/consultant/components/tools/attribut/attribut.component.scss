@@ -1,0 +1,188 @@
+// attribut.component.scss
+
+// ── Titre ─────────────────────────────────────────────────────────────────────
+
+.attrib-title {
+  font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 1rem 0 0.5rem;
+}
+
+// ── Formulaire ────────────────────────────────────────────────────────────────
+
+.form-body {
+  position: relative;
+  min-height: 280px;
+
+  @media (max-width: 575.98px) {
+    min-height: 220px;
+  }
+}
+
+.form-critere  { font-size: clamp(0.9rem, 2vw, 1.1rem); margin: 0.5rem 0 0.25rem; }
+.form-attribut { font-size: clamp(0.8rem, 1.8vw, 1rem);  margin: 0.5rem 0 0.25rem; }
+.form-question { font-size: clamp(0.75rem, 1.6vw, 0.9rem); color: #555; margin-bottom: 0.75rem; }
+
+// ── Ticks (graduations 0-10) ──────────────────────────────────────────────────
+
+.ticks-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 0.5rem;
+
+  span {
+    font-size: clamp(0.55rem, 1.5vw, 0.85rem);
+    color: #555;
+    line-height: 1;
+  }
+}
+
+// ── Range slider ──────────────────────────────────────────────────────────────
+
+input[type=range].form-range::-webkit-slider-runnable-track {
+  height: 8px;
+  background: linear-gradient(to right, #fd6d0d, #00d01f);
+  border-radius: 5px;
+}
+input[type=range].form-range::-moz-range-track {
+  height: 8px;
+  background: linear-gradient(to right, #fd6d0d, #00d01f);
+  border-radius: 5px;
+}
+input[type=range].form-range::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  background: #0d6efd;
+  border: 2px solid white;
+  border-radius: 50%;
+  margin-top: -6px;
+}
+input[type=range].form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #0d6efd;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+// ── Plages descriptives ───────────────────────────────────────────────────────
+
+.plage-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0.5rem 0;
+}
+
+.plage-item {
+  flex: 1 1 0;
+  min-width: 80px;
+  font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+  text-align: center;
+  padding: 2px 4px;
+  border-right: 1px solid #ccc;
+  color: #444;
+  line-height: 1.3;
+
+  &:last-child { border-right: none; }
+}
+
+// ── Item pagination ───────────────────────────────────────────────────────────
+
+.ponderation-item {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+
+  &.active {
+    display: block;
+    opacity: 1;
+  }
+}
+
+.ponderation-item:not(.active) {
+  position: absolute;
+  left: -9999px;
+}
+
+// ── Boutons navigation ────────────────────────────────────────────────────────
+
+.btn-outline-primary {
+  &:disabled       { opacity: 0.5; cursor: not-allowed; }
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  }
+}
+
+// ── Résumé critères ───────────────────────────────────────────────────────────
+
+.crit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.crit-label {
+  flex: 0 0 auto;
+  width: clamp(120px, 45%, 180px);
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.crit-bar {
+  flex: 1 1 0;
+  min-width: 40px;
+}
+
+.crit-val {
+  flex: 0 0 44px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+// ── Gauge ─────────────────────────────────────────────────────────────────────
+
+.gauge-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  min-height: 200px;
+
+  // ngx-charts prend 100% du parent quand [view] n'est pas lié
+  ngx-charts-gauge {
+    width: 100% !important;
+  }
+}
+
+// ── Table détail ──────────────────────────────────────────────────────────────
+
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+.table th, .table td {
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  vertical-align: middle;
+}
+
+#collapseExample3 {
+  margin-bottom: 30px;
+}
+
+// ── Mobile ────────────────────────────────────────────────────────────────────
+
+@media (max-width: 575.98px) {
+  .plage-item {
+    min-width: 60px;
+    font-size: 0.65rem;
+  }
+
+  .crit-label {
+    width: 110px;
+    font-size: 0.75rem;
+  }
+}

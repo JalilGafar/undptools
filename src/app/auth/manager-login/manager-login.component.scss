@@ -1,0 +1,48 @@
+// login.component.scss
+.login-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #032456 100%);
+  min-height: 100vh;
+}
+
+.card {
+  border: none;
+  margin-left: 37%;
+  margin-top: 50px;
+  height: fit-content;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  transition: all 0.3s ease;
+
+  &:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  }
+}
+
+.p-input-icon-left > i:first-of-type {
+  left: 1rem;
+  color: #6c757d;
+}
+
+.p-input-icon-left > .form-control {
+  padding-left: 3rem;
+}
+
+// Animation pour les messages d'erreur
+.invalid-feedback {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
