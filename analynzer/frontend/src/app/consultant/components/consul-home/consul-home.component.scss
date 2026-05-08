@@ -1,0 +1,19 @@
+.navig {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.program{
+    cursor: pointer;
+    
+}
+
+.main {
+  background: linear-gradient(135deg, #ffffff 0%, #0f6bf5 100%);
+  min-height: 100vh;
+}
+
+.card-body:hover {
+    background-color: rgb(27, 27, 27) !important;
+    color: #ffffff !important;
+}

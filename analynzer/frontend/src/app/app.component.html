@@ -1,0 +1,58 @@
+<!-- @if (menuVisible$ | async) {
+    <app-header/>
+}
+@if (manMenuVisible$ | async) {
+    <app-man-header/>
+} -->
+<div id="app">
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <a href="#" class="navbar-brand"> <strong>SGD</strong>VC | UNDP </a>
+    <ul class="navbar-nav mr-auto" routerLinkActive="active">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="home">Home </a>
+      </li>
+      @if (showAdminBoard) {
+        <li class="nav-item">
+          <a  class="nav-link" routerLink="manager">Admin Board</a>
+        </li>
+      }
+      @if (showModeratorBoard) {
+        <li class="nav-item">
+          <a href="/mod" class="nav-link" routerLink="mod">Moderator Board</a>
+        </li>
+      }
+      @if (showUserBoard) {
+        <!-- <li class="nav-item">
+          <a class="nav-link" routerLink="consultant">Consultant Board</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="consultant">Program</a>
+        </li>
+      }
+    </ul>
+
+    @if (!isLoggedIn) {
+      <ul class="navbar-nav ml-auto">
+        <!-- <li class="nav-item">
+          <a href="/register" class="nav-link" routerLink="register">Sign Up</a>
+        </li> -->
+        <li class="nav-item">
+          <a href="/login" class="nav-link" routerLink="login">Login</a>
+        </li>
+      </ul>
+    } @else {
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a  class="nav-link" routerLink="profile">{{ username }}</a>
+        </li>
+        <li class="nav-item">
+          <a href class="nav-link" (click)="logout()">LogOut</a>
+        </li>
+      </ul>
+    }
+  </nav>
+
+  <div class="container">
+    <router-outlet></router-outlet>
+  </div>
+</div>

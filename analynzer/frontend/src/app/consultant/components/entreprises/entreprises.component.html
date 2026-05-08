@@ -1,0 +1,161 @@
+<h1 class="display-4 fw-bold text-primary mb-4 mt-1">Ecpace Consultant GYB</h1>
+
+<h2 class="fs-3 text-secondary mb-6">Sur quel entreprise souhaitez vous travailler ?</h2>
+
+<div class="container">
+  <div class="row">
+    <div class="col-9 company">
+      <div class="row row-cols-1 row-cols-md-2 g-2 m-1">
+        @if(companies$ | async; as data){
+          @for (item of data; track $index) {
+            <div class="col">
+              <div class="card" routerLink="dashbord">
+                <div class="row g-0 align-items-center">
+                  <div class="col-md-4">
+                    <img [src]="'../../../../assets/images/'+item.logo" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h5 class="card-title"> {{item.name}} </h5>
+                      <p class="card-text">Rérion {{item.region}} Situè à {{item.ville}}, {{item.description}} </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        }
+        <div class="col">
+          <div class="card" routerLink="dashbord">
+            <div class="row g-0 align-items-center">
+              <div class="col-md-4">
+                <img src="../../../../assets/images/logo.png" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">TRALORMAT</h5>
+                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de Carreaux en
+                    matériaux locaux</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" routerLink="dashbord">
+            <div class="row g-0 align-items-center">
+              <div class="col-md-4">
+                <img src="../../../../assets/images/chips.png" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">CHIPSCAM</h5>
+                  <p class="card-text">Situè à Bertoua, cette entreprise est spécialisée dans la production de chips de plantain</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" routerLink="dashbord">
+            <div class="row g-0 align-items-center">
+              <div class="col-md-4">
+                <img src="../../../../assets/images/fruit.webp" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">FRUITCAM</h5>
+                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de jus de fruit</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" routerLink="dashbord">
+            <div class="row g-0 align-items-center">
+              <div class="col-md-4">
+                <img src="../../../../assets/images/champignon.jpg" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">CHAMPIGNONCAM</h5>
+                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de champignon</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card" routerLink="dashbord">
+            <div class="row g-0 align-items-center">
+              <div class="col-md-4">
+                <img src="../../../../assets/images/company.jpg" class="img-fluid rounded-start" style="border-radius: 0!important;" alt="...">
+              </div>
+              <div class="col-md-8">
+                <div class="card-body">
+                  <h5 class="card-title">ENTREPRISECAM</h5>
+                  <p class="card-text">Situè à Yaoundé, cette entreprise est spécialisée dans la production de jus de fruit</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="addCons btn btn-primary"> Ajouter une Eentreprise</button>
+      </div>
+      
+
+      
+    </div>
+    <div class="col-3 profil">
+      <div class="card">
+
+        <div class="rounded-circle border d-flex justify-content-center align-items-center"
+          style="width:100px;height:100px" alt="Avatar">
+          <i class="bi bi-person-fill" style="font-size: 5rem; color: cornflowerblue;"></i>
+        </div>
+        <hr>
+        <div class="card-body">
+          <h4 class="card-title">FONDA Jalil</h4>
+          <table class="table">
+            <!-- <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Handle</th>
+              </tr>
+            </thead> -->
+            <tbody>
+              <tr>
+                <!-- <th scope="row">1</th> -->
+                <td>Outils traités</td>
+                <td></td>
+                <td>09</td>
+              </tr>
+              <tr>
+                <!-- <th scope="row">2</th> -->
+                <td>Outils en attente</td>
+                <td></td>
+                <td>28</td>
+              </tr>
+              <tr>
+                <!-- <th scope="row">3</th> -->
+                <td colspan="3">
+                  <h5>Progression des livrables</h5>
+                  <div class="progress">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 25%;" aria-valuenow="10"
+                      aria-valuemin="0" aria-valuemax="100">10%</div>
+                  </div>
+                </td>
+                <!-- <td>@twitter</td> -->
+              </tr>
+            </tbody>
+          </table>
+          <!-- <a routerLink="manOneConsult" class="btn btn-primary">Go somewhere</a> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

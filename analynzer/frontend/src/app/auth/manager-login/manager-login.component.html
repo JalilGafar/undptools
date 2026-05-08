@@ -1,0 +1,107 @@
+<!-- login.component.html -->
+<div class="login-container min-vh-100 d-flex items-center justify-center py-8">
+  <div class="card shadow-lg rounded-4" style="max-width: 35%;">
+    <div class="card-body p-8">
+      <!-- En-tête -->
+      <div class="text-center mb-6">
+        <i class="pi pi-user text-primary" style="font-size: 3rem;"></i>
+        <h2 class="mt-4 mb-2 fw-bold">Connexion compte Manager</h2>
+        <!-- <p class="text-muted">Accédez à votre compte Manager</p> -->
+      </div>
+
+      <!-- Formulaire -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Champ Email -->
+        <div class="mb-4">
+          <label for="email" class="form-label fw-semibold">Adresse email</label>
+          <span class="p-input-icon-left w-100">
+            <i class="pi pi-envelope"></i>
+            <input 
+              pInputText 
+              id="email" 
+              type="email" 
+              formControlName="email"
+              class="form-control py-2 ps-5"
+              placeholder="Votre adresse email"
+              [class.is-invalid]="submitted && f['email'].errors"
+              [class.is-valid]="submitted && !f['email'].errors">
+          </span>
+          
+          @if (submitted && f['email'].errors) {
+            <div class="invalid-feedback d-block">
+              @if (f['email'].errors['required']) {
+                <div>L'email est requis</div>
+              }
+              @if (f['email'].errors['email']) {
+                <div>Format d'email invalide</div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Champ Mot de passe -->
+        <div class="mb-4">
+          <label for="password" class="form-label fw-semibold">Mot de passe</label>
+          <span class="p-input-icon-left w-100">
+            <i class="pi pi-lock"></i>
+            <input 
+              pInputText 
+              id="password" 
+              type="password" 
+              formControlName="password"
+              class="form-control py-2 ps-5"
+              placeholder="Votre mot de passe"
+              [class.is-invalid]="submitted && f['password'].errors"
+              [class.is-valid]="submitted && !f['password'].errors">
+          </span>
+          
+          @if (submitted && f['password'].errors) {
+            <div class="invalid-feedback d-block">
+              @if (f['password'].errors['required']) {
+                <div>Le mot de passe est requis</div>
+              }
+              @if (f['password'].errors['minlength']) {
+                <div>Le mot de passe doit contenir au moins 6 caractères</div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Options -->
+        <div class="mb-6 d-flex row justify-between items-center">
+          <div class="form-check">
+            <input pInputText type="checkbox" id="remember" class="form-check-input">
+            <label for="remember" class="form-check-label small">Se souvenir de moi</label>
+          </div>
+          <div class="mb-4">
+            <a href="#" class="small text-primary text-decoration-none">Mot de passe oublié?</a>
+          </div>
+        </div>
+
+        <!-- Bouton de connexion -->
+        <button 
+          pButton pRipple 
+          type="submit" 
+          class="w-100 p-button-info p-button-lg mb-4">
+          
+          @if (loading) {
+            <span class="d-flex items-center justify-center">
+              <i class="pi pi-spin pi-spinner me-2"></i>
+              Connexion...
+            </span>
+          }
+          @else {
+            <span>Se connecter</span>
+          }
+        </button>
+
+        <!-- Séparateur -->
+        <div class="text-center my-6 position-relative">
+          <hr class="text-muted">
+        </div>
+
+        
+      </form>
+    </div>
+  </div>
+</div>
