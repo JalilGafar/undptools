@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="152" height="152" viewBox="0 0 152 152">
+  <rect width="152" height="152" rx="27" fill="#0468B1"/>
+  <rect x="18" y="18" width="116" height="116" rx="16" fill="#FFFFFF" fill-opacity="0.12"/>
+  <text x="76" y="91.05" font-family="Arial, sans-serif" font-weight="bold"
+        font-size="43" fill="#FFFFFF" text-anchor="middle" dominant-baseline="auto">UNDP</text>
+  <text x="76" y="129.75" font-family="Arial, sans-serif"
+        font-size="16" fill="#AFCDEA" text-anchor="middle">TOOLS</text>
+</svg>

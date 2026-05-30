@@ -1,0 +1,291 @@
+<div class="container py-4">
+
+  <!-- Retour -->
+  <button class="btn btn-outline-secondary btn-sm mb-4" (click)="goBack()">
+    ← Retour
+  </button>
+
+  <!-- Alerte -->
+  @if (alertMessage) {
+    <div class="alert alert-{{ alertType }} alert-dismissible fade show" role="alert">
+      {{ alertMessage }}
+      <button type="button" class="btn-close" (click)="alertMessage = ''"></button>
+    </div>
+  }
+
+  @if (company) {
+
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="mb-0 fw-bold">{{ company.name }}</h4>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm" (click)="toggleEdit()">
+          {{ editMode ? 'Annuler' : '✏️ Modifier' }}
+        </button>
+        @if (!editMode) {
+          <button
+            class="btn btn-outline-danger btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteModal">
+            🗑 Supprimer
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── MODE LECTURE ────────────────────────────────────────────────────── -->
+    @if (!editMode) {
+      <div class="row g-4">
+
+        <div class="col-12 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header fw-semibold">Identification</div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Nom</dt>
+                <dd class="col-sm-7">{{ company.name }}</dd>
+
+                <dt class="col-sm-5">Gérant</dt>
+                <dd class="col-sm-7">{{ company.gerant }}</dd>
+
+                <dt class="col-sm-5">Description gérant</dt>
+                <dd class="col-sm-7">{{ company.descrt_gerant }}</dd>
+
+                <dt class="col-sm-5">Date de création</dt>
+                <dd class="col-sm-7">{{ company.date_creation }}</dd>
+
+                <dt class="col-sm-5">Description</dt>
+                <dd class="col-sm-7">{{ company.description }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header fw-semibold">Activités</div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Produits</dt>
+                <dd class="col-sm-7">{{ company.produits }}</dd>
+
+                <dt class="col-sm-5">Services</dt>
+                <dd class="col-sm-7">{{ company.services }}</dd>
+
+                <dt class="col-sm-5">Nb. employés</dt>
+                <dd class="col-sm-7">{{ company.nbr_employer }}</dd>
+
+                <dt class="col-sm-5">Dont femmes</dt>
+                <dd class="col-sm-7">{{ company.nbr_femme }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header fw-semibold">Localisation</div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Région</dt>
+                <dd class="col-sm-7">{{ company.region }}</dd>
+
+                <dt class="col-sm-5">Département</dt>
+                <dd class="col-sm-7">{{ company.departement }}</dd>
+
+                <dt class="col-sm-5">Ville</dt>
+                <dd class="col-sm-7">{{ company.ville }}</dd>
+
+                <dt class="col-sm-5">Commune</dt>
+                <dd class="col-sm-7">{{ company.commune }}</dd>
+
+                <dt class="col-sm-5">Quartier</dt>
+                <dd class="col-sm-7">{{ company.quartier }}</dd>
+
+                <dt class="col-sm-5">Lieu</dt>
+                <dd class="col-sm-7">{{ company.lieu }}</dd>
+
+                <dt class="col-sm-5">GPS (lat / lng)</dt>
+                <dd class="col-sm-7">{{ company.x }} / {{ company.y }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ── MODE ÉDITION ────────────────────────────────────────────────────── -->
+    @if (editMode) {
+      <form [formGroup]="form" (ngSubmit)="save()">
+
+        <div class="row g-4">
+
+          <!-- Identification -->
+          <div class="col-12 col-md-6">
+            <div class="card shadow-sm">
+              <div class="card-header fw-semibold">Identification</div>
+              <div class="card-body row g-3">
+
+                <div class="col-12">
+                  <label class="form-label">Nom <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="name"
+                    [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
+                  <div class="invalid-feedback">Le nom est obligatoire.</div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Gérant</label>
+                  <input class="form-control" formControlName="gerant">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Description du gérant</label>
+                  <input class="form-control" formControlName="descrt_gerant">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Date de création</label>
+                  <input class="form-control" formControlName="date_creation">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Activités -->
+          <div class="col-12 col-md-6">
+            <div class="card shadow-sm">
+              <div class="card-header fw-semibold">Activités</div>
+              <div class="card-body row g-3">
+
+                <div class="col-12">
+                  <label class="form-label">Produits</label>
+                  <input class="form-control" formControlName="produits">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Services</label>
+                  <input class="form-control" formControlName="services">
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Nb. employés</label>
+                  <input type="number" class="form-control" formControlName="nbr_employer">
+                </div>
+
+                <div class="col-6">
+                  <label class="form-label">Dont femmes</label>
+                  <input type="number" class="form-control" formControlName="nbr_femme">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Localisation -->
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header fw-semibold">Localisation</div>
+              <div class="card-body row g-3">
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Région</label>
+                  <input class="form-control" formControlName="region">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Département</label>
+                  <input class="form-control" formControlName="departement">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Ville</label>
+                  <input class="form-control" formControlName="ville">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Commune</label>
+                  <input class="form-control" formControlName="commune">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Quartier</label>
+                  <input class="form-control" formControlName="quartier">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label">Lieu</label>
+                  <input class="form-control" formControlName="lieu">
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Latitude (x)</label>
+                  <input type="number" step="any" class="form-control" formControlName="x">
+                </div>
+
+                <div class="col-6 col-md-3">
+                  <label class="form-label">Longitude (y)</label>
+                  <input type="number" step="any" class="form-control" formControlName="y">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Actions formulaire -->
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Enregistrer les modifications
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="toggleEdit()">
+            Annuler
+          </button>
+        </div>
+
+      </form>
+    }
+
+  } @else {
+    <div class="d-flex justify-content-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  }
+
+</div>
+
+<!-- ── Modal de confirmation de suppression ────────────────────────────────── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vous êtes sur le point de supprimer l'entreprise <strong>{{ company?.name }}</strong>.</p>
+        <p class="text-muted small">Cette action est irréversible. Les données de diagnostic associées resteront en base.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          data-bs-dismiss="modal"
+          (click)="confirmDelete()"
+          [disabled]="deleting">
+          @if (deleting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+          Supprimer définitivement
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

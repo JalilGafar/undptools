@@ -41,4 +41,20 @@ export class ToolAttrib {
     comment_18!: string;
     note_19!: number;
     comment_19!: string;
+    // Informations génériques entreprise
+    gen_nom_prenom!: string;
+    gen_sexe!: string;
+    gen_age!: number;
+    gen_telephone!: string;
+    gen_adresse!: string;
+    gen_ville!: string;
+    gen_nom_entreprise!: string;
+    gen_type_entreprise!: string;
+    gen_email!: string;
+    gen_activite_principale!: string;
+    gen_activite_autre!: string;
+    gen_ventes_mensuelles!: string;
+    gen_role_entreprise!: string;
+    gen_situation_entreprise!: string;
+    gen_formation_interesse!: string;
 }

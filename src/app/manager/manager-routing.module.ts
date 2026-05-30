@@ -9,6 +9,7 @@ import { NewCompanyComponent } from './components/new-company/new-company.compon
 import { GlobalComponent } from './components/global/global.component';
 import { ListLivrableComponent } from './components/list-livrable/list-livrable.component';
 import { TooltestComponent } from './components/tooltest/tooltest.component';
+import { CompanyDetailComponent } from './components/company-detail/company-detail.component';
 
 
 
@@ -23,6 +24,7 @@ const routes: Routes = [
   {path: 'Tooltest', component: TooltestComponent},
   {path: 'listcompany/:id', component: ListCompanyComponent},
   {path: 'listLivrable/:id', component: ListLivrableComponent},
+  {path: 'company/:id', component: CompanyDetailComponent},
 
 ];
 

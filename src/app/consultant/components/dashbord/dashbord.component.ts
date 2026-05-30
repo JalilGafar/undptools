@@ -2,18 +2,21 @@ import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@a
 import { ShareServiceService } from '../../../shared/share-service.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConsultantService } from '../../consultant.service';
 import { Company } from '../../../core/model/company';
 import { switchMap, tap } from 'rxjs';
 import { StorageService } from '../../../_services/storage.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashbord',
   standalone: true,
   imports: [
-    BaseChartDirective
-  ],
+   // BaseChartDirective,
+   CommonModule,
+    RouterLink
+],
   templateUrl: './dashbord.component.html',
   styleUrl: './dashbord.component.scss'
 })

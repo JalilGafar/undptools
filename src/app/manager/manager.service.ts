@@ -28,6 +28,12 @@ export class ManagerService {
     return this._librables$.asObservable()
   }
 
+  private _selectedCompany$ = new BehaviorSubject<Company | null>(null);
+  get selectedCompany$(): Observable<Company | null> {
+    return this._selectedCompany$.asObservable();
+  }
+  clearSelectedCompany() { this._selectedCompany$.next(null); }
+
   getUserFromServer() {
     this.http.get<User[]>(`${environment.apiUrl}/api/manager/user`).pipe(
       tap(user => {
@@ -70,6 +76,20 @@ export class ManagerService {
     commune: string, quartier: string, lieu: string, x: number, y: number, idUser: number
   }): Observable<Company> {
     return this.http.post<Company>(`${environment.apiUrl}/api/manager/newCompany`, newCompany);
+  }
+
+  getCompanyDetailById(id: number) {
+    this.http.get<Company>(`${environment.apiUrl}/api/manager/company/${id}`).pipe(
+      tap(company => this._selectedCompany$.next(company))
+    ).subscribe();
+  }
+
+  updateCompany(id: number, data: Partial<Company>): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/api/manager/company/${id}`, data);
+  }
+
+  deleteCompany(id: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/api/manager/company/${id}`);
   }
 
   //Liste des livrables
