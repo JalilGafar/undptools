@@ -5,6 +5,7 @@ import { User } from '../core/model/user';
 import { environment } from '../../environment/environment';
 import { Company } from '../core/model/company';
 import { Livrable } from '../core/model/livrable';
+import { LivrableGlobal } from '../core/model/livrable-global';
 
 @Injectable({
   providedIn: 'root'
@@ -103,6 +104,20 @@ export class ManagerService {
       })
     ).subscribe();
 
+  }
+
+  private _allLivrables$ = new BehaviorSubject<LivrableGlobal[]>([]);
+  get allLivrables$(): Observable<LivrableGlobal[]> {
+    return this._allLivrables$.asObservable()
+  }
+
+  //Tous les livrables de la plateforme, tous consultants confondus
+  getAllLivrables() {
+    this.http.get<LivrableGlobal[]>(`${environment.apiUrl}/api/manager/all-livrables`).pipe(
+      tap(livrables => {
+        this._allLivrables$.next(livrables);
+      })
+    ).subscribe();
   }
 
 }
