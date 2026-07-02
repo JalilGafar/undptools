@@ -63,3 +63,26 @@
     opacity: 0;
     transition: opacity 0.2s;
 }
+
+// ── Mobile : pleine largeur < 576px ──────────────────────────────────────────
+
+@media (max-width: 575.98px) {
+    .nav-card {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+        gap: 1rem;
+        min-height: unset;
+        padding: 1rem 1.25rem;
+    }
+
+    .nav-icon {
+        font-size: 2rem;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .nav-title  { font-size: 0.95rem; }
+    .nav-desc   { font-size: 0.78rem; }
+    .nav-arrow  { display: none; }
+}
