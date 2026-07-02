@@ -35,6 +35,8 @@
     "chart.js": "^4.5.0",
     "d3-shape": "^3.2.0",
     "frappe-gantt": "^1.0.4",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "marzipano": "^0.10.2",
     "ng2-charts": "^8.0.0",
     "primeicons": "^7.0.0",

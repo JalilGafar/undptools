@@ -16,6 +16,7 @@
   @if (company) {
 
     <!-- En-tête -->
+    @if (isAdmin) {
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="mb-0 fw-bold">{{ company.name }}</h4>
       <div class="d-flex gap-2">
@@ -32,6 +33,11 @@
         }
       </div>
     </div>
+    } @else {
+    <div class="mb-4">
+      <h4 class="mb-0 fw-bold">{{ company.name }}</h4>
+    </div>
+    }
 
     <!-- ── MODE LECTURE ────────────────────────────────────────────────────── -->
     @if (!editMode) {
@@ -116,7 +122,7 @@
     }
 
     <!-- ── MODE ÉDITION ────────────────────────────────────────────────────── -->
-    @if (editMode) {
+    @if (editMode && isAdmin) {
       <form [formGroup]="form" (ngSubmit)="save()">
 
         <div class="row g-4">
@@ -128,30 +134,30 @@
               <div class="card-body row g-3">
 
                 <div class="col-12">
-                  <label class="form-label">Nom <span class="text-danger">*</span></label>
-                  <input class="form-control" formControlName="name"
+                  <label class="form-label" for="cd_name">Nom <span class="text-danger">*</span></label>
+                  <input id="cd_name" class="form-control" formControlName="name"
                     [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
                   <div class="invalid-feedback">Le nom est obligatoire.</div>
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Gérant</label>
-                  <input class="form-control" formControlName="gerant">
+                  <label class="form-label" for="cd_gerant">Gérant</label>
+                  <input id="cd_gerant" class="form-control" formControlName="gerant">
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Description du gérant</label>
-                  <input class="form-control" formControlName="descrt_gerant">
+                  <label class="form-label" for="cd_descrt_gerant">Description du gérant</label>
+                  <input id="cd_descrt_gerant" class="form-control" formControlName="descrt_gerant">
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Date de création</label>
-                  <input class="form-control" formControlName="date_creation">
+                  <label class="form-label" for="cd_date_creation">Date de création</label>
+                  <input id="cd_date_creation" class="form-control" formControlName="date_creation">
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Description</label>
-                  <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                  <label class="form-label" for="cd_description">Description</label>
+                  <textarea id="cd_description" class="form-control" rows="3" formControlName="description"></textarea>
                 </div>
 
               </div>
@@ -165,23 +171,23 @@
               <div class="card-body row g-3">
 
                 <div class="col-12">
-                  <label class="form-label">Produits</label>
-                  <input class="form-control" formControlName="produits">
+                  <label class="form-label" for="cd_produits">Produits</label>
+                  <input id="cd_produits" class="form-control" formControlName="produits">
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Services</label>
-                  <input class="form-control" formControlName="services">
+                  <label class="form-label" for="cd_services">Services</label>
+                  <input id="cd_services" class="form-control" formControlName="services">
                 </div>
 
                 <div class="col-6">
-                  <label class="form-label">Nb. employés</label>
-                  <input type="number" class="form-control" formControlName="nbr_employer">
+                  <label class="form-label" for="cd_nbr_employer">Nb. employés</label>
+                  <input id="cd_nbr_employer" type="number" class="form-control" formControlName="nbr_employer">
                 </div>
 
                 <div class="col-6">
-                  <label class="form-label">Dont femmes</label>
-                  <input type="number" class="form-control" formControlName="nbr_femme">
+                  <label class="form-label" for="cd_nbr_femme">Dont femmes</label>
+                  <input id="cd_nbr_femme" type="number" class="form-control" formControlName="nbr_femme">
                 </div>
 
               </div>
@@ -195,43 +201,43 @@
               <div class="card-body row g-3">
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Région</label>
-                  <input class="form-control" formControlName="region">
+                  <label class="form-label" for="cd_region">Région</label>
+                  <input id="cd_region" class="form-control" formControlName="region">
                 </div>
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Département</label>
-                  <input class="form-control" formControlName="departement">
+                  <label class="form-label" for="cd_departement">Département</label>
+                  <input id="cd_departement" class="form-control" formControlName="departement">
                 </div>
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Ville</label>
-                  <input class="form-control" formControlName="ville">
+                  <label class="form-label" for="cd_ville">Ville</label>
+                  <input id="cd_ville" class="form-control" formControlName="ville">
                 </div>
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Commune</label>
-                  <input class="form-control" formControlName="commune">
+                  <label class="form-label" for="cd_commune">Commune</label>
+                  <input id="cd_commune" class="form-control" formControlName="commune">
                 </div>
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Quartier</label>
-                  <input class="form-control" formControlName="quartier">
+                  <label class="form-label" for="cd_quartier">Quartier</label>
+                  <input id="cd_quartier" class="form-control" formControlName="quartier">
                 </div>
 
                 <div class="col-12 col-md-4">
-                  <label class="form-label">Lieu</label>
-                  <input class="form-control" formControlName="lieu">
+                  <label class="form-label" for="cd_lieu">Lieu</label>
+                  <input id="cd_lieu" class="form-control" formControlName="lieu">
                 </div>
 
                 <div class="col-6 col-md-3">
-                  <label class="form-label">Latitude (x)</label>
-                  <input type="number" step="any" class="form-control" formControlName="x">
+                  <label class="form-label" for="cd_x">Latitude (x)</label>
+                  <input id="cd_x" type="number" step="any" class="form-control" formControlName="x">
                 </div>
 
                 <div class="col-6 col-md-3">
-                  <label class="form-label">Longitude (y)</label>
-                  <input type="number" step="any" class="form-control" formControlName="y">
+                  <label class="form-label" for="cd_y">Longitude (y)</label>
+                  <input id="cd_y" type="number" step="any" class="form-control" formControlName="y">
                 </div>
 
               </div>
@@ -262,7 +268,8 @@
 
 </div>
 
-<!-- ── Modal de confirmation de suppression ────────────────────────────────── -->
+<!-- ── Modal de confirmation de suppression (admin uniquement) ────────────── -->
+@if (isAdmin) {
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -271,7 +278,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p>Vous êtes sur le point de supprimer l'entreprise <strong>{{ company?.name }}</strong>.</p>
+        <p>Vous êtes sur le point de supprimer l'entreprise <strong>{{ company.name }}</strong>.</p>
         <p class="text-muted small">Cette action est irréversible. Les données de diagnostic associées resteront en base.</p>
       </div>
       <div class="modal-footer">
@@ -289,3 +296,4 @@
     </div>
   </div>
 </div>
+}

@@ -1,0 +1,154 @@
+<div class="container cp-wrapper">
+
+  <!-- Navigation -->
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-4" onclick="history.back()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  @if (user$ | async; as user) {
+
+  <!-- En-tête du profil -->
+  <div class="cp-header">
+    <div class="cp-avatar">
+      <img [src]="'assets/images/' + user.username + '.jpg'"
+           [alt]="user.username"
+           onerror="this.src='assets/images/default-avatar.png'" />
+    </div>
+    <div class="cp-identity">
+      <h2 class="cp-name">{{ user.username }}</h2>
+      <p class="cp-email"><i class="bi bi-envelope me-1"></i>{{ user.email }}</p>
+      @if (user.tel) {
+        <p class="cp-tel"><i class="bi bi-telephone me-1"></i>{{ user.tel }}</p>
+      }
+      <span class="badge cp-role-badge">
+        <i class="bi bi-person-badge me-1"></i>{{ user.name }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="cp-stats">
+    <div class="cp-stat-card">
+      <i class="bi bi-building cp-stat-icon text-primary"></i>
+      <div class="cp-stat-value">{{ companiesCount$ | async }}</div>
+      <div class="cp-stat-label">Entreprises assignées</div>
+      <a [routerLink]="['/manager/listcompany', consultantId]" class="cp-stat-link">
+        Voir la liste <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="cp-stat-card">
+      <i class="bi bi-file-earmark-check cp-stat-icon text-success"></i>
+      <div class="cp-stat-value">{{ livrableCount$ | async }}</div>
+      <div class="cp-stat-label">Livrables remplis</div>
+      <a [routerLink]="['/manager/listLivrable', consultantId]" class="cp-stat-link">
+        Voir la liste <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  } @else {
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-person-x" style="font-size: 2.5rem;"></i>
+      <p class="mt-2">Chargement du profil…</p>
+    </div>
+  }
+
+  <!-- Section Entreprises -->
+  <section class="cp-section">
+    <h4 class="cp-section-title">
+      <i class="bi bi-building me-2 text-primary"></i>Entreprises assignées
+    </h4>
+
+    @if (companies$ | async; as companies) {
+      @if (companies.length) {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          @for (c of companies; track c.id) {
+            <div class="col">
+              <div class="cp-company-card">
+                <div class="cp-company-header">
+                  <img [src]="'assets/images/' + c.logo"
+                       [alt]="c.name"
+                       onerror="this.src='assets/images/default-company.png'"
+                       class="cp-company-logo" />
+                  <div>
+                    <h6 class="cp-company-name">{{ c.name }}</h6>
+                    <p class="cp-company-loc">
+                      <i class="bi bi-geo-alt me-1"></i>{{ c.ville || '—' }}
+                      @if (c.region) { , {{ c.region }} }
+                    </p>
+                  </div>
+                </div>
+                @if (c.description) {
+                  <p class="cp-company-desc">{{ c.description }}</p>
+                }
+                <div class="cp-company-footer">
+                  @if (c.date_creation) {
+                    <span class="badge bg-light text-secondary">
+                      <i class="bi bi-calendar me-1"></i>{{ c.date_creation }}
+                    </span>
+                  }
+                  <a [routerLink]="['/manager/company', c.id]" class="btn btn-sm btn-outline-primary">
+                    Détails <i class="bi bi-arrow-right ms-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="cp-empty">
+          <i class="bi bi-inbox"></i>
+          <p>Aucune entreprise assignée à ce consultant.</p>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Section Livrables -->
+  <section class="cp-section">
+    <h4 class="cp-section-title">
+      <i class="bi bi-file-earmark-check me-2 text-success"></i>Livrables remplis
+    </h4>
+
+    @if (livrables$ | async; as livrables) {
+      @if (livrables.length) {
+        <div class="table-responsive">
+          <table class="table table-hover cp-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Livrable</th>
+                <th>Entreprise</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of livrables; track l.id) {
+                <tr>
+                  <td class="text-muted">{{ l.id }}</td>
+                  <td><span class="badge bg-primary-subtle text-primary">{{ l.livrable }}</span></td>
+                  <td>{{ l.company }}</td>
+                  <td class="text-muted">{{ l.date | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-outline-success"
+                            (click)="viewLivrable(l.comp_id, l.tool_code)">
+                      <i class="bi bi-eye me-1"></i>Voir
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="cp-empty">
+          <i class="bi bi-file-x"></i>
+          <p>Aucun livrable rempli pour ce consultant.</p>
+        </div>
+      }
+    }
+  </section>
+
+</div>

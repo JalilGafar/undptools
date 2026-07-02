@@ -11,6 +11,7 @@ import { AuthService } from './_services/auth.service';
 import { ConsultantRoutingModule } from "./consultant/consultant-routing.module";
 import { MegaMenuItem } from 'primeng/api';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 
 interface MenuItem {
   label: string;
@@ -51,7 +52,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   isLoggedIn = false;
   showAdminBoard = false;
   showModeratorBoard = false;
-  showUserBoard = false;
+  showConsultantBoard = false;
   username?: string;
 
   menu: MenuItem[] = [
@@ -310,11 +311,14 @@ export class AppComponent implements OnInit, AfterContentChecked {
     }
   ];
 
+  updateAvailable = false;
+
   constructor(
     private menuService: ShareServiceService,
     private router: Router,
     private storageService: StorageService,
-    private authService: AuthService
+    private authService: AuthService,
+    private swUpdate: SwUpdate
   ) {
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
@@ -331,8 +335,17 @@ export class AppComponent implements OnInit, AfterContentChecked {
       });
   }
 
+  applyUpdate(): void {
+    this.swUpdate.activateUpdate().then(() => window.location.reload());
+  }
+
   ngOnInit(): void {
 
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates
+        .pipe(filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
+        .subscribe(() => { this.updateAvailable = true; });
+    }
 
     // this.storageService.setVisibleToolsFalse()
 
@@ -346,11 +359,11 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
       this.showAdminBoard = this.roles.includes('ROLE_ADMIN');
       this.showModeratorBoard = this.roles.includes('ROLE_MODERATOR');
-      this.showUserBoard = this.roles.includes('ROLE_USER');
+      this.showConsultantBoard = this.roles.includes('ROLE_CONSULTANT');
 
       this.username = user.username;
 
-      if (this.showAdminBoard) {
+      if (this.showAdminBoard || this.showModeratorBoard) {
         this.router.navigate(['/manager']);
       } else {
         this.router.navigate(['/consultant']);

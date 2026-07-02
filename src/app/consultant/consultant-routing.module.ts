@@ -26,12 +26,14 @@ import { T2fComponent } from './components/tools/t2f/t2f.component';
 import { T2gComponent } from './components/tools/t2g/t2g.component';
 import { ConsulHomeComponent } from './components/consul-home/consul-home.component';
 import { AddCompanyComponent } from './components/add-company/add-company.component';
+import { EditCompanyComponent } from './components/edit-company/edit-company.component';
 import { OnconstructionComponent } from '../shared/components/onconstruction/onconstruction.component';
 
 const routes: Routes = [
   {path: '', component: ConsulHomeComponent},
   {path: 'companies', component: EntreprisesComponent},
   {path: 'newcompany', component: AddCompanyComponent},
+  {path: 'edit-company/:id', component: EditCompanyComponent},
   {path: 'dashbord/:id', component: DashbordComponent},
   {path: 'documentation', component: DocumentaionComponent},
   

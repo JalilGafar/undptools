@@ -1,3 +1,20 @@
+.update-banner {
+  position: fixed;
+  bottom: 56px; // au-dessus du footer fixe
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  background: #0468B1;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
 // Compense header fixe (56px) + footer fixe (~44px)
 #app {
   padding-top: 56px;

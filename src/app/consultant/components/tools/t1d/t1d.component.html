@@ -128,9 +128,10 @@
                                                     <hr>
 
                                                     <div class="col-9">
-                                                        <label for="" class="form-label">Commentaire</label>
+                                                        <label class="form-label" [for]="'comt_' + ($index + 1)">Commentaire</label>
                                                         <textarea class="form-control"
                                                             placeholder="Ecrivez ici les raisons de cette note."
+                                                            [id]="'comt_' + ($index + 1)"
                                                             [formControlName]="'comt_' + ($index + 1)"
                                                             rows="2">
                                                         </textarea>
@@ -558,7 +559,7 @@
                                             <!-- Situation Juridique et Fiscale (notes 1–4) -->
                                             <tr>
                                                 <th scope="row" rowspan="4" class="text-center">Situation Juridique et Fiscale</th>
-                                                <td>{{ getItemsStartingWith(1)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(1)[0].libele }}</td>
                                                 <td>{{item.note_1}}/10</td>
                                                 <td scope="row" rowspan="4" class="text-center">
                                                     {{((item.note_1+item.note_2+item.note_3+item.note_4)/4).toFixed(1)}}/10
@@ -566,17 +567,17 @@
                                                 <td>{{item.comt_1}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(2)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(2)[0].libele }}</td>
                                                 <td>{{item.note_2}}/10</td>
                                                 <td>{{item.comt_2}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(3)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(3)[0].libele }}</td>
                                                 <td>{{item.note_3}}/10</td>
                                                 <td>{{item.comt_3}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(4)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(4)[0].libele }}</td>
                                                 <td>{{item.note_4}}/10</td>
                                                 <td>{{item.comt_4}}</td>
                                             </tr>
@@ -584,7 +585,7 @@
                                             <!-- Leadership et Climat Organisationnel (notes 5–12) -->
                                             <tr>
                                                 <th scope="row" rowspan="8" class="text-center">Leadership et Climat Organisationnelle</th>
-                                                <td>{{ getItemsStartingWith(5)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(5)[0].libele }}</td>
                                                 <td>{{item.note_5}}/10</td>
                                                 <td scope="row" rowspan="8" class="text-center">
                                                     {{((item.note_5+item.note_6+item.note_7+item.note_8+item.note_9+item.note_10+item.note_11+item.note_12)/8).toFixed(1)}}/10
@@ -592,37 +593,37 @@
                                                 <td>{{item.comt_5}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(6)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(6)[0].libele }}</td>
                                                 <td>{{item.note_6}}/10</td>
                                                 <td>{{item.comt_6}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(7)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(7)[0].libele }}</td>
                                                 <td>{{item.note_7}}/10</td>
                                                 <td>{{item.comt_7}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(8)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(8)[0].libele }}</td>
                                                 <td>{{item.note_8}}/10</td>
                                                 <td>{{item.comt_8}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(9)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(9)[0].libele }}</td>
                                                 <td>{{item.note_9}}/10</td>
                                                 <td>{{item.comt_9}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(10)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(10)[0].libele }}</td>
                                                 <td>{{item.note_10}}/10</td>
                                                 <td>{{item.comt_10}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(11)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(11)[0].libele }}</td>
                                                 <td>{{item.note_11}}/10</td>
                                                 <td>{{item.comt_11}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(12)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(12)[0].libele }}</td>
                                                 <td>{{item.note_12}}/10</td>
                                                 <td>{{item.comt_12}}</td>
                                             </tr>
@@ -630,7 +631,7 @@
                                             <!-- Organisation de l'Entreprise (notes 13–20) -->
                                             <tr>
                                                 <th scope="row" rowspan="8" class="text-center">Organisation de l'Entreprise</th>
-                                                <td>{{ getItemsStartingWith(13)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(13)[0].libele }}</td>
                                                 <td>{{item.note_13}}/10</td>
                                                 <td scope="row" rowspan="8" class="text-center">
                                                     {{((item.note_13+item.note_14+item.note_15+item.note_16+item.note_17+item.note_18+item.note_19+item.note_20)/8).toFixed(1)}}/10
@@ -638,37 +639,37 @@
                                                 <td>{{item.comt_13}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(14)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(14)[0].libele }}</td>
                                                 <td>{{item.note_14}}/10</td>
                                                 <td>{{item.comt_14}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(15)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(15)[0].libele }}</td>
                                                 <td>{{item.note_15}}/10</td>
                                                 <td>{{item.comt_15}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(16)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(16)[0].libele }}</td>
                                                 <td>{{item.note_16}}/10</td>
                                                 <td>{{item.comt_16}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(17)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(17)[0].libele }}</td>
                                                 <td>{{item.note_17}}/10</td>
                                                 <td>{{item.comt_17}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(18)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(18)[0].libele }}</td>
                                                 <td>{{item.note_18}}/10</td>
                                                 <td>{{item.comt_18}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(19)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(19)[0].libele }}</td>
                                                 <td>{{item.note_19}}/10</td>
                                                 <td>{{item.comt_19}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(20)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(20)[0].libele }}</td>
                                                 <td>{{item.note_20}}/10</td>
                                                 <td>{{item.comt_20}}</td>
                                             </tr>
@@ -676,7 +677,7 @@
                                             <!-- Finance et Comptabilité (notes 21–28) -->
                                             <tr>
                                                 <th scope="row" rowspan="8" class="text-center">Finance et Comptabilité</th>
-                                                <td>{{ getItemsStartingWith(21)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(21)[0].libele }}</td>
                                                 <td>{{item.note_21}}/10</td>
                                                 <td scope="row" rowspan="8" class="text-center">
                                                     {{((item.note_21+item.note_22+item.note_23+item.note_24+item.note_25+item.note_26+item.note_27+item.note_28)/8).toFixed(1)}}/10
@@ -684,37 +685,37 @@
                                                 <td>{{item.comt_21}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(22)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(22)[0].libele }}</td>
                                                 <td>{{item.note_22}}/10</td>
                                                 <td>{{item.comt_22}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(23)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(23)[0].libele }}</td>
                                                 <td>{{item.note_23}}/10</td>
                                                 <td>{{item.comt_23}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(24)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(24)[0].libele }}</td>
                                                 <td>{{item.note_24}}/10</td>
                                                 <td>{{item.comt_24}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(25)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(25)[0].libele }}</td>
                                                 <td>{{item.note_25}}/10</td>
                                                 <td>{{item.comt_25}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(26)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(26)[0].libele }}</td>
                                                 <td>{{item.note_26}}/10</td>
                                                 <td>{{item.comt_26}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(27)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(27)[0].libele }}</td>
                                                 <td>{{item.note_27}}/10</td>
                                                 <td>{{item.comt_27}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(28)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(28)[0].libele }}</td>
                                                 <td>{{item.note_28}}/10</td>
                                                 <td>{{item.comt_28}}</td>
                                             </tr>
@@ -722,7 +723,7 @@
                                             <!-- Planification Stratégique (notes 29–35) -->
                                             <tr>
                                                 <th scope="row" rowspan="7" class="text-center">Planification Stratégique</th>
-                                                <td>{{ getItemsStartingWith(29)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(29)[0].libele }}</td>
                                                 <td>{{item.note_29}}/10</td>
                                                 <td scope="row" rowspan="7" class="text-center">
                                                     {{((item.note_29+item.note_30+item.note_31+item.note_32+item.note_33+item.note_34+item.note_35)/7).toFixed(1)}}/10
@@ -730,32 +731,32 @@
                                                 <td>{{item.comt_29}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(30)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(30)[0].libele }}</td>
                                                 <td>{{item.note_30}}/10</td>
                                                 <td>{{item.comt_30}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(31)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(31)[0].libele }}</td>
                                                 <td>{{item.note_31}}/10</td>
                                                 <td>{{item.comt_31}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(32)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(32)[0].libele }}</td>
                                                 <td>{{item.note_32}}/10</td>
                                                 <td>{{item.comt_32}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(33)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(33)[0].libele }}</td>
                                                 <td>{{item.note_33}}/10</td>
                                                 <td>{{item.comt_33}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(34)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(34)[0].libele }}</td>
                                                 <td>{{item.note_34}}/10</td>
                                                 <td>{{item.comt_34}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(35)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(35)[0].libele }}</td>
                                                 <td>{{item.note_35}}/10</td>
                                                 <td>{{item.comt_35}}</td>
                                             </tr>
@@ -763,7 +764,7 @@
                                             <!-- Production et Opérations (notes 36–43) -->
                                             <tr>
                                                 <th scope="row" rowspan="8" class="text-center">Production et Opérations</th>
-                                                <td>{{ getItemsStartingWith(36)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(36)[0].libele }}</td>
                                                 <td>{{item.note_36}}/10</td>
                                                 <td scope="row" rowspan="8" class="text-center">
                                                     {{((item.note_36+item.note_37+item.note_38+item.note_39+item.note_40+item.note_41+item.note_42+item.note_43)/8).toFixed(1)}}/10
@@ -771,37 +772,37 @@
                                                 <td>{{item.comt_36}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(37)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(37)[0].libele }}</td>
                                                 <td>{{item.note_37}}/10</td>
                                                 <td>{{item.comt_37}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(38)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(38)[0].libele }}</td>
                                                 <td>{{item.note_38}}/10</td>
                                                 <td>{{item.comt_38}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(39)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(39)[0].libele }}</td>
                                                 <td>{{item.note_39}}/10</td>
                                                 <td>{{item.comt_39}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(40)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(40)[0].libele }}</td>
                                                 <td>{{item.note_40}}/10</td>
                                                 <td>{{item.comt_40}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(41)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(41)[0].libele }}</td>
                                                 <td>{{item.note_41}}/10</td>
                                                 <td>{{item.comt_41}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(42)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(42)[0].libele }}</td>
                                                 <td>{{item.note_42}}/10</td>
                                                 <td>{{item.comt_42}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(43)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(43)[0].libele }}</td>
                                                 <td>{{item.note_43}}/10</td>
                                                 <td>{{item.comt_43}}</td>
                                             </tr>
@@ -809,7 +810,7 @@
                                             <!-- Assurance Qualité (notes 44–51) -->
                                             <tr>
                                                 <th scope="row" rowspan="8" class="text-center">Assurance Qualité</th>
-                                                <td>{{ getItemsStartingWith(44)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(44)[0].libele }}</td>
                                                 <td>{{item.note_44}}/10</td>
                                                 <td scope="row" rowspan="8" class="text-center">
                                                     {{((item.note_44+item.note_45+item.note_46+item.note_47+item.note_48+item.note_49+item.note_50+item.note_51)/8).toFixed(1)}}/10
@@ -817,37 +818,37 @@
                                                 <td>{{item.comt_44}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(45)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(45)[0].libele }}</td>
                                                 <td>{{item.note_45}}/10</td>
                                                 <td>{{item.comt_45}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(46)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(46)[0].libele }}</td>
                                                 <td>{{item.note_46}}/10</td>
                                                 <td>{{item.comt_46}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(47)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(47)[0].libele }}</td>
                                                 <td>{{item.note_47}}/10</td>
                                                 <td>{{item.comt_47}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(48)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(48)[0].libele }}</td>
                                                 <td>{{item.note_48}}/10</td>
                                                 <td>{{item.comt_48}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(49)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(49)[0].libele }}</td>
                                                 <td>{{item.note_49}}/10</td>
                                                 <td>{{item.comt_49}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(50)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(50)[0].libele }}</td>
                                                 <td>{{item.note_50}}/10</td>
                                                 <td>{{item.comt_50}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(51)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(51)[0].libele }}</td>
                                                 <td>{{item.note_51}}/10</td>
                                                 <td>{{item.comt_51}}</td>
                                             </tr>
@@ -855,7 +856,7 @@
                                             <!-- Commercialisation (notes 52–62) -->
                                             <tr>
                                                 <th scope="row" rowspan="11" class="text-center">Commercialisation</th>
-                                                <td>{{ getItemsStartingWith(52)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(52)[0].libele }}</td>
                                                 <td>{{item.note_52}}/10</td>
                                                 <td scope="row" rowspan="11" class="text-center">
                                                     {{((item.note_52+item.note_53+item.note_54+item.note_55+item.note_56+item.note_57+item.note_58+item.note_59+item.note_60+item.note_61+item.note_62)/11).toFixed(1)}}/10
@@ -863,52 +864,52 @@
                                                 <td>{{item.comt_52}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(53)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(53)[0].libele }}</td>
                                                 <td>{{item.note_53}}/10</td>
                                                 <td>{{item.comt_53}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(54)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(54)[0].libele }}</td>
                                                 <td>{{item.note_54}}/10</td>
                                                 <td>{{item.comt_54}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(55)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(55)[0].libele }}</td>
                                                 <td>{{item.note_55}}/10</td>
                                                 <td>{{item.comt_55}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(56)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(56)[0].libele }}</td>
                                                 <td>{{item.note_56}}/10</td>
                                                 <td>{{item.comt_56}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(57)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(57)[0].libele }}</td>
                                                 <td>{{item.note_57}}/10</td>
                                                 <td>{{item.comt_57}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(58)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(58)[0].libele }}</td>
                                                 <td>{{item.note_58}}/10</td>
                                                 <td>{{item.comt_58}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(59)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(59)[0].libele }}</td>
                                                 <td>{{item.note_59}}/10</td>
                                                 <td>{{item.comt_59}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(60)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(60)[0].libele }}</td>
                                                 <td>{{item.note_60}}/10</td>
                                                 <td>{{item.comt_60}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(61)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(61)[0].libele }}</td>
                                                 <td>{{item.note_61}}/10</td>
                                                 <td>{{item.comt_61}}</td>
                                             </tr>
                                             <tr>
-                                                <td>{{ getItemsStartingWith(62)[0]?.libele }}</td>
+                                                <td>{{ getItemsStartingWith(62)[0].libele }}</td>
                                                 <td>{{item.note_62}}/10</td>
                                                 <td>{{item.comt_62}}</td>
                                             </tr>

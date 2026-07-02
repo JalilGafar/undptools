@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { ManagerService } from '../../manager.service';
 import { Company } from '../../../core/model/company';
+import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-company-detail',
@@ -21,6 +22,7 @@ export class CompanyDetailComponent implements OnInit {
   deleting = false;
   alertMessage = '';
   alertType: 'success' | 'danger' | '' = '';
+  isAdmin = false;
 
   form!: FormGroup;
 
@@ -28,10 +30,14 @@ export class CompanyDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private managerService: ManagerService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private storageService: StorageService
   ) {}
 
   ngOnInit(): void {
+    const roles: string[] = this.storageService.getUser()?.roles ?? [];
+    this.isAdmin = roles.includes('ROLE_ADMIN');
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.managerService.clearSelectedCompany();
     this.managerService.getCompanyDetailById(id);

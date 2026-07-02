@@ -1,0 +1,166 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="container ec-wrapper">
+
+  <!-- Navigation -->
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" onclick="history.back()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <!-- En-tête -->
+  <div class="ec-header">
+    <div class="ec-header-icon">
+      <i class="bi bi-pencil-square"></i>
+    </div>
+    <div>
+      <h2 class="ec-title">Renseigner l'entreprise</h2>
+      @if (companyName) {
+        <p class="ec-subtitle">Mise à jour du profil de <strong>{{ companyName }}</strong></p>
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="ec-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p>Chargement des données…</p>
+    </div>
+  } @else {
+
+  <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="row g-3">
+
+    <!-- ── Informations générales ──────────────────────────────────── -->
+    <div class="col-12">
+      <h5 class="ec-section-title"><i class="bi bi-info-circle me-2"></i>Informations générales</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Nom de l'entreprise <span class="text-danger">*</span></label>
+      <input class="form-control" [class.is-invalid]="isInvalid('name')"
+             type="text" formControlName="name">
+      @if (isInvalid('name')) {
+        <div class="invalid-feedback">Le nom est requis.</div>
+      }
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Année de création</label>
+      <input class="form-control" type="number" min="1900" max="2030"
+             formControlName="date_creation">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Produits vendus</label>
+      <textarea class="form-control" formControlName="produits" rows="3"></textarea>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Services proposés</label>
+      <textarea class="form-control" formControlName="services" rows="3"></textarea>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Brève présentation</label>
+      <textarea class="form-control" formControlName="description" rows="3"></textarea>
+    </div>
+
+    <!-- ── Informations sur le gérant ──────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="ec-section-title"><i class="bi bi-person-badge me-2"></i>Informations sur le gérant</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Nom du gérant</label>
+      <input class="form-control" type="text" formControlName="gerant">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Nombre d'employés</label>
+      <input class="form-control" type="number" formControlName="nbr_employer">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Nombre de femmes</label>
+      <input class="form-control" type="number" formControlName="nbr_femme">
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">À propos du gérant</label>
+      <textarea class="form-control" formControlName="descrt_gerant" rows="3"></textarea>
+    </div>
+
+    <!-- ── Localisation ────────────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="ec-section-title"><i class="bi bi-geo-alt me-2"></i>Localisation</h5>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Région</label>
+      <input class="form-control" type="text" formControlName="region">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Département</label>
+      <input class="form-control" type="text" formControlName="departement">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Ville</label>
+      <input class="form-control" type="text" formControlName="ville">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Commune</label>
+      <input class="form-control" type="text" formControlName="commune">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Quartier</label>
+      <input class="form-control" type="text" formControlName="quartier">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Lieu-dit</label>
+      <input class="form-control" type="text" formControlName="lieu">
+    </div>
+
+    <!-- GPS -->
+    <div class="col-12">
+      <label class="form-label">Coordonnées GPS</label>
+      @if (geoAvailable) {
+        <div class="mb-2">
+          <p-button icon="pi pi-map-marker" label="Utiliser ma position actuelle"
+            severity="secondary" size="small" [loading]="isLocating"
+            (onClick)="captureLocation()" />
+        </div>
+      }
+      <div class="row g-2">
+        <div class="col-6">
+          <input class="form-control" type="number" formControlName="x" placeholder="X — Longitude">
+        </div>
+        <div class="col-6">
+          <input class="form-control" type="number" formControlName="y" placeholder="Y — Latitude">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Actions ─────────────────────────────────────────────────── -->
+    <div class="col-12 ec-actions">
+      <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+        <i class="bi bi-x-circle me-1"></i> Annuler
+      </button>
+      <button type="submit" class="btn btn-success ec-btn-save" [disabled]="isSaving">
+        @if (isSaving) {
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+        } @else {
+          <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+        }
+      </button>
+    </div>
+
+  </form>
+
+  }
+
+</div>

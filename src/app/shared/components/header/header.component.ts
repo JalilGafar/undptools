@@ -43,7 +43,7 @@ export class HeaderComponent implements OnInit {
     isLoggedIn = false;
     showAdminBoard = false;
     showModeratorBoard = false;
-    showUserBoard = false;
+    showConsultantBoard = false;
     username?: string;
 
     menu: MenuItem[] = [
@@ -341,15 +341,22 @@ export class HeaderComponent implements OnInit {
             this.roles = user?.roles ?? [];
             this.showAdminBoard = this.roles.includes('ROLE_ADMIN');
             this.showModeratorBoard = this.roles.includes('ROLE_MODERATOR');
-            this.showUserBoard = this.roles.includes('ROLE_USER');
+            this.showConsultantBoard = this.roles.includes('ROLE_CONSULTANT');
             this.username = user?.username;
+        });
+
+        this.menuService.sidebarOpen$.pipe(
+            takeUntilDestroyed(this.destroyRef)
+        ).subscribe(open => {
+            this.isSidebarOpen = open;
+            if (!open) this.menu.forEach(item => item.expanded = false);
         });
 
         // Redirection initiale au chargement de la page (une seule fois)
         const user = this.storageService.getUser();
         if (user) {
             const roles: string[] = user.roles ?? [];
-            if (roles.includes('ROLE_ADMIN')) {
+            if (roles.includes('ROLE_ADMIN') || roles.includes('ROLE_MODERATOR')) {
                 this.router.navigate(['/manager']);
             } else {
                 this.router.navigate(['/consultant']);
@@ -374,6 +381,7 @@ export class HeaderComponent implements OnInit {
     toggleSidebar() {
         this.isSidebarOpen = !this.isSidebarOpen;
         this.isSidebarMini = false;
+        this.menuService[this.isSidebarOpen ? 'openSidebar' : 'closeSidebar']();
     }
 
     toggleSidebarMini() {
@@ -419,13 +427,9 @@ export class HeaderComponent implements OnInit {
         // Vérifier si le clic est en dehors de la sidebar et du lien Tools
         if (this.isSidebarOpen &&
             !sidebar?.contains(targetElement) &&
-            !targetElement.closest('.nav-link')?.textContent?.includes('Tools')) {
-            this.isSidebarOpen = false;
-
-            // Fermer tous les sous-menus
-            this.menu.forEach(item => {
-                item.expanded = false;
-            });
+            !targetElement.closest('.nav-link')?.textContent?.includes('Tools') &&
+            !targetElement.closest('.btn-open-tools')) {
+            this.menuService.closeSidebar();
         }
     }
 

@@ -89,12 +89,17 @@ export class ConsultantService {
   }
 
   getCompanyById(id: number): Observable<Company> {
-    // if (!this.lastCandidatesLoad) {
-    //   this.getFormationsFromServer()
-    // }
     return this.company$.pipe(
       map(company => company.filter(company => company.id === id)[0])
     );
+  }
+
+  getCompanyDetailById(id: number): Observable<Company> {
+    return this.http.get<Company>(`${environment.apiUrl}/api/consultant/company/${id}`);
+  }
+
+  updateCompany(id: number, data: Partial<Company>): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/api/consultant/company/${id}`, data);
   }
 
   //Add new company

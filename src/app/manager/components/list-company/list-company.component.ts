@@ -4,6 +4,7 @@ import { Company } from '../../../core/model/company';
 import { ManagerService } from '../../manager.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-list-company',
@@ -17,17 +18,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 })
 export class ListCompanyComponent implements OnInit {
 
-  
   companies$!: Observable<Company[]>;
   userId!: number;
+  isAdmin = false;
 
   constructor(
     private ManagerServices: ManagerService,
     private route: ActivatedRoute,
-    private appRout: Router
+    private appRout: Router,
+    private storageService: StorageService
   ){}
   
   ngOnInit(): void {
+
+    const roles: string[] = this.storageService.getUser()?.roles ?? [];
+    this.isAdmin = roles.includes('ROLE_ADMIN');
 
     this.route.params.pipe(
       tap(params   => this.userId =  params['id'])

@@ -6,6 +6,7 @@ import { RegisterComponent } from './auth/register/register.component';
 import { ManagerLoginComponent } from './auth/manager-login/manager-login.component';
 import { ProgramComponent } from './shared/components/program/program.component';
 import { AdminGuard } from './core/guard/admin.guard';
+import { ManagerGuard } from './core/guard/manager.guard';
 import { AuthGuard } from './core/guard/auth.guard';
 import { ProfileComponent } from './auth/profile/profile.component';
 import { VisitorHomeComponent } from './visiteur/components/visitor-home/visitor-home.component';
@@ -22,7 +23,7 @@ export const routes: Routes = [
     { path: 'supervisor', component: SupervisorComponent },
     { path: 'program', component: ProgramComponent },
     { path: 'consultant', loadChildren: () => import('./consultant/consultant.module').then(m => m.ConsultantModule), canActivate: [AuthGuard]  },
-    { path: 'manager', loadChildren: () => import('./manager/manager.module').then(m => m.ManagerModule), canActivate: [AdminGuard]  },
+    { path: 'manager', loadChildren: () => import('./manager/manager.module').then(m => m.ManagerModule), canActivate: [ManagerGuard]  },
     { path: 'mintoul', loadChildren: () => import('./mintoul/mintoul.module').then(m => m.MintoulModule), canActivate: []   },
     { path: 'home', component: HomeComponent },
     { path: '', component: HomeComponent },

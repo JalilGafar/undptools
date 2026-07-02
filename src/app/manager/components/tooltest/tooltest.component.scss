@@ -1,3 +1,70 @@
+// ── Bandeau CTA ────────────────────────────────────────────────────────────────
+.tools-cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, #1a56db 0%, #0e3fa3 100%);
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  margin: 1.25rem 0 2rem;
+  box-shadow: 0 8px 28px rgba(26, 86, 219, 0.30);
+  flex-wrap: wrap;
+}
+
+.tools-cta-content {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: #fff;
+}
+
+.tools-cta-icon {
+  font-size: 2.4rem;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.tools-cta-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.tools-cta-desc {
+  font-size: 0.875rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.btn-open-tools {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background: #fff;
+  color: #1a56db;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.4rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #e8f0fe;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+// ── Contenu principal ───────────────────────────────────────────────────────────
 .gyb-container {
 max-width: 1000px;
 margin: auto;

@@ -18,7 +18,7 @@
     <ul class="navbar-nav me-auto" routerLinkActive="active">
 
       @if (showAdminBoard) {
-        @if (visibleTools$ | async) {
+        @if ((visibleTools$ | async) || (menuVisible$ | async)) {
           <li class="nav-item">
             <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">
               Tools
@@ -31,12 +31,19 @@
       }
 
       @if (showModeratorBoard) {
+        @if ((visibleTools$ | async) || (menuVisible$ | async)) {
+          <li class="nav-item">
+            <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">
+              Tools
+            </a>
+          </li>
+        }
         <li class="nav-item">
-          <a class="nav-link" routerLink="mod" (click)="closeNav()">Moderator Board</a>
+          <a class="nav-link" routerLink="manager" (click)="closeNav()">Moderator Board</a>
         </li>
       }
 
-      @if (showUserBoard) {
+      @if (showConsultantBoard) {
         @if (visibleTools$ | async) {
           <li class="nav-item">
             <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">

@@ -10,6 +10,7 @@ import { GlobalComponent } from './components/global/global.component';
 import { ListLivrableComponent } from './components/list-livrable/list-livrable.component';
 import { TooltestComponent } from './components/tooltest/tooltest.component';
 import { CompanyDetailComponent } from './components/company-detail/company-detail.component';
+import { ConsultantProfileComponent } from './components/consultant-profile/consultant-profile.component';
 
 
 
@@ -25,6 +26,7 @@ const routes: Routes = [
   {path: 'listcompany/:id', component: ListCompanyComponent},
   {path: 'listLivrable/:id', component: ListLivrableComponent},
   {path: 'company/:id', component: CompanyDetailComponent},
+  {path: 'consultant-profile/:id', component: ConsultantProfileComponent},
 
 ];
 

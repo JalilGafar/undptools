@@ -5,6 +5,12 @@
     <app-man-header/>
 } -->
 <div id="app">
+  @if (updateAvailable) {
+    <div class="update-banner">
+      <span><i class="bi bi-arrow-clockwise me-2"></i>Une nouvelle version est disponible.</span>
+      <button class="btn btn-sm btn-light ms-3" (click)="applyUpdate()">Mettre à jour</button>
+    </div>
+  }
   <app-header/>
   <!-- <nav class="navbar navbar-expand navbar-dark bg-dark">
     <a href="#" class="navbar-brand mx-4"> <strong>SGD</strong>VC | UNDP Cameroon</a>
@@ -19,7 +25,7 @@
         <a href="/mod" class="nav-link" routerLink="mod">Moderator Board</a>
       </li>
       }
-      @if (showUserBoard) {
+      @if (showConsultantBoard) {
 
       @if (visibleTools$ |async) {
       <li class="nav-item" style="cursor: pointer;" (click)="toggleSidebar()">

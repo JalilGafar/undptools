@@ -82,7 +82,7 @@ export class NewCompanyComponent implements OnInit {
     this.managerService.getUserFromServer();
 
     this.user$ = this.managerService.persona$.pipe(
-      map(users => users.filter(user => user.name == 'user'))
+      map(users => users.filter(user => user.name == 'consultant'))
     );
     
 

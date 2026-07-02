@@ -4,9 +4,11 @@
         ← Retour
     </button>
      <div class="row">
+        @if (isAdmin) {
         <div class="col-12 col-md-2 p-3 align-self-center">
             <button class="addCons btn btn-success" (click)="NewCompany()"> Ajouter une Entreprise</button>
         </div>
+        }
     </div>
 
     <div class="row">

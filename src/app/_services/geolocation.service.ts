@@ -59,7 +59,7 @@ export class GeolocationService {
 
     const mergedOptions: PositionOptions = {
       enableHighAccuracy: true,
-      timeout: 15000,
+      timeout: 60000,
       maximumAge: 0,
       ...options,
     };

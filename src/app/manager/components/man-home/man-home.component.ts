@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, Route, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { UserService } from '../../../_services/user.service';
 import { ManagerService } from '../../manager.service';
 import { Observable } from 'rxjs';
@@ -12,7 +12,6 @@ import { StorageService } from '../../../_services/storage.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink
   ],
   templateUrl: './man-home.component.html',
   styleUrl: './man-home.component.scss'

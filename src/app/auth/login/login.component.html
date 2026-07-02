@@ -1,52 +1,88 @@
-<div class="col-md-12">
-  <div class="card card-container">
-    <h3>
-      Se connecter ou entrer comme visiteur
-    </h3>
-    <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" class="profile-img-card" />
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <!-- Branding -->
+    <div class="login-brand">
+      <img src="assets/images/sdpgyb.png" alt="SDP-GYB" class="login-logo" />
+      <h2 class="login-title">Plateforme SDP-GYB</h2>
+      <p class="login-subtitle">Connectez-vous à votre espace</p>
+    </div>
+
     @if (!isLoggedIn) {
-    <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
+    <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate autocomplete="on">
+
+      <!-- Nom d'utilisateur -->
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" name="username" [(ngModel)]="form.username" required #username="ngModel"
-          [ngClass]="{ 'is-invalid': f.submitted && username.errors }" />
+        <label for="username">Nom d'utilisateur</label>
+        <input id="username" type="text" class="form-control" name="username"
+          [(ngModel)]="form.username" required #username="ngModel" autocomplete="username"
+          [ngClass]="{ 'is-invalid': f.submitted && username.errors }"
+          [disabled]="isLoading"
+          placeholder="Votre identifiant" />
         @if (username.errors && f.submitted) {
-        <div class="invalid-feedback">Username is required!</div>
+        <div class="invalid-feedback">L'identifiant est requis.</div>
         }
       </div>
+
+      <!-- Mot de passe -->
       <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" name="password" [(ngModel)]="form.password" required minlength="6"
-          #password="ngModel" [ngClass]="{ 'is-invalid': f.submitted && password.errors }" />
-        @if (password.errors && f.submitted) {
-        <div class="invalid-feedback">
-          @if (password.errors['required']) {
-          <div>Password is required</div>
-          }
-          @if (password.errors['minlength']) {
-          <div>Password must be at least 6 characters</div>
+        <label for="password">Mot de passe</label>
+        <div class="input-group has-validation">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" class="form-control"
+            name="password" [(ngModel)]="form.password" required minlength="6"
+            autocomplete="current-password" #password="ngModel"
+            [ngClass]="{ 'is-invalid': f.submitted && password.errors }"
+            [disabled]="isLoading"
+            placeholder="••••••••" />
+          <button type="button" class="btn btn-toggle-password"
+            (click)="showPassword = !showPassword"
+            [disabled]="isLoading"
+            [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
+          @if (password.errors && f.submitted) {
+          <div class="invalid-feedback">
+            @if (password.errors['required']) { <span>Le mot de passe est requis.</span> }
+            @if (password.errors['minlength']) { <span>Au moins 6 caractères.</span> }
+          </div>
           }
         </div>
-        }
       </div>
-      <div class="form-group">
-        <button class="btn btn-primary btn-block">Login</button>
+
+      <!-- Bouton connexion -->
+      <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary btn-login" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Connexion en cours…
+          } @else {
+            Se connecter
+          }
+        </button>
       </div>
-      <div class="visitorbtn">
-        <a routerLink="/visitor">
-          <button type="button" class="btn btn-outline-dark">Entrer comme visiteur</button>
+
+      <!-- Visiteur -->
+      <div class="form-group text-center">
+        <a routerLink="/visitor" class="btn btn-outline-secondary btn-visitor">
+          Continuer comme visiteur
         </a>
       </div>
-      <div class="form-group">
-        @if (f.submitted && isLoginFailed) {
-        <div class="alert alert-danger" role="alert">
-          Login failed: {{ errorMessage }}
-        </div>
-        }
+
+      <!-- Erreur -->
+      @if (f.submitted && isLoginFailed) {
+      <div class="alert alert-danger mt-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Identifiants incorrects : {{ errorMessage }}
       </div>
+      }
+
     </form>
     } @else {
-    <div class="alert alert-success">Logged in as {{ roles }}.</div>
+    <div class="alert alert-success text-center">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Connecté en tant que <strong>{{ roles }}</strong>
+    </div>
     }
+
   </div>
 </div>

@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { StorageService } from '../../../_services/storage.service';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { ShareServiceService } from '../../../shared/share-service.service';
 
 @Component({
   selector: 'app-tooltest',
@@ -18,6 +19,7 @@ export class TooltestComponent implements OnInit, OnDestroy {
 
   constructor(
     private storageService: StorageService,
+    private shareService: ShareServiceService,
   ) { }
 
   ngOnInit(): void {
@@ -28,10 +30,13 @@ export class TooltestComponent implements OnInit, OnDestroy {
     this.visibleTools$ = this.storageService.visibleTools$;
   };
 
-  ngOnDestroy() {
-    this.storageService.setVisibleToolsFalse();
+  openTools(): void {
+    this.shareService.openSidebar();
   }
 
-
+  ngOnDestroy() {
+    this.storageService.setVisibleToolsFalse();
+    this.shareService.closeSidebar();
+  }
 
 }

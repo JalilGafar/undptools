@@ -24,54 +24,11 @@
 .form-attribut { font-size: clamp(0.8rem, 1.8vw, 1rem);  margin: 0.5rem 0 0.25rem; }
 .form-question { font-size: clamp(0.75rem, 1.6vw, 0.9rem); color: #555; margin-bottom: 0.75rem; }
 
-// ── Ticks (graduations 0-10) ──────────────────────────────────────────────────
-
-.ticks-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 2px;
-  margin-top: 0.5rem;
-
-  span {
-    font-size: clamp(0.55rem, 1.5vw, 0.85rem);
-    color: #555;
-    line-height: 1;
-  }
-}
-
 .accordion-button{
   background-color: cornflowerblue;
 }
 .accordion-body{
   padding: 4px;
-}
-
-// ── Range slider ──────────────────────────────────────────────────────────────
-
-input[type=range].form-range::-webkit-slider-runnable-track {
-  height: 8px;
-  background: linear-gradient(to right, #fd6d0d, #00d01f);
-  border-radius: 5px;
-}
-input[type=range].form-range::-moz-range-track {
-  height: 8px;
-  background: linear-gradient(to right, #fd6d0d, #00d01f);
-  border-radius: 5px;
-}
-input[type=range].form-range::-webkit-slider-thumb {
-  width: 20px;
-  height: 20px;
-  background: #0d6efd;
-  border: 2px solid white;
-  border-radius: 50%;
-  margin-top: -6px;
-}
-input[type=range].form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #0d6efd;
-  border: 2px solid white;
-  border-radius: 50%;
 }
 
 // ── Plages descriptives ───────────────────────────────────────────────────────
@@ -84,16 +41,26 @@ input[type=range].form-range::-moz-range-thumb {
 }
 
 .plage-item {
-  flex: 1 1 0;
+  flex: 1 1 calc(50% - 4px);
   min-width: 80px;
   font-size: clamp(0.65rem, 1.5vw, 0.8rem);
   text-align: center;
-  padding: 2px 4px;
-  border-right: 1px solid #ccc;
+  padding: 6px 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   color: #444;
   line-height: 1.3;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 
-  &:last-child { border-right: none; }
+  &:hover { background-color: #f0f4ff; border-color: #86b7fe; }
+
+  &.selected {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+    font-weight: 600;
+  }
 }
 
 // ── Item pagination ───────────────────────────────────────────────────────────
@@ -181,6 +148,7 @@ input[type=range].form-range::-moz-range-thumb {
   .plage-item {
     min-width: 60px;
     font-size: 0.65rem;
+    padding: 4px 2px;
   }
 
   .crit-label {

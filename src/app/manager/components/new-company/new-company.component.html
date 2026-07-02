@@ -78,7 +78,7 @@
                     <input id="lieu" class="form-control" type="text" formControlName="lieu">
                 </div>
                 <div class="col-md-4">
-                    <label for="lieu" class="form-label">Consultant responsable</label>
+                    <label class="form-label">Consultant responsable</label>
                     <div class="card flex justify-center">
                         @if (user$|async; as user) {
                         <p-select [options]="user" formControlName="idUser" [checkmark]="true" optionLabel="username"

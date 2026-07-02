@@ -3,31 +3,49 @@
     <button type="button" class="btn btn-primary p-2" onclick="history.back()">
         ← Retour
     </button>
+    @if (isAdmin) {
     <div class="row">
         <div class="col-12 col-md-2 p-3 align-self-center">
             <button class="addCons btn btn-success" routerLink="/register"> Ajouter un Profil</button>
         </div>
     </div>
+    }
     <div class="row  row-cols-1 row-cols-sm-2 row-cols-md-4 justify-content-around">
         @if (user$ |async; as data) {
         @for (item of data; track $index) {
-            @if (item.name === "user") {
-                <div class="card  col me-3 mb-3 shadow p-3 bg-body rounded">
+
+            @if (item.name === "consultant") {
+                <div class="card col me-3 mb-3 shadow p-3 bg-body rounded">
                     <img [src]="'../../../../assets/images/'+item.username+'.jpg'" class="card-img-top" alt="...">
                     <div class="card-body">
                         <h5 class="card-title">{{item.username}}</h5>
-                        <p class="card-text">
-                            {{item.email}}
-                        </p> 
-                        <button type="button" class="btn btn-outline-primary m-1 btn-sm" (click)="consultantLivrable(item.id)" >Voir ses livrables</button>
-                        <button type="button" class="btn btn-outline-primary m-1 btn-sm" (click)="consultantSelect(item.id)" >Voir ses entreprises</button>
-                        <button type="button" class="btn btn-outline-primary m-1 btn-sm" routerLink="/build" >Voir son profil</button>
+                        <p class="card-text">{{item.email}}</p>
+                        <button type="button" class="btn btn-outline-primary m-1 btn-sm" (click)="consultantLivrable(item.id)">Voir ses livrables</button>
+                        <button type="button" class="btn btn-outline-primary m-1 btn-sm" (click)="consultantSelect(item.id)">Voir ses entreprises</button>
+                        <button type="button" class="btn btn-outline-primary m-1 btn-sm"
+                            [routerLink]="['/manager/consultant-profile', item.id]">Voir son profil</button>
                     </div>
                     <div class="card-footer text-muted text-center">
                         {{item.name}} <i class="bi bi-minecart-loaded" style="font-size: 2rem; color: rgb(221, 80, 37);"></i>
                     </div>
                 </div>
             }
+
+            @if (item.name === "moderator" && isAdmin) {
+                <div class="card col me-3 mb-3 shadow p-3 bg-body rounded border-warning">
+                    <img [src]="'../../../../assets/images/'+item.username+'.jpg'" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">{{item.username}}</h5>
+                        <p class="card-text">{{item.email}}</p>
+                        <button type="button" class="btn btn-outline-warning m-1 btn-sm"
+                            [routerLink]="['/manager/consultant-profile', item.id]">Voir son profil</button>
+                    </div>
+                    <div class="card-footer text-warning text-center fw-semibold">
+                        {{item.name}} <i class="bi bi-shield-check" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            }
+
         }
         }
     </div>

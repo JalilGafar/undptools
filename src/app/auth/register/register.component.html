@@ -1,77 +1,117 @@
-<div class="col-md-12">
-    <div class="card card-container">
-        <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" class="profile-img-card" />
-        @if (!isSuccessful) {
-        <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" name="username" [(ngModel)]="form.username" required
-                    minlength="3" maxlength="20" #username="ngModel"
-                    [ngClass]="{ 'is-invalid': f.submitted && username.errors }" />
-                @if (username.errors && f.submitted) {
-                <div class="invalid-feedback">
-                    @if (username.errors['required']) {
-                    <div>Username is required</div>
-                    }
-                    @if (username.errors['minlength']) {
-                    <div>Username must be at least 3 characters</div>
-                    }
-                    @if (username.errors['maxlength']) {
-                    <div>Username must be at most 20 characters</div>
-                    }
-                </div>
-                }
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control" name="email" [(ngModel)]="form.email" required email
-                    #email="ngModel" [ngClass]="{ 'is-invalid': f.submitted && email.errors }" />
-                @if (email.errors && f.submitted) {
-                <div class="invalid-feedback">
-                    @if (email.errors['required']) {
-                    <div>Email is required</div>
-                    }
-                    @if (email.errors['email']) {
-                    <div>Email must be a valid email address</div>
-                    }
-                </div>
-                }
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" name="password" [(ngModel)]="form.password" required
-                    minlength="6" #password="ngModel" [ngClass]="{ 'is-invalid': f.submitted && password.errors }" />
-                @if (password.errors && f.submitted) {
-                <div class="invalid-feedback">
-                    @if (password.errors['required']) {
-                    <div>Password is required</div>
-                    }
-                    @if (password.errors['minlength']) {
-                    <div>Password must be at least 6 characters</div>
-                    }
-                </div>
-                }
-            </div>
-            <div class="form-group">
-                <label for="roles">Role</label>
-                <select name="roles" class="form-select" aria-label="Default select example" [(ngModel)]="form.roles" required
-                    #roles="ngModel">
-                    <option value="1">Consultant</option>
-                    <option value="3">Manager</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <button class="btn btn-primary btn-block">Sign Up</button>
-            </div>
+<div class="register-wrapper">
+  <div class="register-card">
 
-            @if (f.submitted && isSignUpFailed) {
-            <div class="alert alert-warning">
-                Signup failed!<br />{{ errorMessage }}
-            </div>
-            }
-        </form>
-        } @else {
-        <div class="alert alert-success">Your registration is successful!</div>
-        }
+    <!-- Branding -->
+    <div class="register-brand">
+      <img src="assets/images/sdpgyb.png" alt="SDP-GYB" class="register-logo" />
+      <h2 class="register-title">Créer un profil</h2>
+      <p class="register-subtitle">Renseignez les informations du nouvel utilisateur</p>
     </div>
+
+    @if (!isSuccessful) {
+    <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate autocomplete="off">
+
+      <!-- Nom d'utilisateur -->
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input id="username" type="text" class="form-control" name="username"
+          [(ngModel)]="form.username" required minlength="3" maxlength="20"
+          #username="ngModel" autocomplete="username"
+          [ngClass]="{ 'is-invalid': f.submitted && username.errors }"
+          placeholder="Entre 3 et 20 caractères" />
+        @if (username.errors && f.submitted) {
+        <div class="invalid-feedback">
+          @if (username.errors['required']) { <span>L'identifiant est requis.</span> }
+          @if (username.errors['minlength']) { <span>Au moins 3 caractères.</span> }
+          @if (username.errors['maxlength']) { <span>20 caractères maximum.</span> }
+        </div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Adresse e-mail</label>
+        <input id="email" type="email" class="form-control" name="email"
+          [(ngModel)]="form.email" required email #email="ngModel" autocomplete="email"
+          [ngClass]="{ 'is-invalid': f.submitted && email.errors }"
+          placeholder="exemple@domaine.com" />
+        @if (email.errors && f.submitted) {
+        <div class="invalid-feedback">
+          @if (email.errors['required']) { <span>L'e-mail est requis.</span> }
+          @if (email.errors['email']) { <span>Adresse e-mail invalide.</span> }
+        </div>
+        }
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <div class="password-label-row">
+          <label for="password">Mot de passe</label>
+          <button type="button" class="btn-generate" (click)="generatePassword()"
+            title="Générer un mot de passe sécurisé">
+            <i class="bi bi-magic me-1"></i>Générer
+          </button>
+        </div>
+        <div class="input-group has-validation">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" class="form-control"
+            name="password" [(ngModel)]="form.password" required minlength="6"
+            autocomplete="new-password" #password="ngModel"
+            [ngClass]="{ 'is-invalid': f.submitted && password.errors }"
+            placeholder="••••••••" />
+          <button type="button" class="btn btn-toggle-password"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
+          @if (password.errors && f.submitted) {
+          <div class="invalid-feedback">
+            @if (password.errors['required']) { <span>Le mot de passe est requis.</span> }
+            @if (password.errors['minlength']) { <span>Au moins 6 caractères.</span> }
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Rôle -->
+      <div class="form-group">
+        <label for="roles">Rôle attribué</label>
+        <select id="roles" name="roles" class="form-select" [(ngModel)]="form.roles" required #roles="ngModel">
+          <option value="consultant">Consultant</option>
+          <option value="moderator">Modérateur</option>
+          <option value="entreprise">Entreprise</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <!-- Bouton -->
+      <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary btn-register">Créer le profil</button>
+      </div>
+
+      <!-- Erreur -->
+      @if (f.submitted && isSignUpFailed) {
+      <div class="alert alert-danger mt-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Échec de l'inscription : {{ errorMessage }}
+      </div>
+      }
+
+    </form>
+    } @else {
+    <div class="alert alert-success text-center mt-2">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Profil créé avec succès !
+    </div>
+    <div class="success-pdf-info">
+      <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+      <span>Le fichier PDF avec les identifiants a été téléchargé automatiquement.</span>
+    </div>
+    <div class="text-center mt-3">
+      <a routerLink="/manager/listconsult" class="btn btn-outline-primary btn-sm">
+        ← Retour à la liste
+      </a>
+    </div>
+    }
+
+  </div>
 </div>

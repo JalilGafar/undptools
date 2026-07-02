@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { User } from '../../../core/model/user';
 import { UserService } from '../../../_services/user.service';
 import { ManagerService } from '../../manager.service';
+import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-list-consultant',
@@ -18,17 +19,21 @@ import { ManagerService } from '../../manager.service';
 })
 export class ListConsultantComponent implements OnInit {
 
-  user$!: Observable<User[]>
+  user$!: Observable<User[]>;
+  isAdmin = false;
 
   constructor(
       private userService: UserService,
       private managerService: ManagerService,
-      private router: Router
+      private router: Router,
+      private storageService: StorageService
     ) { }
 
   ngOnInit(): void {
-    this.managerService.getUserFromServer();
+    const roles: string[] = this.storageService.getUser()?.roles ?? [];
+    this.isAdmin = roles.includes('ROLE_ADMIN');
 
+    this.managerService.getUserFromServer();
     this.user$ = this.managerService.persona$;
   }
 

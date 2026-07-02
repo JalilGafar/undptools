@@ -24,8 +24,10 @@ export class LoginComponent implements OnInit {
   };
   isLoggedIn = false;
   isLoginFailed = false;
+  isLoading = false;
   errorMessage = '';
   roles: string[] = [];
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
@@ -43,23 +45,26 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     const { username, password } = this.form;
 
+    this.isLoading = true;
+    this.isLoginFailed = false;
+
     this.authService.login(username, password).subscribe({
       next: data => {
         this.storageService.saveUser(data);
 
-        this.isLoginFailed = false;
         this.isLoggedIn = true;
         this.roles = this.storageService.getUser().roles;
 
-        if (this.roles.includes('ROLE_ADMIN')) {
+        if (this.roles.includes('ROLE_ADMIN') || this.roles.includes('ROLE_MODERATOR')) {
           this.router.navigateByUrl('/manager');
         } else {
           this.router.navigateByUrl('/consultant');
         }
       },
       error: err => {
-        this.errorMessage = err.error.message;
+        this.errorMessage = err.error?.message ?? 'Une erreur est survenue.';
         this.isLoginFailed = true;
+        this.isLoading = false;
       }
     });
   }

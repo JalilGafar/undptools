@@ -26,6 +26,12 @@ export class ShareServiceService {
     this._manMenuVisible.next(false);
   }
 
+  private _sidebarOpen$ = new BehaviorSubject<boolean>(false);
+  sidebarOpen$ = this._sidebarOpen$.asObservable();
+
+  openSidebar()  { this._sidebarOpen$.next(true);  }
+  closeSidebar() { this._sidebarOpen$.next(false); }
+
   private _loading$ = new BehaviorSubject<boolean>(false);
   get loading$(): Observable<boolean> {
     return this._loading$.asObservable();
