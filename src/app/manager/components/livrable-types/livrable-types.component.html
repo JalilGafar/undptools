@@ -1,0 +1,18 @@
+<div class="container nav-grid-container">
+    <h3>Tous les livrables</h3>
+
+    @if (livrables$ | async; as data) {
+        <div class="row gy-3 gx-3">
+            @for (type of types; track type.tool_code) {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="nav-card" (click)="goToType(type.tool_code)">
+                        <i class="bi {{type.icon}} nav-icon"></i>
+                        <h5 class="nav-title">{{type.label}}</h5>
+                        <p class="nav-desc">{{countByType(data, type.tool_code)}} livrable(s)</p>
+                        <span class="nav-arrow"><i class="bi bi-arrow-right-circle"></i></span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
