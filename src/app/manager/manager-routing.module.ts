@@ -11,6 +11,8 @@ import { ListLivrableComponent } from './components/list-livrable/list-livrable.
 import { TooltestComponent } from './components/tooltest/tooltest.component';
 import { CompanyDetailComponent } from './components/company-detail/company-detail.component';
 import { ConsultantProfileComponent } from './components/consultant-profile/consultant-profile.component';
+import { LivrableTypesComponent } from './components/livrable-types/livrable-types.component';
+import { LivrableTypeTableComponent } from './components/livrable-type-table/livrable-type-table.component';
 
 
 
@@ -25,6 +27,8 @@ const routes: Routes = [
   {path: 'Tooltest', component: TooltestComponent},
   {path: 'listcompany/:id', component: ListCompanyComponent},
   {path: 'listLivrable/:id', component: ListLivrableComponent},
+  {path: 'all-livrables', component: LivrableTypesComponent},
+  {path: 'all-livrables/:type', component: LivrableTypeTableComponent},
   {path: 'company/:id', component: CompanyDetailComponent},
   {path: 'consultant-profile/:id', component: ConsultantProfileComponent},
 

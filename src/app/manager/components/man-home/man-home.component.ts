@@ -67,6 +67,9 @@ export class ManHomeComponent implements OnInit {
   seeCompanies(){
     this.router.navigateByUrl('manager/listcompany/'+999999);
   }
+  seeAllLivrables(){
+    this.router.navigateByUrl('manager/all-livrables');
+  }
   seeGlobal(){
     this.router.navigateByUrl('manager/global');
   }
