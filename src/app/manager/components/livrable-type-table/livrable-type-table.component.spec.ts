@@ -48,7 +48,6 @@ describe('LivrableTypeTableComponent', () => {
   });
 
   it('should filter livrables$ to only the route type and set the label', (done) => {
-    component.typeLabel;
     expect(component.typeLabel).toBe('Prédiagnostic');
     component.livrables$.subscribe(data => {
       expect(data.length).toBe(1);

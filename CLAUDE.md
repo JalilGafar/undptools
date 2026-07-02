@@ -113,6 +113,8 @@ Quand `updateAvailable` passe à `true`, une bannière apparaît en bas de page.
 | `/manager/global` | `GlobalComponent` | Analytics globaux |
 | `/manager/Tooltest` | `TooltestComponent` | Test d'outils |
 | `/manager/listLivrable/:id` | `ListLivrableComponent` | Livrables d'un consultant |
+| `/manager/all-livrables` | `LivrableTypesComponent` | Cards par type de livrable (Diagnostic intégral / Prédiagnostic) avec compteur |
+| `/manager/all-livrables/:type` | `LivrableTypeTableComponent` | Tableau des livrables d'un type donné, tous consultants confondus |
 | `/manager/company/:id` | `CompanyDetailComponent` | Détail entreprise |
 | `/manager/consultant-profile/:id` | `ConsultantProfileComponent` | Profil d'un consultant |
 
@@ -191,6 +193,7 @@ SSR-safe (`isPlatformBrowser` sur tous les accès `window`/`sessionStorage`).
 | `getCompanyFromServer()` | GET `/api/consultant/companies` | Toutes les entreprises |
 | `getCompanyFromConsultantId(id)` | GET `/api/consultant/companiesUser?idUser=id` | Entreprises d'un consultant |
 | `getLivrableFromUserId(id)` | GET `/api/manager/livrables?idUser=id` | Livrables d'un consultant |
+| `getAllLivrables()` | GET `/api/manager/all-livrables` | Tous les livrables de la plateforme, tous consultants confondus |
 | `addCompany(data)` | POST `/api/manager/newCompany` | Créer entreprise |
 | `getCompanyDetailById(id)` | GET `/api/manager/company/:id` | Détail entreprise |
 | `updateCompany(id, data)` | PUT `/api/manager/company/:id` | Mettre à jour |
@@ -299,6 +302,7 @@ Ne pas recréer ces interfaces — les importer depuis `src/app/core/model/`.
 | `child.ts` | `Child` | plage, label |
 | `mat_integ_label.ts` | `IntegLabel` | id_diaginteg, reper, domaine, libele |
 | `livrable.ts` | `Livrable` | id, livrable, tableur, tool_code, company, date, comp_id, cons_id |
+| `livrable-global.ts` | `LivrableGlobal` | id_livrable, livrable, tableur, tool_code, comp_id, company, cons_id, consultant, date, updated_at |
 | `activity.ts` | `Activity` | Modèle local d'affichage — miroir de `GanttTask`, non API |
 | `personnel-entreprise.ts` | `PersonnelEntreprise` | nom_poste, nom_personne, temps_poste, activites, cons_id?, comp_id? |
 
