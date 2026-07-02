@@ -1,0 +1,32 @@
+<div class="container">
+    <h3>{{ typeLabel }}</h3>
+
+    @if (livrables$ | async; as data) {
+        @if (data.length) {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Entreprise</th>
+                        <th scope="col">Consultant</th>
+                        <th scope="col">Date de création</th>
+                        <th scope="col">Date de dernière modification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of data; track item.id_livrable) {
+                        <tr (click)="viewLivrable(item)">
+                            <td> {{item.company}} </td>
+                            <td> {{item.consultant}} </td>
+                            <td> {{item.date | date:'medium'}} </td>
+                            <td> {{item.updated_at | date:'medium'}} </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        } @else {
+            <div class="empty">
+                Aucun livrable disponible pour ce type
+            </div>
+        }
+    }
+</div>
