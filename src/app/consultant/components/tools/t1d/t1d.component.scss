@@ -1,123 +1,348 @@
-/* Design de la track */
-input[type=range].form-range::-webkit-slider-runnable-track {
-  height: 8px;
-  background: linear-gradient(to right, #fd6d0d, #00d01f);
-  border-radius: 5px;
-}
-input[type=range].form-range::-moz-range-track {
-  height: 8px;
-  background: linear-gradient(to right, #fd6d0d, #00d01f);
-  border-radius: 5px;
-}
+// Même charte que les autres outils — pensé d'abord pour le mobile.
+// Ce composant utilise ViewEncapsulation.None : tous les sélecteurs sont donc limités à .td-wrapper
+// (ou préfixés td-) pour ne pas modifier l'apparence des autres pages.
+$primary:  #1a56db;
+$border:   #e5e7eb;
+$muted:    #6b7280;
+$surface:  #f8fafc;
+$radius:   12px;
+$low:      #dc3545;
+$mid:      #f59e0b;
+$high:     #0f9d58;
 
-/* Curseur */
-input[type=range].form-range::-webkit-slider-thumb {
-  width: 18px;
-  height: 18px;
-  background: #0d6efd;
-  border: 2px solid white;
-  border-radius: 50%;
-  margin-top: -5px;
-}
-input[type=range].form-range::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: #0d6efd;
-  border: 2px solid white;
-  border-radius: 50%;
-}
+.td-wrapper {
+  max-width: 1000px;
+  padding-top: 1.25rem;
+  padding-bottom: 2rem;
 
-/* Graduations */
-.d-flex span {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.plage{
-    border-right: 1px solid rgb(77, 77, 77)
-}
-
-.ponderation-item {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  
-  &.active {
-    display: block;
-    opacity: 1;
+  // ── En-tête ─────────────────────────────────────────────────────────────────
+  .td-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+    border-radius: $radius;
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 1.25rem;
+    color: #fff;
   }
-}
+  .td-header-icon { font-size: 2rem; flex-shrink: 0; opacity: 0.9; }
+  .td-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+  .td-subtitle { font-size: 0.875rem; margin: 0; color: rgba(255, 255, 255, 0.85); }
 
-// Animation pour le changement d'élément
-.ponderation-item:not(.active) {
-  position: absolute;
-  left: -9999px;
-}
+  // ── Bascule Résumé / Questionnaire ──────────────────────────────────────────
+  .td-tabs {
+    display: flex;
+    gap: .25rem;
+    padding: .25rem;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
 
-.card-body {
-  position: relative;
-  min-height: 300px; // Ajustez selon vos besoins
-}
+    button {
+      flex: 1;
+      min-height: 46px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      font-weight: 600;
+      color: $muted;
 
-// Style pour les boutons de navigation
-.btn-outline-primary {
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  &:not(:disabled):hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-}
-
-// Style pour l'indicateur de progression
-.card-header span {
-  background-color: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: 1px solid #dee2e6;
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .card-header {
-    .d-flex {
-      flex-direction: column;
-      gap: 1rem;
+      &.active {
+        background: #fff;
+        color: $primary;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+      }
     }
   }
-  
-  .ponderation-item.active {
-    padding: 0 0.5rem;
+
+  // ── Cartes ──────────────────────────────────────────────────────────────────
+  .td-card {
+    background: #fff;
+    border: 1.5px solid $border;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    height: auto;
+  }
+
+  .td-card-title,
+  .td-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid $primary;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+
+  .td-empty {
+    text-align: center;
+    color: #94a3b8;
+    padding: 3rem 1rem;
+
+    i { font-size: 2.5rem; }
+    p { margin: .5rem 0 1rem; }
+  }
+
+  // ── Niveaux de couleur ──────────────────────────────────────────────────────
+  .lvl-0 { --lvl: #94a3b8; }   // sans réponse
+  .lvl-1 { --lvl: #{$low}; }   // Insuffisant
+  .lvl-2 { --lvl: #f97316; }   // À améliorer
+  .lvl-3 { --lvl: #{$mid}; }   // Suffisant
+  .lvl-4 { --lvl: #65a30d; }   // Bon
+  .lvl-5 { --lvl: #{$high}; }  // Excellent
+  .progress-bar[class*='lvl-'] { background-color: var(--lvl); }
+
+  .td-chip {
+    display: inline-block;
+    padding: .25rem .65rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--lvl);
+    background: color-mix(in srgb, var(--lvl) 14%, #fff);
+    white-space: nowrap;
+
+    &.sm { padding: .15rem .55rem; font-size: .75rem; }
+  }
+
+  // ── Résumé : scores par domaine ─────────────────────────────────────────────
+  .td-score { margin-bottom: .85rem; }
+  .td-score-label { font-size: .9rem; font-weight: 600; color: #334155; margin-bottom: 4px; }
+  .td-score-line { display: flex; align-items: center; gap: .75rem; }
+  .td-progress { flex: 1; height: 10px; border-radius: 6px; background: #e8edf3; }
+  .td-score-value { min-width: 64px; text-align: right; font-weight: 700; font-size: .9rem; color: #1e293b; }
+
+  // Graphique : occupe toute la largeur disponible (plus de taille fixe 400 × 300)
+  .td-chart {
+    width: 100%;
+    height: 340px;
+  }
+
+  // ── Détail par domaine ──────────────────────────────────────────────────────
+  .td-domain-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding-bottom: .6rem;
+    margin-bottom: .25rem;
+    border-bottom: 1.5px solid $border;
+  }
+
+  .td-item { padding: .65rem 0; border-bottom: 1px solid #f1f5f9; &:last-child { border-bottom: 0; } }
+  .td-item-q { margin: 0 0 .35rem; font-size: .9rem; color: #334155; }
+  .td-item-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; }
+  .td-item-c { font-size: .85rem; color: $muted; font-style: italic; word-break: break-word; }
+  .td-swot-list { margin: 0; padding-left: 1.2rem; font-size: .9rem; li { margin-bottom: .25rem; } }
+
+  // ── Personnel ───────────────────────────────────────────────────────────────
+  .td-people { display: flex; flex-direction: column; gap: .75rem; }
+
+  .td-person {
+    border: 1.5px solid $border;
+    border-radius: 12px;
+    background: $surface;
+    padding: .85rem;
+  }
+
+  .td-person-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+
+  .td-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $primary;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .td-person-del {
+    width: 44px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: $low;
+    font-size: 1.1rem;
+
+    &:hover:not(:disabled) { background: #fdecee; }
+    &:disabled { opacity: .35; }
+  }
+
+  .td-add {
+    width: 100%;
+    min-height: 48px;
+    margin-top: .85rem;
+    border-style: dashed;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+
+  // ── Champs : confortables au doigt (16 px évite le zoom automatique sur iOS) ─
+  .form-label { font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+
+  .form-control {
+    border: 1.5px solid $border;
+    border-radius: 8px;
+    font-size: 1rem;
+    min-height: 46px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, 0.12); outline: none; }
+    &:disabled { background-color: $surface; color: #1e293b; }
+  }
+
+  textarea.form-control { min-height: 0; resize: vertical; line-height: 1.45; }
+
+  // ── Questionnaire ───────────────────────────────────────────────────────────
+  .td-progress-head { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; scroll-margin-top: 70px; }
+  .td-count { font-weight: 700; color: #1e293b; }
+  .td-percent { color: $muted; }
+  .td-progress-global { height: 8px; border-radius: 6px; background: #e8edf3; margin-bottom: 1rem; }
+
+  .td-domain-chip {
+    display: inline-block;
+    padding: .2rem .65rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    color: $primary;
+    background: #eef3ff;
+    margin-bottom: .6rem;
+  }
+
+  .td-q { font-size: 1.05rem; font-weight: 600; color: #1e293b; line-height: 1.4; margin-bottom: 1rem; }
+
+  // Réponses : 5 choix en boutons larges ; la note correspondante s'affiche en dessous (non modifiable)
+  .td-choices {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .5rem;
+    margin-bottom: .85rem;
+  }
+
+  .td-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 52px;
+    padding: .5rem .9rem;
+    border: 1.5px solid $border;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+
+    &:hover:not(.disabled) { border-color: var(--lvl); }
+
+    &.selected {
+      border-color: var(--lvl);
+      background: color-mix(in srgb, var(--lvl) 10%, #fff);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--lvl) 25%, transparent);
+    }
+
+    &.disabled { cursor: default; }
+  }
+
+  // Le bouton radio natif reste dans la page (accessible au clavier et aux lecteurs d'écran) mais invisible
+  .td-choice-input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: inherit;
+  }
+
+  .td-choice-dot {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    background: #fff;
+    transition: all .15s ease;
+  }
+
+  .td-choice.selected .td-choice-dot {
+    border-color: var(--lvl);
+    background: radial-gradient(circle, var(--lvl) 0 45%, #fff 50%);
+  }
+
+  .td-choice-label { font-weight: 600; font-size: 1rem; color: #1e293b; }
+
+  .td-choice:focus-within { outline: 2px solid $primary; outline-offset: 2px; }
+
+  .td-note-result {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 56px;
+    padding: .6rem 1rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--lvl, #94a3b8) 12%, #fff);
+    border: 1.5px dashed color-mix(in srgb, var(--lvl, #94a3b8) 55%, #fff);
+    text-align: center;
+    font-size: .9rem;
+
+    strong { font-size: 1.8rem; color: var(--lvl); line-height: 1; }
+    small { font-size: 1rem; color: $muted; font-weight: 400; }
+  }
+
+  .td-incomplete {
+    background: #fff7e6;
+    border: 1px solid #fde2a8;
+    color: #92400e;
+    border-radius: 8px;
+    padding: .5rem .75rem;
+    font-size: .85rem;
+    margin-bottom: 1rem;
+  }
+
+  // Navigation collée en bas de l'écran
+  .td-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem 0;
+    background: #fff;
+    border-top: 1px solid $border;
+    box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, 0.15);
+
+    .btn { min-height: 46px; font-weight: 600; }
+    .btn:last-child { margin-left: auto; }
+  }
+
+  // Légende du radar : explique les anneaux de la grille
+  .td-radar-key {
+    margin: .5rem 0 0;
+    font-size: .78rem;
+    color: $muted;
+    text-align: center;
+    line-height: 1.5;
+
+    span { white-space: nowrap; }
+  }
+
+  @media (max-width: 576px) {
+    .td-header { padding: 1rem 1.1rem; }
+    .td-card { padding: .85rem; }
+    .td-chart { height: 300px; }
+    .td-nav .btn { flex: 1; }
   }
 }
-
-/* [ngx-charts-line-series]:nth-child(odd) .line {
-  stroke-dasharray: 5 !important;
-} */
-
-// ngx-charts-polar-chart ngx-charts-chart .ngx-charts  path.line {
-  
-//   fill: #ffffff !important;
-//   // fill-opacity: 0.4; /* optionnel */
-// }
-
-ngx-charts-polar-chart ngx-charts-chart .ngx-charts  ngx-charts-polar-series path.line {
-  
-  fill: #fff !important;
-  fill-opacity: 0.1; /* optionnel */
-}
-
-// ngx-charts-polar-chart ngx-charts-chart .ngx-charts {
-//   .polar-charts-series:nth-child(1)  {
-//     path.line{
-//       fill: #190057 !important;
-//     }
-//   }
-  
-// }
-
-
-

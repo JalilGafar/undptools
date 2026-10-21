@@ -1,0 +1,139 @@
+$border: #e5e7eb;
+$surface: #f8fafc;
+
+.cg-upload {
+  background: $surface;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.cg-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
+  .cg-stage-filter {
+    width: auto;
+    min-width: 180px;
+  }
+}
+
+.cg-empty {
+  text-align: center;
+  color: #94a3b8;
+  padding: 3rem 0;
+
+  i { font-size: 2.5rem; }
+}
+
+.cg-card {
+  border: 1px solid $border;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cg-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 0;
+  background: $surface;
+  cursor: zoom-in;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cg-meta {
+  padding: .6rem .75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.cg-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+}
+
+.cg-legend {
+  margin: 0;
+  font-size: .85rem;
+  color: #334155;
+  word-break: break-word;
+}
+
+.cg-foot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cg-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, .92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  figure {
+    margin: 0;
+    max-width: 92vw;
+    text-align: center;
+    color: #fff;
+
+    img {
+      max-width: 92vw;
+      max-height: 80vh;
+      border-radius: 6px;
+    }
+
+    figcaption {
+      margin-top: .75rem;
+      font-size: .95rem;
+    }
+  }
+}
+
+.cg-lb-close,
+.cg-lb-nav {
+  position: absolute;
+  background: rgba(255, 255, 255, .15);
+  border: 0;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+
+  &:hover { background: rgba(255, 255, 255, .3); }
+}
+
+.cg-lb-close { top: 1rem; right: 1rem; }
+.cg-lb-nav { top: 50%; transform: translateY(-50%); }
+.cg-lb-prev { left: 1rem; }
+.cg-lb-next { right: 1rem; }
+
+@media (max-width: 576px) {
+  .cg-lb-nav { width: 38px; height: 38px; }
+}

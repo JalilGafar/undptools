@@ -1,1 +1,19 @@
-<p>t1h works!</p>
+<button class="btn btn-outline-secondary btn-sm mx-3 mx-md-5 mt-4" (click)="goBack()">
+  ← Retour
+</button>
+
+<div class="card mx-3 mx-md-5 mt-4 mb-5">
+  <div class="card-header">
+    <h5 class="card-title text-center mb-0">1H Photos de l'entreprise</h5>
+  </div>
+  <div class="card-body">
+    @if (companyId) {
+      <app-company-gallery [companyId]="companyId" />
+    } @else {
+      <div class="text-center text-muted py-4">
+        <p>Aucune entreprise sélectionnée.</p>
+        <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+      </div>
+    }
+  </div>
+</div>

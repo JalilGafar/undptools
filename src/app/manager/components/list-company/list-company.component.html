@@ -38,7 +38,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <img [src]="'../../../../assets/images/'+item.logo" class="img-fluid rounded-start"
+                            <img [src]="item.logo | companyLogo" onerror="this.onerror=null;this.src='assets/images/company.jpg'" class="img-fluid rounded-start"
                                 style="border-radius: 0!important;" alt="...">
                         </div>
                         <div class="col-md-8">
@@ -70,10 +70,10 @@
                             </div>
                             <div class="row justify-content-between mt-2 mb-3">
                                 <div class="col-6">
-                                    <strong>Nombr de livrable : </strong> 1
+                                    <strong>Nombre de livrables : </strong> {{ livrableCounts.get(item.id) ?? 0 }}
                                 </div>
                                 <div class="col-4">
-                                    <button type="button" class="btn btn-warning btn-sm" routerLink="/build" >Voir les livrables</button>
+                                    <button type="button" class="btn btn-warning btn-sm" [routerLink]="['/manager/company-livrables', item.id]">Voir les livrables</button>
                                 </div>
                             </div>
                     

@@ -11,6 +11,8 @@ import { ToolMatDiagInteg } from '../core/model/tool1D';
 import { GanttTask } from '../core/model/gantt-task.model';
 import { UpdateGanttTaskDto } from '../core/model/updateGantt';
 import { BusinessModelCanvas } from '../core/model/businessModelCanvas';
+import { ProfilResponse } from '../core/model/entreprise-profil';
+import { CartographieResponse } from '../core/model/cartographie-clients';
 
 @Injectable({
   providedIn: 'root'
@@ -100,6 +102,12 @@ export class ConsultantService {
 
   updateCompany(id: number, data: Partial<Company>): Observable<any> {
     return this.http.put(`${environment.apiUrl}/api/consultant/company/${id}`, data);
+  }
+
+  uploadCompanyLogo(id: number, file: File): Observable<{ logo: string }> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return this.http.post<{ logo: string }>(`${environment.apiUrl}/api/consultant/company/${id}/logo`, formData);
   }
 
   //Add new company
@@ -278,6 +286,26 @@ export class ConsultantService {
         this._ToolActivities$.next(updatedList);
       })
     );;
+  }
+
+  ///////////PROFIL DU PARTICIPANT (1L)
+  fetchProfil(idUser: number, idComp: number): Observable<ProfilResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<ProfilResponse>(`${environment.apiUrl}/api/profil`, { params });
+  }
+
+  saveProfil(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/profil`, payload);
+  }
+
+  ///////////CARTOGRAPHIE DES CLIENTS B2B (1G)
+  fetchCartographie(idUser: number, idComp: number): Observable<CartographieResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<CartographieResponse>(`${environment.apiUrl}/api/cartographie`, { params });
+  }
+
+  saveCartographie(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/cartographie`, payload);
   }
 
   ///////////BUSINESS MODEL CANVAS

@@ -1,11 +1,41 @@
 @if (currentUser) {
 <div class="container pt-5">
 
+  <!-- Retour -->
+  <button class="btn btn-outline-secondary btn-sm mb-4" (click)="goBack()">
+    ← Retour
+  </button>
+
   <div class="card">
     <div class="card-header">
       Profil
     </div>
     <div class="card-body">
+      <div class="profile-avatar">
+        <img [src]="photoPreview ?? (currentUser.photo | avatar)"
+             [alt]="currentUser.username"
+             (error)="onImgError($event)" />
+      </div>
+      <div class="text-center mb-3">
+        <input #photoInput type="file" class="d-none" accept="image/jpeg,image/png,image/webp"
+               (change)="onPhotoSelected($event)">
+        @if (photoPreview) {
+          <button type="button" class="btn btn-success btn-sm me-1" [disabled]="isUploading" (click)="savePhoto()">
+            @if (isUploading) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Enregistrer la photo
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="isUploading" (click)="cancelPhoto()">Annuler</button>
+        } @else {
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="photoInput.click()">
+            Modifier ma photo
+          </button>
+          <div class="form-text">JPG, PNG ou WEBP — 10 Mo maximum.</div>
+        }
+        @if (photoMessage) {
+          <div class="small mt-2" [class.text-success]="photoMessageType === 'success'"
+               [class.text-danger]="photoMessageType === 'danger'">{{ photoMessage }}</div>
+        }
+      </div>
       <h5 class="card-title">{{ currentUser.username }}</h5>
       <p class="card-text">
         <strong>Email:</strong>

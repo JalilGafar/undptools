@@ -1,0 +1,146 @@
+<div class="cg">
+
+  @if (message) {
+    <div class="alert py-2" [class.alert-success]="messageType === 'success'"
+         [class.alert-danger]="messageType === 'danger'">{{ message }}</div>
+  }
+
+  <!-- ── Ajout ─────────────────────────────────────────────────────────── -->
+  @if (canWrite) {
+    <div class="cg-upload">
+      <input #fileInput type="file" class="d-none" multiple
+             accept="image/jpeg,image/png,image/webp" (change)="onFilesSelected($event)">
+
+      @if (!files.length) {
+        <button type="button" class="btn btn-primary" (click)="fileInput.click()">
+          <i class="bi bi-cloud-arrow-up me-2"></i>Ajouter des photos
+        </button>
+        <span class="form-text ms-2">JPG, PNG ou WEBP — 10 Mo et {{ 8 }} images maximum par envoi.</span>
+      } @else {
+        <div class="row g-2 align-items-end">
+          <div class="col-12">
+            <strong>{{ files.length }} image{{ files.length > 1 ? 's' : '' }} sélectionnée{{ files.length > 1 ? 's' : '' }}</strong>
+            <span class="text-muted small ms-2">{{ files[0].name }}@if (files.length > 1) { , … }</span>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small mb-1">Catégorie</label>
+            <select class="form-select form-select-sm" [(ngModel)]="category">
+              @for (c of categories; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label small mb-1">Étape</label>
+            <select class="form-select form-select-sm" [(ngModel)]="stage">
+              @for (s of stages; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small mb-1">Légende (optionnelle)</label>
+            <input type="text" class="form-control form-control-sm" maxlength="255"
+                   [(ngModel)]="legend" placeholder="Ex. : atelier de transformation">
+          </div>
+          <div class="col-12">
+            <button type="button" class="btn btn-success btn-sm me-2" [disabled]="isUploading" (click)="upload()">
+              @if (isUploading) { <span class="spinner-border spinner-border-sm me-1"></span>Envoi en cours… }
+              @else { <i class="bi bi-check-circle me-1"></i>Envoyer }
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="isUploading" (click)="clearFiles()">Annuler</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Filtres ───────────────────────────────────────────────────────── -->
+  <div class="cg-filters">
+    <div class="btn-group btn-group-sm flex-wrap" role="group">
+      <button type="button" class="btn" [class.btn-primary]="!filterCategory" [class.btn-outline-primary]="filterCategory"
+              (click)="filterCategory = ''">Toutes ({{ images.length }})</button>
+      @for (c of categories; track c.value) {
+        <button type="button" class="btn" [class.btn-primary]="filterCategory === c.value"
+                [class.btn-outline-primary]="filterCategory !== c.value"
+                (click)="filterCategory = c.value">
+          <i class="bi {{ c.icon }} me-1"></i>{{ c.label }} ({{ countByCategory(c.value) }})
+        </button>
+      }
+    </div>
+    <select class="form-select form-select-sm cg-stage-filter" [(ngModel)]="filterStage">
+      <option value="">Toutes les étapes</option>
+      @for (s of stages; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- ── Grille ────────────────────────────────────────────────────────── -->
+  @if (isLoading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (loadError) {
+    <div class="alert alert-danger">Impossible de charger la galerie.</div>
+  } @else if (!filtered.length) {
+    <div class="cg-empty">
+      <i class="bi bi-images"></i>
+      <p>{{ images.length ? 'Aucune image pour ces filtres.' : 'Aucune image pour cette entreprise.' }}</p>
+    </div>
+  } @else {
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+      @for (img of filtered; track img.id; let i = $index) {
+        <div class="col">
+          <div class="cg-card">
+            <button type="button" class="cg-thumb" (click)="openLightbox(i)" [attr.aria-label]="'Agrandir l\'image ' + (i + 1)">
+              @if (thumbs.get(img.id); as url) {
+                <img [src]="url" [alt]="img.legend || categoryLabel(img.category)">
+              } @else {
+                <span class="spinner-border spinner-border-sm text-secondary"></span>
+              }
+            </button>
+            <div class="cg-meta">
+              <div class="cg-badges">
+                <span class="badge bg-primary-subtle text-primary">{{ categoryLabel(img.category) }}</span>
+                <span class="badge" [class.bg-warning-subtle]="img.stage === 'initiale'" [class.text-warning-emphasis]="img.stage === 'initiale'"
+                      [class.bg-success-subtle]="img.stage === 'finale'" [class.text-success]="img.stage === 'finale'">
+                  {{ stageLabel(img.stage) }}
+                </span>
+              </div>
+              @if (img.legend) { <p class="cg-legend">{{ img.legend }}</p> }
+              <div class="cg-foot">
+                <small class="text-muted">{{ img.created_at | date:'dd/MM/yyyy' }}</small>
+                @if (canDelete) {
+                  <button type="button" class="btn btn-link btn-sm text-danger p-0" (click)="remove(img)" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ── Agrandissement ──────────────────────────────────────────────────── -->
+@if (current; as img) {
+  <div class="cg-lightbox" (click)="closeLightbox()">
+    <button type="button" class="cg-lb-close" (click)="closeLightbox()" aria-label="Fermer"><i class="bi bi-x-lg"></i></button>
+    @if (filtered.length > 1) {
+      <button type="button" class="cg-lb-nav cg-lb-prev" (click)="$event.stopPropagation(); move(-1)" aria-label="Précédente"><i class="bi bi-chevron-left"></i></button>
+      <button type="button" class="cg-lb-nav cg-lb-next" (click)="$event.stopPropagation(); move(1)" aria-label="Suivante"><i class="bi bi-chevron-right"></i></button>
+    }
+    <figure (click)="$event.stopPropagation()">
+      @if (lightboxUrl) {
+        <img [src]="lightboxUrl" [alt]="img.legend || categoryLabel(img.category)">
+      } @else {
+        <div class="spinner-border text-light"></div>
+      }
+      <figcaption>
+        {{ categoryLabel(img.category) }} · {{ stageLabel(img.stage) }}
+        @if (img.legend) { — {{ img.legend }} }
+      </figcaption>
+    </figure>
+  </div>
+}

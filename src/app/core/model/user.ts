@@ -3,5 +3,6 @@ export class User {
     username!:string;
     name!: string
     email!:string;
-    tel!:string 
+    tel!:string;
+    photo?: string | null;
 }

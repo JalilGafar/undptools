@@ -8,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class ManDashbordComponent {
 
+  goBack(): void {
+    history.back();
+  }
+
 }

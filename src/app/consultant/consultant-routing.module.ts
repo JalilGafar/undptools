@@ -48,10 +48,10 @@ const routes: Routes = [
   {path: 'tool/t1ea', component: T1eaComponent},
   {path: 'tool/t1eb', component: OnconstructionComponent},
   {path: 'tool/t1f', component: OnconstructionComponent},
-  {path: 'tool/t1g', component: OnconstructionComponent},
-  {path: 'tool/t1h', component: OnconstructionComponent},
+  {path: 'tool/t1g', component: T1gComponent},
+  {path: 'tool/t1h', component: T1hComponent},
   {path: 'tool/t1i', component: OnconstructionComponent},
-  {path: 'tool/t1l', component: OnconstructionComponent},
+  {path: 'tool/t1l', component: T1lComponent},
   
   {path: 'tool/t2a', component: OnconstructionComponent},
   {path: 'tool/t2b', component: OnconstructionComponent},

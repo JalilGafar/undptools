@@ -1,17 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, tap } from 'rxjs';
 import { Company } from '../../../core/model/company';
 import { ManagerService } from '../../manager.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { StorageService } from '../../../_services/storage.service';
+import { CompanyLogoPipe } from '../../../core/company-logo.pipe';
 
 @Component({
   selector: 'app-list-company',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink
+    RouterLink,
+    CompanyLogoPipe
   ],
   templateUrl: './list-company.component.html',
   styleUrl: './list-company.component.scss'
@@ -21,6 +24,8 @@ export class ListCompanyComponent implements OnInit {
   companies$!: Observable<Company[]>;
   userId!: number;
   isAdmin = false;
+  livrableCounts = new Map<number, number>();
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private ManagerServices: ManagerService,
@@ -45,6 +50,14 @@ export class ListCompanyComponent implements OnInit {
     }
 
     this.companies$ = this.ManagerServices.company$;
+
+    // Nombre réel de livrables par entreprise
+    this.ManagerServices.getAllLivrables();
+    this.ManagerServices.allLivrables$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(livrables => {
+      const counts = new Map<number, number>();
+      livrables.forEach(l => counts.set(l.comp_id, (counts.get(l.comp_id) ?? 0) + 1));
+      this.livrableCounts = counts;
+    });
     
   }
 

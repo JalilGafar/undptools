@@ -438,4 +438,8 @@ export class AttributComponent implements OnInit, OnDestroy {
       });
   }
 
+  goBack(): void {
+    history.back();
+  }
+
 }

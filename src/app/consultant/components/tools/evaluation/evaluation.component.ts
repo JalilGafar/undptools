@@ -8,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class EvaluationComponent {
 
+  goBack(): void {
+    history.back();
+  }
+
 }

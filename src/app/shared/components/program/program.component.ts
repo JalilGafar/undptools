@@ -36,4 +36,8 @@ export class ProgramComponent  implements OnInit{
 
   }
 
+  goBack(): void {
+    history.back();
+  }
+
 }

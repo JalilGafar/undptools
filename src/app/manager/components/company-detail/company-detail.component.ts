@@ -6,17 +6,20 @@ import { tap } from 'rxjs';
 import { ManagerService } from '../../manager.service';
 import { Company } from '../../../core/model/company';
 import { StorageService } from '../../../_services/storage.service';
+import { CompanyGalleryComponent } from '../../../shared/components/company-gallery/company-gallery.component';
+import { ProfilSummaryComponent } from '../profil-summary/profil-summary.component';
 
 @Component({
   selector: 'app-company-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CompanyGalleryComponent, ProfilSummaryComponent],
   templateUrl: './company-detail.component.html',
   styleUrl: './company-detail.component.scss'
 })
 export class CompanyDetailComponent implements OnInit {
 
   company!: Company;
+  tab: 'infos' | 'profil' | 'photos' = 'infos';
   editMode = false;
   saving = false;
   deleting = false;

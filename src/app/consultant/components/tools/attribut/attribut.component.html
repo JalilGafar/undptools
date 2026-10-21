@@ -1,5 +1,10 @@
 <div class="container-fluid px-2 px-md-3">
 
+    <!-- Retour -->
+    <button class="btn btn-outline-secondary btn-sm mt-2" (click)="goBack()">
+        ← Retour
+    </button>
+
     @if (showAlert) {
     <div class="alert alert-{{alertType}} mx-2 mt-3 text-center" role="alert">
         <i class="bi bi-exclamation-triangle-fill px-2"></i>

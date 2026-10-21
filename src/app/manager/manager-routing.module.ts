@@ -13,6 +13,7 @@ import { CompanyDetailComponent } from './components/company-detail/company-deta
 import { ConsultantProfileComponent } from './components/consultant-profile/consultant-profile.component';
 import { LivrableTypesComponent } from './components/livrable-types/livrable-types.component';
 import { LivrableTypeTableComponent } from './components/livrable-type-table/livrable-type-table.component';
+import { CompanyLivrablesComponent } from './components/company-livrables/company-livrables.component';
 
 
 
@@ -30,6 +31,7 @@ const routes: Routes = [
   {path: 'all-livrables', component: LivrableTypesComponent},
   {path: 'all-livrables/:type', component: LivrableTypeTableComponent},
   {path: 'company/:id', component: CompanyDetailComponent},
+  {path: 'company-livrables/:id', component: CompanyLivrablesComponent},
   {path: 'consultant-profile/:id', component: ConsultantProfileComponent},
 
 ];

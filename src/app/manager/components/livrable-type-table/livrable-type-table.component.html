@@ -1,32 +1,87 @@
-<div class="container">
-    <h3>{{ typeLabel }}</h3>
+<div class="lvt-page">
+  <div class="container">
+
+    <!-- Retour -->
+    <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+      ← Retour
+    </button>
 
     @if (livrables$ | async; as data) {
+
+      <div class="lvt-card">
+
+        <!-- En-tête -->
+        <div class="lvt-header">
+          <div class="lvt-header-text">
+            <h3 class="lvt-title">{{ typeLabel }}</h3>
+            <p class="lvt-subtitle">Livrables de tous les consultants pour ce type de diagnostic</p>
+          </div>
+          <span class="lvt-count-badge">
+            <i class="bi bi-collection me-1"></i>{{ data.length }} livrable{{ data.length > 1 ? 's' : '' }}
+          </span>
+        </div>
+
         @if (data.length) {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Entreprise</th>
-                        <th scope="col">Consultant</th>
-                        <th scope="col">Date de création</th>
-                        <th scope="col">Date de dernière modification</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (item of data; track item.id_livrable) {
-                        <tr (click)="viewLivrable(item)">
-                            <td> {{item.company}} </td>
-                            <td> {{item.consultant}} </td>
-                            <td> {{item.date | date:'medium'}} </td>
-                            <td> {{item.updated_at | date:'medium'}} </td>
-                        </tr>
-                    }
-                </tbody>
+          <div class="lvt-table-wrapper">
+            <table class="lvt-table">
+              <thead>
+                <tr>
+                  @for (col of columns; track col.key) {
+                    <th scope="col" (click)="sortBy(col.key)" [class.lvt-sorted]="sortKey === col.key">
+                      <span class="lvt-th-content">
+                        <i class="bi {{col.icon}} lvt-th-icon"></i>
+                        {{ col.label }}
+                        <i class="bi {{sortIcon(col.key)}} lvt-sort-icon"></i>
+                      </span>
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of sortedData(data); track item.id_livrable) {
+                  <tr (click)="viewLivrable(item)">
+                    <td>
+                      <div class="lvt-company">
+                        <i class="bi bi-building lvt-company-icon"></i>
+                        <span class="fw-semibold">{{ item.company }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="lvt-consultant">
+                        <span class="lvt-avatar">{{ initials(item.consultant) }}</span>
+                        <span>{{ item.consultant }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      @if (item.ville) {
+                        <span class="text-body-secondary"><i class="bi bi-geo-alt me-1"></i>{{ item.ville }}</span>
+                      } @else {
+                        <span class="lvt-empty-cell">—</span>
+                      }
+                    </td>
+                    <td>
+                      @if (item.secteur) {
+                        <span class="lvt-badge">{{ item.secteur }}</span>
+                      } @else {
+                        <span class="lvt-empty-cell">—</span>
+                      }
+                    </td>
+                    <td class="text-body-secondary">{{ item.date | date:'dd MMM yyyy' }}</td>
+                    <td class="text-body-secondary">{{ item.updated_at | date:'dd MMM yyyy, HH:mm' }}</td>
+                  </tr>
+                }
+              </tbody>
             </table>
+          </div>
         } @else {
-            <div class="empty">
-                Aucun livrable disponible pour ce type
-            </div>
+          <div class="lvt-empty">
+            <i class="bi bi-inbox lvt-empty-icon"></i>
+            <p>Aucun livrable disponible pour ce type</p>
+          </div>
         }
+
+      </div>
     }
+
+  </div>
 </div>

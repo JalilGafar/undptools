@@ -7,6 +7,8 @@ export class LivrableGlobal {
     company!: string;
     cons_id!: number;
     consultant!: string;
+    ville!: string;
+    secteur!: string;
     date!: string;
     updated_at!: string;
 }

@@ -17,5 +17,8 @@ import { CommonModule } from '@angular/common';
 })
 export class T1eaComponent  {
 
-  
+  goBack(): void {
+    history.back();
+  }
+
 }

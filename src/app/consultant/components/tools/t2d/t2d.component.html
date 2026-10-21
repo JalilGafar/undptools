@@ -1,4 +1,9 @@
 <div class="bmc-container">
+    <!-- Retour -->
+    <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+        ← Retour
+    </button>
+
     <!-- Error Message -->
     @if (errorMessage) {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">

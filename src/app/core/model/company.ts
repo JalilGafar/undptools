@@ -18,5 +18,6 @@ export class Company {
     x!: number;
     y!: number;
     idUser!: number;
-    logo!: string
+    logo!: string;
+    secteur!: string;
 }

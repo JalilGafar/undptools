@@ -58,6 +58,7 @@ export class NewCompanyComponent implements OnInit {
     this.companyForm = this.formBuilder.group({
       name: [null, [Validators.required]],
       date_creation: [null],
+      secteur: [''],
       produits: [''],
       services: [''],
       description: [''],
@@ -151,7 +152,9 @@ export class NewCompanyComponent implements OnInit {
     return control?.invalid && (control.touched || this.formSubmitted);
   }
 
-  onGoBack() { }
+  onGoBack() {
+    history.back();
+  }
 
   // ── Géolocalisation ─────────────────────────────────────────────────────────
 

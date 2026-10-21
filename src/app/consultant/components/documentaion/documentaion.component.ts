@@ -8,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class DocumentaionComponent {
 
+  goBack(): void {
+    history.back();
+  }
+
 }

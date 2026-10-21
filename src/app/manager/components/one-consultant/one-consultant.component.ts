@@ -32,6 +32,8 @@ export class OneConsultantComponent implements OnInit {
     this.companies$ = this.ManagerServices.company$;
   }
 
-
+  goBack(): void {
+    history.back();
+  }
 
 }

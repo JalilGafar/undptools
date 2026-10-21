@@ -5,6 +5,7 @@ import { Company } from '../../../core/model/company';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { StorageService } from '../../../_services/storage.service';
+import { AvatarPipe, CompanyLogoPipe, DEFAULT_COMPANY_LOGO } from '../../../core/company-logo.pipe';
 
 @Component({
   selector: 'app-entreprises',
@@ -12,6 +13,8 @@ import { StorageService } from '../../../_services/storage.service';
   imports: [
     RouterLink,
     CommonModule,
+    CompanyLogoPipe,
+    AvatarPipe,
   ],
   templateUrl: './entreprises.component.html',
   styleUrl: './entreprises.component.scss'
@@ -70,6 +73,16 @@ export class EntreprisesComponent implements OnInit {
 
   companySelect(id: number) {
     this.router.navigateByUrl('/consultant/dashbord/' + id);
+  }
+
+  onLogoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = DEFAULT_COMPANY_LOGO;
+  }
+
+  goBack(): void {
+    history.back();
   }
 
 }

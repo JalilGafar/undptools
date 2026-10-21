@@ -1,0 +1,170 @@
+@if (isLoading) {
+  <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+} @else if (loadError) {
+  <div class="alert alert-danger">Impossible de charger le profil de l'entreprise.</div>
+} @else if (!profil) {
+  <div class="ps-empty">
+    <i class="bi bi-person-vcard"></i>
+    <p>Le profil du participant n'a pas encore été rempli par le consultant.</p>
+  </div>
+} @else {
+
+  <!-- Barre d'information et d'actions -->
+  <div class="ps-bar">
+    <div class="text-muted small">
+      Rempli par <strong>{{ profil.consultant || '—' }}</strong>
+      · dernière modification le {{ profil.updated_at | date:'dd/MM/yyyy HH:mm' }}
+      @if (profil.date_reunion) { · réunion du {{ profil.date_reunion | date:'dd/MM/yyyy' }} }
+    </div>
+    <div class="ms-auto d-flex flex-wrap gap-3 align-items-center">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="psUsd" [checked]="showUsd" (change)="showUsd = !showUsd">
+        <label class="form-check-label small" for="psUsd">
+          Afficher en USD <span class="text-muted">(1 USD = {{ fx.xafPerUsd }} FCFA, moyenne {{ fx.year }})</span>
+        </label>
+      </div>
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="openTool()">
+        <i class="bi bi-printer me-1"></i>Ouvrir / Imprimer
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-info-circle me-2"></i>Informations générales</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-5">Représentant</dt><dd class="col-sm-7">{{ text(profil.representant) }}</dd>
+            <dt class="col-sm-5">Téléphone</dt><dd class="col-sm-7">{{ text(profil.telephone) }}</dd>
+            <dt class="col-sm-5">E-mail</dt><dd class="col-sm-7">{{ text(profil.email) }}</dd>
+            <dt class="col-sm-5">Adresse</dt><dd class="col-sm-7">{{ text(profil.adresse) }}</dd>
+            <dt class="col-sm-5">Activité / secteur</dt><dd class="col-sm-7">{{ text(profil.activite) }}</dd>
+            <dt class="col-sm-5">Années d'activité</dt><dd class="col-sm-7">{{ text(profil.annees_activite) }}</dd>
+            <dt class="col-sm-5">Organisation</dt><dd class="col-sm-7">{{ text(profil.organisation) }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Effectif et type d'entreprise</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-5">Effectif total</dt><dd class="col-sm-7">{{ text(profil.effectif_total) }}</dd>
+            <dt class="col-sm-5">Dont femmes</dt><dd class="col-sm-7">{{ text(profil.effectif_femmes) }}</dd>
+            <dt class="col-sm-5">Dont hommes</dt><dd class="col-sm-7">{{ text(effectifHommes) }}</dd>
+            <dt class="col-sm-5">Type d'entreprise</dt><dd class="col-sm-7">{{ typeEntreprise(profil.type_entreprise) }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-mortarboard me-2"></i>Niveaux d'études</div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Niveau</th>
+                <th class="text-center">Chef d'entreprise</th>
+                <th class="text-center">Tous les salariés</th>
+                <th class="text-center">Femmes</th>
+                <th class="text-center">Hommes</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (n of niveaux; track n.key) {
+                <tr>
+                  <td>
+                    {{ n.label }}
+                    @if (n.key === 'autre' && profil.etude_autre_precision) {
+                      <span class="text-muted small">— {{ profil.etude_autre_precision }}</span>
+                    }
+                  </td>
+                  <td class="text-center">{{ etude(n.key, 'chef') ? 'Oui' : '—' }}</td>
+                  <td class="text-center">{{ text(tousSalaries(n.key)) }}</td>
+                  <td class="text-center">{{ text(etude(n.key, 'femmes')) }}</td>
+                  <td class="text-center">{{ text(etude(n.key, 'hommes')) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-bank me-2"></i>Statut juridique et finances</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-7">Enregistrement fiscal</dt><dd class="col-sm-5">{{ yesNo(profil.enregistrement_fiscal) }}</dd>
+            <dt class="col-sm-7">Type de facturation</dt><dd class="col-sm-5">{{ facturation(profil.type_facturation) }}</dd>
+            <dt class="col-sm-7">Compte bancaire / d'épargne</dt><dd class="col-sm-5">{{ yesNo(profil.compte_bancaire) }}</dd>
+            <dt class="col-sm-7">Suivi du chiffre d'affaires</dt><dd class="col-sm-5">{{ yesNo(profil.suivi_ca) }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-hand-thumbs-up me-2"></i>Soutien institutionnel</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-7">Programme de soutien suivi</dt><dd class="col-sm-5">{{ yesNo(profil.soutien_programme) }}</dd>
+            <dt class="col-sm-7">Institution / programme</dt><dd class="col-sm-5">{{ text(profil.soutien_nom) }}</dd>
+            <dt class="col-sm-7">Capital d'amorçage / subvention</dt><dd class="col-sm-5">{{ yesNo(profil.subvention_recue) }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-graph-up-arrow me-2"></i>Ventes et marketing</div>
+        <div class="card-body">
+          @if (ventes.length) {
+            <div class="table-responsive mb-3">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Type de produit vendu</th>
+                    <th class="text-end">Volume des ventes mensuel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (l of ventes; track $index) {
+                    <tr>
+                      <td>{{ text(l.produit) }}</td>
+                      <td class="text-end">{{ money(l.volume_fcfa) }}</td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr class="ps-total">
+                    <td>Chiffre d'affaires mensuel total approximatif</td>
+                    <td class="text-end">{{ money(totalVentesFcfa) }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          } @else {
+            <p class="text-muted mb-3">Aucune ligne de vente renseignée.</p>
+          }
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Clients réguliers (B2C)</dt><dd class="col-sm-8">{{ text(profil.clients_reguliers) }}</dd>
+            <dt class="col-sm-4">Où vend-on ?</dt><dd class="col-sm-8">{{ canaux(profil.canaux_vente) }}</dd>
+            <dt class="col-sm-4">Clientèle principale</dt><dd class="col-sm-8">{{ clientele(profil.type_clientele) }}</dd>
+            <dt class="col-sm-4">Commentaires sur le marché</dt><dd class="col-sm-8">{{ text(profil.commentaires_marche) }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+  </div>
+}

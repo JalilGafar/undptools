@@ -1,38 +1,54 @@
 <div class="container">
-    @if (user$ |async; as data) {
-        <h3> Liste des Livrabre du consultant  {{data.username}} </h3>
+    <!-- Retour -->
+    <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+        ← Retour
+    </button>
+
+    @if (user$ | async; as user) {
+        <h3>Livrables du consultant {{ user.username }}</h3>
+    } @else {
+        <h3>Livrables du consultant</h3>
     }
-    @if (librables$ |async; as data) {
-        @if (data.length) {
-            <table class="table table-hover">
+
+    @if (isLoading) {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    } @else if (loadError) {
+        <div class="alert alert-danger">Impossible de charger les livrables. Veuillez réessayer.</div>
+    } @else if (livrables.length) {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">livrable</th>
+                        <th scope="col">Livrable</th>
                         <th scope="col">Entreprise</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">comp_id</th>
-                        <th scope="col">cons_id</th>
-        
+                        <th scope="col">Créé le</th>
+                        <th scope="col">Dernière modification</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (item of data; track $index) {
-                        <tr (click)="viewLivrable(item.comp_id, item.tool_code)" >
-                            <th scope="row"> {{item.id}} </th>
-                            <td> {{item.livrable}} </td>
-                            <td> {{item.company}} </td>
-                            <td> {{item.date | date:'medium'}} </td>
-                            <td> {{item.comp_id}} </td>
-                            <td> {{userId}} </td>
+                    @for (item of livrables; track trackLivrable(item)) {
+                        <tr class="livrable-row" (click)="viewLivrable(item.comp_id, item.tool_code)">
+                            <td>{{ item.livrable }}</td>
+                            <td>{{ item.company }}</td>
+                            <td class="text-muted">{{ item.date | date:'dd/MM/yyyy' }}</td>
+                            <td class="text-muted">{{ item.updated_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-success"
+                                        (click)="$event.stopPropagation(); viewLivrable(item.comp_id, item.tool_code)">
+                                    <i class="bi bi-eye me-1"></i>Voir
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        } @else {
-            <div class="empty">
-                Aucun livrable disponible pour le moment
-            </div>
-        }
+        </div>
+    } @else {
+        <div class="empty">
+            Aucun livrable disponible pour le moment
+        </div>
     }
 </div>

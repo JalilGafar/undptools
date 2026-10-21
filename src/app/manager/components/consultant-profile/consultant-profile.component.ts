@@ -7,11 +7,12 @@ import { StorageService } from '../../../_services/storage.service';
 import { User } from '../../../core/model/user';
 import { Company } from '../../../core/model/company';
 import { Livrable } from '../../../core/model/livrable';
+import { AvatarPipe, CompanyLogoPipe } from '../../../core/company-logo.pipe';
 
 @Component({
   selector: 'app-consultant-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, CompanyLogoPipe, AvatarPipe],
   templateUrl: './consultant-profile.component.html',
   styleUrl: './consultant-profile.component.scss'
 })
@@ -48,6 +49,7 @@ export class ConsultantProfileComponent implements OnInit {
     this.companies$ = this.managerService.company$;
     this.companiesCount$ = this.companies$.pipe(map(list => list.length));
 
+    this.managerService.clearLivrables();
     this.managerService.getLivrableFromUserId(this.consultantId);
     this.livrables$ = this.managerService.livrable$;
     this.livrableCount$ = this.livrables$.pipe(map(list => list.length));

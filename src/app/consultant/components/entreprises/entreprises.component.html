@@ -1,3 +1,10 @@
+<div class="container pt-3">
+  <!-- Retour -->
+  <button class="btn btn-outline-secondary btn-sm mb-2" (click)="goBack()">
+    ← Retour
+  </button>
+</div>
+
 <div class="ent-header">
   <h1 class="ent-title">
     Espace Consultant GYB /
@@ -14,7 +21,7 @@
     <div class="col-12 col-lg-3 order-first order-lg-last profil">
       <div class="card profil-card">
         <div class="profil-avatar">
-          <img [src]="'../../../../assets/images/'+currentUser.username+'.jpg'" alt="Avatar">
+          <img [src]="currentUser.photo | avatar" (error)="onLogoError($event)" alt="Avatar">
         </div>
         <hr>
         <div class="card-body">
@@ -56,7 +63,8 @@
               <div class="card company-card" (click)="companySelect(item.id)">
                 <div class="row g-0 align-items-center">
                   <div class="col-4">
-                    <img [src]="'../../../../assets/images/'+item.logo"
+                    <img [src]="item.logo | companyLogo"
+                      (error)="onLogoError($event)"
                       class="company-img"
                       alt="{{ item.name }}">
                   </div>

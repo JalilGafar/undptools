@@ -107,8 +107,11 @@
                 <li class="nav-item" (click)="toggleSidebar()">
                   <a [routerLink]="['consultant/tool', child.route]"
                     [queryParams]="{ toolName: child.label }"
-                    class="nav-link">
-                    {{ child.label }}
+                    class="nav-link tool-link" [class.tool-soon]="child.status === 'soon'">
+                    <span class="tool-label">{{ child.label }}</span>
+                    @if (child.status === 'active') {
+                      <span class="tool-dot" title="Outil actif" role="img" aria-label="Outil actif"></span>
+                    }
                   </a>
                 </li>
               }

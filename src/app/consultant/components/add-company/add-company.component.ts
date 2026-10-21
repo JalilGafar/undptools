@@ -78,7 +78,7 @@ export class AddCompanyComponent implements OnInit {
   }
 
   onGoBack() {
-
+    history.back();
   }
 
 }

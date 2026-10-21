@@ -176,8 +176,8 @@ SSR-safe (`isPlatformBrowser` sur tous les accès `window`/`sessionStorage`).
 
 | Propriété / Méthode | Description |
 |---|---|
-| `CompanyId: number` | ID entreprise courante (en mémoire, perdu au refresh) |
-| `ConsultantId: number` (défaut: `0`) | `0` = consultant connecté, `N` = consultant vu par un manager |
+| `CompanyId: number` | ID entreprise courante (lecture seule ; modifié via `setIdComp`, conservé en sessionStorage donc survit au refresh) |
+| `ConsultantId: number` (défaut: `0`) | `0` ou son propre id = consultant connecté ; `N` = consultant vu par un manager (modifié via `setIdConsultant`, conservé en sessionStorage). Les outils masquent « Enregistrer » quand `ConsultantId != user.id` |
 | `currentUser$: Observable<any>` | Flux réactif de l'utilisateur courant |
 | `visibleTools$: Observable<boolean>` | Contrôle la visibilité de la sidebar des outils |
 | `saveUser(user)` / `getUser()` / `isLoggedIn()` | Gestion session sessionStorage (clé: `auth-user`) |
@@ -301,7 +301,7 @@ Ne pas recréer ces interfaces — les importer depuis `src/app/core/model/`.
 | `predia_mat_label.ts` | `PrediaLabel` | reper, critere, attribut, question, **children: Child[]** (parsé) |
 | `child.ts` | `Child` | plage, label |
 | `mat_integ_label.ts` | `IntegLabel` | id_diaginteg, reper, domaine, libele |
-| `livrable.ts` | `Livrable` | id, livrable, tableur, tool_code, company, date, comp_id, cons_id |
+| `livrable.ts` | `Livrable` | id_livrable (unique seulement avec `tool_code`), livrable, tableur, tool_code, company, date, updated_at, comp_id, cons_id |
 | `livrable-global.ts` | `LivrableGlobal` | id_livrable, livrable, tableur, tool_code, comp_id, company, cons_id, consultant, date, updated_at |
 | `activity.ts` | `Activity` | Modèle local d'affichage — miroir de `GanttTask`, non API |
 | `personnel-entreprise.ts` | `PersonnelEntreprise` | nom_poste, nom_personne, temps_poste, activites, cons_id?, comp_id? |
@@ -499,3 +499,45 @@ RewriteRule ^ /index.html [L]
 | `PrediaLabelJSON.children` est une string | Parser avec `JSON.parse()` avant usage — voir `parseChildren()` dans `AttributComponent` |
 | Composant non-standalone dans un module lazy | Tous les composants sont standalone : lister les imports explicitement |
 | Avatar manquant | L'image `assets/images/{{username}}.jpg` doit exister pour chaque consultant |
+
+---
+
+## Images (logos, photos de profil, galerie)
+
+- Les images **ne sont plus dans `assets/images`** (réservé aux visuels du site) : elles sont téléversées vers l'API (`BackUndp/uploads` et `private`). Voir le CLAUDE.md du backend.
+- `core/company-logo.pipe.ts` : pipes `companyLogo` et `avatar` (référence `uploads/...` → `apiUrl/...`, image par défaut `company.jpg` / `user.png` si vide). Pour les erreurs de chargement, repli via `(error)` ou `onerror`.
+- Logo : `ConsultantService.uploadCompanyLogo()`, envoyé par `EditCompanyComponent` après la sauvegarde du formulaire.
+- Photo de profil : `AuthService.uploadPhoto()` depuis `ProfileComponent` ; la session (`StorageService.saveUser`) est mise à jour avec `photo`.
+- Galerie : `shared/gallery.service.ts` + `shared/components/company-gallery` (`<app-company-gallery [companyId]>`), utilisé par `T1hComponent` (outil 1H, écriture selon `canWrite`) et `CompanyDetailComponent` (manager, lecture). Les images protégées sont lues en blob (`URL.createObjectURL`) : **toujours révoquer** avec `URL.revokeObjectURL`.
+- Outil **5G** (même intitulé « Photos de l'entreprise ») pas encore branché : réutiliser `<app-company-gallery>` avec `stage` `finale`.
+
+---
+
+## Outil 1L — Profil du participant (`T1lComponent`)
+
+- Route `/consultant/tool/t1l`, service `ConsultantService.fetchProfil()` / `saveProfil()`, modèle `core/model/entreprise-profil.ts`. Formulaire en 7 sections (équivalent du classeur Excel), lignes de ventes dynamiques (FormArray).
+- Lecture seule pour les managers (`ROLE_ADMIN`/`ROLE_MODERATOR`) ou si `ConsultantId` ≠ utilisateur ; ceux-ci disposent d'un interrupteur **« Afficher en USD »** (taux fixe `fx` renvoyé par l'API). Les montants restent en FCFA partout ailleurs.
+- Impression : bouton « Imprimer / PDF » (`window.print()`), mise en page dans le `@media print` du composant ; la classe `print-profil` posée sur `<body>` masque l'en-tête/pied de page du site (règle dans `styles.scss`).
+- Prévu ensuite : outils 1i et 5E (même famille, beaucoup plus de champs : réutiliser les sections communes), onglet « Profil » dans `company-detail`, tableau de bord statistique global (managers/moderators).
+
+## Outil 1G — Cartographie des clients (`T1gComponent`)
+
+- Route `/consultant/tool/t1g`, service `ConsultantService.fetchCartographie()` / `saveCartographie()`, modèle `core/model/cartographie-clients.ts`. **Une fiche par client** (formulaire mobile-first, repliable, FormArray ; pas de tableau), % par client, nombre de clients, part du plus gros client (alerte ≥ 30 %). Contrôles : nom de client requis dès qu'une fiche contient des informations, e-mail avec domaine, téléphone, remarques ≤ 1000 caractères (compteur), doublon signalé ; mêmes règles côté API. Barre d'enregistrement collée en bas de l'écran.
+- Même logique que 1L : lecture seule pour les managers (interrupteur USD, taux `fx`), impression via `window.print()` (paysage, classe `print-profil` sur `<body>`).
+
+## Tableaux à défilement horizontal (mobile)
+
+Pour tout tableau large : `<div class="table-responsive scroll-visible" appScrollHint>…</div>` suivi de `<p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement</p>`, et un `min-width` sur le `<table>`. La barre de défilement est alors toujours visible (styles globaux `.scroll-visible`, `styles.scss`) et l'indication n'apparaît que si le tableau déborde (`ScrollHintDirective`, `src/app/shared/scroll-hint.directive.ts`). Utilisé par 1L (niveaux d'études, ventes) et le tableau de bord global.
+
+## Outil 1D — Diagnostic intégral (`T1dComponent`), interface mobile-first
+
+- Deux modes (`mode`) : **Résumé** (scores par domaine, graphique polaire sans taille fixe, détail par domaine) et **Questionnaire** (une question à la fois, barre de navigation collée en bas). **Matrice à 60 questions, 5 réponses** (`REPONSES` : Insuffisant 1 → Excellent 5) : la réponse choisie attribue la note, affichée mais non modifiable ; **0 = sans réponse** ; score d'un domaine = moyenne des réponses données ÷ 5 × 100 (`computeScores`) ; enregistrement partiel autorisé (« x / 60 répondues »). Les domaines sont décrits dans `domaines` (plages de questions) : ne plus dupliquer les lignes du détail à la main.
+- Lecture seule (`readOnly`) : `ConsultantId` ≠ 0 et ≠ utilisateur (un manager) → formulaires désactivés, pas de bouton d'enregistrement.
+- Le composant utilise `ViewEncapsulation.None` : tous les sélecteurs SCSS sont limités à `.td-wrapper`.
+- ⚠ Le tableau « Personnel de l'entreprise » (`infoEntrepriseForm`) **n'est pas enregistré** : aucune route ni table côté backend pour l'instant.
+
+## Menu des outils et insigne « Actif »
+
+- Le menu « Tools » est construit à partir du **catalogue `src/app/shared/tools.catalog.ts`** (source unique, il remplace les deux listes qui étaient écrites à la main dans `header.component.ts` et `app.component.ts`). Chaque outil a un `status` : `'active'` (**pastille verte** à droite de la ligne) ou `'soon'` (**ligne grisée**, **toujours cliquable**). Pas de texte « Actif »/« Bientôt », ni compteur, ni légende.
+- **Pour activer un outil** : passer son `status` à `'active'` dans le catalogue ET vérifier que sa route (`consultant-routing.module.ts`) pointe vers le vrai composant (et non `OnconstructionComponent`).
+- Actifs à ce jour : prédiagnostic, 1D, 1G, 1H, 1L, 2D. 1B/2B (rien n'est enregistré), 1C (modification des tâches : `PUT /api/tools/activities/:id` absent) et 1E_a (page vide) restent « Bientôt » tant qu'ils ne sont pas complets.

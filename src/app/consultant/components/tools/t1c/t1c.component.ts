@@ -235,4 +235,8 @@ export class T1cComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  goBack(): void {
+    history.back();
+  }
+
 }

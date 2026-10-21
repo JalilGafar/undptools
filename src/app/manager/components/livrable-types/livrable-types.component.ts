@@ -37,4 +37,8 @@ export class LivrableTypesComponent implements OnInit {
   goToType(toolCode: string) {
     this.router.navigateByUrl('manager/all-livrables/' + toolCode);
   }
+
+  goBack(): void {
+    history.back();
+  }
 }

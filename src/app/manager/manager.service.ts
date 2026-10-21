@@ -6,6 +6,8 @@ import { environment } from '../../environment/environment';
 import { Company } from '../core/model/company';
 import { Livrable } from '../core/model/livrable';
 import { LivrableGlobal } from '../core/model/livrable-global';
+import { EntrepriseProfil, ProfilVente } from '../core/model/entreprise-profil';
+import { StatsResponse } from '../core/model/stats';
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +46,6 @@ export class ManagerService {
   }
 
   getUserById(id:number): Observable<User>{
-    this.getCompanyFromServer();
     return this.persona$.pipe(
       map(personas => personas.filter(persona => persona.id === id)[0])
     );
@@ -93,6 +94,15 @@ export class ManagerService {
     return this.http.delete(`${environment.apiUrl}/api/manager/company/${id}`);
   }
 
+  clearLivrables() {
+    this._librables$.next([]);
+  }
+
+  //Liste des livrables d'un consultant, sans passer par le magasin partagé (chargement / erreur gérés par l'appelant)
+  fetchLivrables(id: number): Observable<Livrable[]> {
+    return this.http.get<Livrable[]>(`${environment.apiUrl}/api/manager/livrables`, { params: new HttpParams().append('idUser', id) });
+  }
+
   //Liste des livrables
   getLivrableFromUserId(id: number) {
     let Id = new HttpParams();
@@ -104,6 +114,21 @@ export class ManagerService {
       })
     ).subscribe();
 
+  }
+
+  //Livrables d'une entreprise, tous consultants confondus
+  fetchCompanyLivrables(companyId: number): Observable<LivrableGlobal[]> {
+    return this.http.get<LivrableGlobal[]>(`${environment.apiUrl}/api/manager/company/${companyId}/livrables`);
+  }
+
+  //Profil du participant (1L) le plus récent d'une entreprise
+  fetchCompanyProfil(companyId: number): Observable<{ profil: (EntrepriseProfil & { consultant: string | null }) | null; ventes: ProfilVente[]; fx: { year: number; xafPerUsd: number } }> {
+    return this.http.get<any>(`${environment.apiUrl}/api/profil/company/${companyId}`);
+  }
+
+  //Statistiques : une ligne par entreprise (tableau de bord global)
+  fetchStats(): Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(`${environment.apiUrl}/api/manager/stats`);
   }
 
   private _allLivrables$ = new BehaviorSubject<LivrableGlobal[]>([]);

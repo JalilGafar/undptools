@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { of, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,16 +10,17 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Button } from 'primeng/button';
+import { CompanyLogoPipe, DEFAULT_COMPANY_LOGO } from '../../../core/company-logo.pipe';
 
 @Component({
   selector: 'app-edit-company',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ToastModule, ConfirmDialog, Button],
+  imports: [CommonModule, ReactiveFormsModule, ToastModule, ConfirmDialog, Button, CompanyLogoPipe],
   providers: [MessageService, ConfirmationService],
   templateUrl: './edit-company.component.html',
   styleUrl: './edit-company.component.scss'
 })
-export class EditCompanyComponent implements OnInit {
+export class EditCompanyComponent implements OnInit, OnDestroy {
 
   companyForm!: FormGroup;
   companyId!: number;
@@ -31,6 +33,13 @@ export class EditCompanyComponent implements OnInit {
   private confirmationService = inject(ConfirmationService);
   private geoService = inject(GeolocationService);
   isLocating = false;
+
+  // ── Logo ────────────────────────────────────────────────────────────────────
+  private readonly LOGO_MAX_BYTES = 10 * 1024 * 1024;
+  private readonly LOGO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  currentLogo: string | null = null;
+  logoPreview: string | null = null;
+  private logoFile: File | null = null;
   geoAvailable = this.geoService.isAvailable();
 
   constructor(
@@ -45,6 +54,7 @@ export class EditCompanyComponent implements OnInit {
     this.companyForm = this.fb.group({
       name:          [null, Validators.required],
       date_creation: [null],
+      secteur:       [''],
       produits:      [''],
       services:      [''],
       description:   [''],
@@ -67,6 +77,7 @@ export class EditCompanyComponent implements OnInit {
     this.consultantService.getCompanyDetailById(this.companyId).subscribe({
       next: company => {
         this.companyName = company.name;
+        this.currentLogo = company.logo ?? null;
         this.companyForm.patchValue(company);
         this.isLoading = false;
       },
@@ -80,6 +91,40 @@ export class EditCompanyComponent implements OnInit {
         });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.cancelLogo();
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!this.LOGO_TYPES.includes(file.type)) {
+      this.messageService.add({ severity: 'error', summary: 'Logo', detail: 'Format non supporté (JPG, PNG ou WEBP).', life: 5000 });
+      return;
+    }
+    if (file.size > this.LOGO_MAX_BYTES) {
+      this.messageService.add({ severity: 'error', summary: 'Logo', detail: 'Image trop volumineuse (10 Mo maximum).', life: 5000 });
+      return;
+    }
+    this.cancelLogo();
+    this.logoFile = file;
+    this.logoPreview = URL.createObjectURL(file);
+  }
+
+  cancelLogo(): void {
+    if (this.logoPreview) URL.revokeObjectURL(this.logoPreview);
+    this.logoPreview = null;
+    this.logoFile = null;
+  }
+
+  onLogoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.onerror = null;
+    img.src = DEFAULT_COMPANY_LOGO;
   }
 
   isInvalid(field: string): boolean {
@@ -122,7 +167,11 @@ export class EditCompanyComponent implements OnInit {
     if (this.companyForm.invalid) return;
 
     this.isSaving = true;
-    this.consultantService.updateCompany(this.companyId, this.companyForm.value).subscribe({
+    this.consultantService.updateCompany(this.companyId, this.companyForm.value).pipe(
+      switchMap(() => this.logoFile
+        ? this.consultantService.uploadCompanyLogo(this.companyId, this.logoFile)
+        : of(null))
+    ).subscribe({
       next: () => {
         this.isSaving = false;
         this.messageService.add({

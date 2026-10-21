@@ -1,3 +1,8 @@
+<!-- Retour -->
+<button class="btn btn-outline-secondary btn-sm m-3" (click)="goBack()">
+    ← Retour
+</button>
+
 @if (companies$ |async; as data) {
     @for (item of data; track $index) {
         <ul>

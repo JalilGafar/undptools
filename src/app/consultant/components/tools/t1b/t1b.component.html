@@ -1,131 +1,117 @@
-<div class="card mx-5 mt-4">
-    <div class="card-header">
-        <h5 class="card-title text-center"> {{toolName}} </h5>
+<div class="container mr-wrapper">
+
+  <!-- Retour -->
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <!-- En-tête -->
+  <div class="mr-header">
+    <div class="mr-header-icon"><i class="bi bi-journal-text"></i></div>
+    <div>
+      <h2 class="mr-title">{{ toolName || 'Minutes de réunion' }}</h2>
+      <p class="mr-subtitle">Compte rendu de la réunion et fiche de présence</p>
     </div>
-    <div class="card-body">
-        <form action="" class="row g-3" [formGroup]="MeetForm">
+  </div>
 
-            <table>
-                <tr>
-                    <td class="input-empty">
-                        <textarea class="form-control" placeholder="Etape" formControlName="etape" rows="1">
-                        </textarea>
-                    </td>
-                </tr>
+  <form [formGroup]="MeetForm" novalidate>
 
-                <tr>
-                    <td class="input-empty">
-                        <textarea class="form-control" placeholder="Date" formControlName="date" rows="1">
-                        </textarea>
-                    </td>
-                </tr>
+    <!-- ── La réunion ──────────────────────────────────────────────────── -->
+    <h5 class="mr-section-title"><i class="bi bi-calendar-event me-2"></i>La réunion</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-4">
+        <label class="form-label" for="etape">Étape</label>
+        <input id="etape" class="form-control" type="text" formControlName="etape" placeholder="ex. Étape 1">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label" for="date">Date</label>
+        <input id="date" class="form-control" type="date" formControlName="date">
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label" for="lieu">Lieu</label>
+        <input id="lieu" class="form-control" type="text" formControlName="lieu" placeholder="ex. siège de l'entreprise">
+      </div>
+    </div>
 
-                <tr>
-                    <td class="input-empty">
-                        <textarea class="form-control" placeholder="Lieu" formControlName="lieu" rows="1">
-                        </textarea>
-                    </td>
-                </tr>
+    <!-- ── Contenu ─────────────────────────────────────────────────────── -->
+    <h5 class="mr-section-title"><i class="bi bi-card-text me-2"></i>Contenu de la réunion</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <label class="form-label" for="objectif">Objectifs de la réunion</label>
+        <textarea id="objectif" class="form-control" rows="3" formControlName="objectif"></textarea>
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="ordre">Ordre du jour</label>
+        <textarea id="ordre" class="form-control" rows="4" formControlName="ordre"></textarea>
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="resultats">Résultats et engagements</label>
+        <textarea id="resultats" class="form-control" rows="4" formControlName="resultats"></textarea>
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="remarque">Remarques</label>
+        <textarea id="remarque" class="form-control" rows="3" formControlName="remarque"></textarea>
+      </div>
+    </div>
 
-                <tr>
-                    <td class="big-box">
-                        <textarea class="form-control" placeholder="Objectifs de la réunion" formControlName="objectif"
-                            rows="2">
-                        </textarea>
-                    </td>
-                </tr>
+    <!-- ── Fiche de présence ───────────────────────────────────────────── -->
+    <h5 class="mr-section-title"><i class="bi bi-people me-2"></i>Fiche de présence</h5>
 
-                <tr>
-                    <td class="big-box">
-                        <textarea class="form-control" placeholder="Ordre du jour" formControlName="ordre" rows="2">
-                        </textarea>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="big-box">
-                        <textarea class="form-control" placeholder="Résultats et Engagements"
-                            formControlName="resultats" rows="2">
-                        </textarea>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="big-box">
-                        <textarea class="form-control" placeholder="Remarques" formControlName="remarque" rows="2">
-                        </textarea>
-                    </td>
-                </tr>
-            </table>
-        </form>
-
-        <h3>Fiche de présence</h3>
-        <table class="present">
-            <tr>
-                <th>N.</th>
-                <th>Noms et prénoms</th>
-                <th>Contact</th>
-            </tr>
-
-            <!-- Lignes dynamiques -->
-            <tr>
-                <td class="number">1</td>
-                <td>
-                    <input class="fiche" type="text">
-                </td>
-                <td class="signature">
-                    <input type="text" class="fiche">
-                </td>
-            </tr>
-            <tr>
-                <td class="number">2</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-            <tr>
-                <td class="number">3</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-            <tr>
-                <td class="number">4</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-            <tr>
-                <td class="number">5</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-            <tr>
-                <td class="number">6</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-            <tr>
-                <td class="number">7</td>
-                <td><input type="text" class="fiche"></td>
-                <td class="signature"><input type="text" class="fiche"></td>
-            </tr>
-
-        </table>
-
-        <div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Enregistrer</button>
-        </div>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" routerLink="../../companies" >Enregistrer la minute de Réunion</button>
-                    </div>
-                </div>
+    <div formArrayName="presents" class="mr-attendees">
+      @for (p of presents.controls; track p; let i = $index) {
+        <div class="mr-attendee" [formGroupName]="i">
+          <span class="mr-badge">{{ i + 1 }}</span>
+          <div class="row g-2 flex-grow-1">
+            <div class="col-12 col-md-7">
+              <label class="form-label" [for]="'present-nom-' + i">Nom et prénom</label>
+              <input [id]="'present-nom-' + i" class="form-control" type="text" formControlName="nom"
+                     autocomplete="off" autocapitalize="words">
             </div>
+            <div class="col-12 col-md-5">
+              <label class="form-label" [for]="'present-contact-' + i">Contact</label>
+              <input [id]="'present-contact-' + i" class="form-control" type="text" formControlName="contact"
+                     autocomplete="off" placeholder="Téléphone ou e-mail">
+            </div>
+          </div>
+          <button type="button" class="mr-del" (click)="removeAttendee(i)" title="Retirer cette personne"
+                  aria-label="Retirer cette personne">
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
-
+      }
     </div>
+
+    <button type="button" class="btn btn-outline-primary mr-add" (click)="addAttendee()">
+      <i class="bi bi-person-plus me-1"></i>Ajouter une personne
+    </button>
+
+    <!-- ── Actions (barre collée en bas de l'écran sur mobile) ─────────── -->
+    <div class="mr-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+        <i class="bi bi-x-circle me-1"></i> Annuler
+      </button>
+      <button type="button" class="btn btn-primary mr-btn-save" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <i class="bi bi-check-circle me-2"></i>Enregistrer
+      </button>
+    </div>
+  </form>
+
+  <!-- Modal de confirmation -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Enregistrer la minute de réunion ?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-footer mr-modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" routerLink="../../companies">
+            Enregistrer la minute de réunion
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>

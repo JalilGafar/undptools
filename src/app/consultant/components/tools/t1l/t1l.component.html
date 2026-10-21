@@ -1,1 +1,367 @@
-<p>t1l works!</p>
+<div class="container pf-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="pf-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <div class="ms-auto d-flex flex-wrap gap-3 align-items-center">
+      @if (isManagerRole) {
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="usdSwitch" [checked]="showUsd" (change)="showUsd = !showUsd">
+          <label class="form-check-label small" for="usdSwitch">
+            Afficher en USD
+            <span class="text-muted">(1 USD = {{ fx.xafPerUsd }} FCFA, moyenne {{ fx.year }})</span>
+          </label>
+        </div>
+      }
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="print()">
+        <i class="bi bi-printer me-1"></i>Imprimer / PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- En-tête -->
+  <div class="pf-header">
+    <div class="pf-header-icon"><i class="bi bi-person-vcard"></i></div>
+    <div>
+      <h2 class="pf-title">Profil du participant</h2>
+      @if (companyName) {
+        <p class="pf-subtitle">
+          <strong>{{ companyName }}</strong>
+          @if (consultantName) { · Consultant : {{ consultantName }} }
+        </p>
+      }
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="pf-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p>Chargement des données…</p>
+    </div>
+  } @else if (!companyId) {
+    <div class="pf-loading">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <div class="alert alert-danger">Impossible de charger le profil. Veuillez réessayer.</div>
+  } @else {
+
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule : seul le consultant concerné peut modifier ce profil.
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="row g-3">
+
+    <!-- ── 1. Informations générales ───────────────────────────────────── -->
+    <div class="col-12">
+      <h5 class="pf-section-title"><i class="bi bi-info-circle me-2"></i>Informations générales</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Nom du propriétaire / représentant</label>
+      <input class="form-control" type="text" formControlName="representant" maxlength="255">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Téléphone</label>
+      <input class="form-control" type="tel" formControlName="telephone" maxlength="50">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">E-mail</label>
+      <input class="form-control" type="email" formControlName="email" maxlength="255">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Adresse de l'entreprise</label>
+      <input class="form-control" type="text" formControlName="adresse" maxlength="255">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Activité principale / secteur</label>
+      <input class="form-control" type="text" formControlName="activite" maxlength="255"
+             placeholder="ex. agroalimentaire, textile">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Années d'activité</label>
+      <input class="form-control" type="text" formControlName="annees_activite" maxlength="50"
+             placeholder="ex. 4 ans et 6 mois">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Date de la réunion</label>
+      <input class="form-control" type="date" formControlName="date_reunion">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Organisation / Programme</label>
+      <input class="form-control" type="text" formControlName="organisation" maxlength="100">
+    </div>
+
+    <!-- ── 2. Effectif ─────────────────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-people me-2"></i>Effectif</h5>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Personnes travaillant dans l'entreprise</label>
+      <input class="form-control" type="number" min="0" formControlName="effectif_total"
+             [class.is-invalid]="isInvalid('effectif_total')">
+      <div class="form-text">Y compris le propriétaire.</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Dont femmes</label>
+      <input class="form-control" type="number" min="0" formControlName="effectif_femmes"
+             [class.is-invalid]="isInvalid('effectif_femmes') || femmesSuperieuresAuTotal">
+      @if (femmesSuperieuresAuTotal) {
+        <div class="invalid-feedback d-block">Ne peut pas dépasser l'effectif total.</div>
+      }
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Dont hommes</label>
+      <input class="form-control" type="text" [value]="effectifHommes ?? ''" disabled>
+    </div>
+
+    <!-- ── 3. Niveaux d'études ─────────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-mortarboard me-2"></i>Niveaux d'études</h5>
+      <p class="pf-help">Pour chaque niveau, cochez le chef d'entreprise et indiquez le nombre de femmes et d'hommes.</p>
+    </div>
+
+    <div class="col-12">
+      <div class="pf-card table-responsive scroll-visible" appScrollHint>
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Niveau d'études moyen</th>
+              <th class="text-center">Chef d'entreprise</th>
+              <th class="text-center">Tous les salariés</th>
+              <th class="text-center">Femmes</th>
+              <th class="text-center">Hommes</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (n of niveaux; track n.key) {
+              <tr>
+                <td>
+                  {{ n.label }}
+                  @if (n.key === 'autre') {
+                    <input class="form-control form-control-sm mt-1" type="text" formControlName="etude_autre_precision"
+                           maxlength="255" placeholder="Précisez le type de formation">
+                  }
+                </td>
+                <td class="text-center">
+                  <input class="form-check-input" type="checkbox" [formControlName]="'etude_' + n.key + '_chef'">
+                </td>
+                <td class="text-center fw-semibold">{{ tousSalaries(n.key) ?? '' }}</td>
+                <td class="pf-num"><input class="form-control form-control-sm" type="number" min="0" [formControlName]="'etude_' + n.key + '_femmes'"></td>
+                <td class="pf-num"><input class="form-control form-control-sm" type="number" min="0" [formControlName]="'etude_' + n.key + '_hommes'"></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement</p>
+    </div>
+
+    <!-- ── 4. Type d'entreprise ────────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-building me-2"></i>Type d'entreprise</h5>
+    </div>
+
+    <div class="col-12">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="te1" formControlName="type_entreprise" value="familiale">
+        <label class="form-check-label" for="te1">Entreprise familiale</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="te2" formControlName="type_entreprise" value="independante">
+        <label class="form-check-label" for="te2">Indépendante (propriétaire unique)</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="te3" formControlName="type_entreprise" value="cooperative">
+        <label class="form-check-label" for="te3">Collective / coopérative</label>
+      </div>
+    </div>
+
+    <!-- ── 5. Statut juridique et finances ─────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-bank me-2"></i>Statut juridique et finances</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Enregistrement fiscal ?</label>
+      <select class="form-select" formControlName="enregistrement_fiscal">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Type de facturation</label>
+      <select class="form-select" formControlName="type_facturation">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option value="manuelle">Manuelle</option>
+        <option value="electronique">Électronique</option>
+        <option value="aucune">Aucune</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Compte bancaire professionnel ou compte d'épargne ?</label>
+      <select class="form-select" formControlName="compte_bancaire">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Suivez-vous le chiffre d'affaires ?</label>
+      <select class="form-select" formControlName="suivi_ca">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+
+    <!-- ── 6. Ventes et marketing ──────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-graph-up-arrow me-2"></i>Ventes et marketing</h5>
+    </div>
+
+    <div class="col-12">
+      <div class="pf-card table-responsive scroll-visible" appScrollHint>
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Type de produit vendu</th>
+              <th class="text-end">Volume des ventes mensuel ({{ showUsd ? 'USD' : 'FCFA' }})</th>
+              @if (!readOnly) { <th class="no-print"></th> }
+            </tr>
+          </thead>
+          <tbody formArrayName="ventes">
+            @for (line of ventes.controls; track line; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input class="form-control form-control-sm" type="text" formControlName="produit" maxlength="255"
+                           placeholder="ex. pain frais, viennoiseries"></td>
+                <td class="pf-amount">
+                  @if (readOnly) {
+                    <span class="text-end d-block">{{ money(line.get('volume_fcfa')?.value) }}</span>
+                  } @else {
+                    <input class="form-control form-control-sm text-end" type="number" min="0" step="1"
+                           formControlName="volume_fcfa" placeholder="FCFA">
+                  }
+                </td>
+                @if (!readOnly) {
+                  <td class="text-center no-print">
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0" (click)="removeLine(i)" title="Supprimer la ligne">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="pf-total">
+              <td>Chiffre d'affaires mensuel total approximatif</td>
+              <td class="text-end">{{ money(totalVentesFcfa) }}</td>
+              @if (!readOnly) { <td class="no-print"></td> }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement</p>
+      @if (!readOnly) {
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2 no-print" (click)="addLine()">
+          <i class="bi bi-plus-lg me-1"></i>Ajouter une ligne
+        </button>
+      }
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Nombre de clients réguliers (B2C)</label>
+      <input class="form-control" type="number" min="0" formControlName="clients_reguliers">
+      <div class="form-text">Par exemple : environ 50 par jour.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Type principal de clientèle</label>
+      <select class="form-select" formControlName="type_clientele">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option value="grand_public">Grand public</option>
+        <option value="particuliers">Particuliers (B2C)</option>
+        <option value="entreprises">Entreprises (B2B)</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+
+    <div class="col-12" formGroupName="canaux">
+      <label class="form-label d-block">Où vendez-vous ?</label>
+      @for (c of canaux; track c.value) {
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" [id]="'canal-' + c.value" [formControlName]="c.value">
+          <label class="form-check-label" [for]="'canal-' + c.value">{{ c.label }}</label>
+        </div>
+      }
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Commentaires sur le marché / zone d'influence</label>
+      <textarea class="form-control" rows="3" formControlName="commentaires_marche" maxlength="2000"></textarea>
+    </div>
+
+    <!-- ── 7. Soutien institutionnel ───────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-hand-thumbs-up me-2"></i>Soutien institutionnel</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Avez-vous participé à un programme de soutien aux micro-entreprises (institution gouvernementale ou ONG) ?</label>
+      <select class="form-select" formControlName="soutien_programme">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Si oui, nom de l'institution ou du programme</label>
+      <input class="form-control" type="text" formControlName="soutien_nom" maxlength="255">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Avez-vous déjà reçu un capital d'amorçage / une subvention ?</label>
+      <select class="form-select" formControlName="subvention_recue">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+
+    <!-- Signatures (impression uniquement) -->
+    <div class="col-12 pf-signatures">
+      <div>Signature du consultant : <span class="pf-line"></span></div>
+      <div>Signature du propriétaire : <span class="pf-line"></span></div>
+    </div>
+
+    <!-- ── Actions ─────────────────────────────────────────────────────── -->
+    @if (alertMessage) {
+      <div class="col-12 no-print">
+        <div class="alert mb-0" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">
+          {{ alertMessage }}
+        </div>
+      </div>
+    }
+    @if (!readOnly) {
+      <div class="col-12 pf-actions no-print">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+          <i class="bi bi-x-circle me-1"></i> Annuler
+        </button>
+        <button type="submit" class="btn btn-success pf-btn-save" [disabled]="isSaving">
+          @if (isSaving) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+          } @else {
+            <i class="bi bi-check-circle me-2"></i>Enregistrer le profil
+          }
+        </button>
+      </div>
+    }
+  </form>
+  }
+</div>

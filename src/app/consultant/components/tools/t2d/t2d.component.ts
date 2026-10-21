@@ -335,4 +335,8 @@ getSectionItems(sectionName: string, source: BusinessModelCanvas | null ): strin
   getSection(sectionName: string) {
     return this.sections.find(s => s.name === sectionName);
   }
+
+  goBack(): void {
+    history.back();
+  }
 }

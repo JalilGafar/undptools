@@ -157,4 +157,8 @@ export class DashbordComponent implements OnInit {
   //   // this.storageService.setVisibleToolsFalse();
   // }
 
+  goBack(): void {
+    history.back();
+  }
+
 }

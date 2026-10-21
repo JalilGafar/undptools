@@ -1,2 +1,205 @@
-// Pas de style spécifique — hérite de .table / .table-hover Bootstrap,
-// cohérent avec list-livrable.component.scss
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+.lvt-page {
+    padding-bottom: 2rem;
+}
+
+// ── Carte conteneur ──────────────────────────────────────────────────────────
+
+.lvt-card {
+    background: #ffffff;
+    border: 1px solid #e5e9f0;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(16, 24, 40, 0.06);
+    overflow: hidden;
+}
+
+// ── En-tête ──────────────────────────────────────────────────────────────────
+
+.lvt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 1.75rem;
+    background: linear-gradient(135deg, #005bbc 0%, #0094d8 100%);
+    color: #ffffff;
+}
+
+.lvt-title {
+    margin: 0 0 0.2rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.lvt-subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.lvt-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+// ── Tableau ──────────────────────────────────────────────────────────────────
+
+.lvt-table-wrapper {
+    overflow-x: auto;
+}
+
+.lvt-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #f7f9fc;
+        color: #475467;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.9rem 1.25rem;
+        border-bottom: 1px solid #e5e9f0;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            background: #eef2f8;
+            color: #005bbc;
+        }
+
+        &.lvt-sorted {
+            color: #005bbc;
+            background: #eef5fd;
+        }
+    }
+
+    .lvt-th-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .lvt-th-icon {
+        font-size: 0.85rem;
+        opacity: 0.65;
+    }
+
+    .lvt-sort-icon {
+        font-size: 0.8rem;
+        opacity: 0.55;
+    }
+
+    tbody tr {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+            background-color: #f5f9ff;
+        }
+
+        &:not(:last-child) td {
+            border-bottom: 1px solid #eef1f6;
+        }
+    }
+
+    td {
+        padding: 0.85rem 1.25rem;
+        vertical-align: middle;
+        color: #1d2939;
+    }
+}
+
+// ── Cellules spécifiques ─────────────────────────────────────────────────────
+
+.lvt-company {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lvt-company-icon {
+    color: #006eb5;
+    font-size: 0.95rem;
+}
+
+.lvt-consultant {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.lvt-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e8f1fc;
+    color: #005bbc;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.lvt-badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: #eef7ee;
+    color: #2c7a3d;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lvt-empty-cell {
+    color: #b0b7c3;
+}
+
+// ── État vide ────────────────────────────────────────────────────────────────
+
+.lvt-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem 1rem;
+    color: #98a2b3;
+    text-align: center;
+}
+
+.lvt-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.6;
+}
+
+// ── Mobile ───────────────────────────────────────────────────────────────────
+
+@media (max-width: 575.98px) {
+    .lvt-header {
+        padding: 1.15rem 1.25rem;
+    }
+
+    .lvt-table td,
+    .lvt-table thead th {
+        padding: 0.7rem 0.85rem;
+    }
+}

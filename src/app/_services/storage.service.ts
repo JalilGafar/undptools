@@ -3,6 +3,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const USER_KEY = 'auth-user';
+const COMPANY_KEY = 'auth-company-id';
+const CONSULTANT_KEY = 'auth-consultant-id';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +13,28 @@ export class StorageService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     this._currentUser$ = new BehaviorSubject<any>(this.readUserFromStorage());
+    this._companyId = this.readNumber(COMPANY_KEY) as number;
+    this._consultantId = this.readNumber(CONSULTANT_KEY) ?? 0;
   }
 
-  CompanyId!: number;
-  ConsultantId: number = 0;
+  // Entreprise / consultant courants : conservés dans sessionStorage pour survivre à l'actualisation de la page
+  private _companyId!: number;
+  private _consultantId = 0;
+
+  get CompanyId(): number { return this._companyId; }
+  get ConsultantId(): number { return this._consultantId; }
+
+  private readNumber(key: string): number | undefined {
+    if (!isPlatformBrowser(this.platformId)) return undefined;
+    const n = Number(window.sessionStorage.getItem(key));
+    return Number.isFinite(n) && window.sessionStorage.getItem(key) !== null ? n : undefined;
+  }
+
+  private writeNumber(key: string, value: number): void {
+    if (isPlatformBrowser(this.platformId)) {
+      window.sessionStorage.setItem(key, String(value));
+    }
+  }
 
   // ── Utilisateur courant (flux réactif) ─────────────────────────────────────
 
@@ -75,11 +95,13 @@ export class StorageService {
   }
 
   public setIdComp(id: number) {
-    this.CompanyId = id;
+    this._companyId = Number(id);
+    this.writeNumber(COMPANY_KEY, this._companyId);
   }
 
   public setIdConsultant(id: number) {
-    this.ConsultantId = id;
+    this._consultantId = Number(id);
+    this.writeNumber(CONSULTANT_KEY, this._consultantId);
   }
 
   // conservées pour compatibilité

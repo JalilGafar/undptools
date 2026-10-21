@@ -39,8 +39,29 @@
     </div>
     }
 
-    <!-- ── MODE LECTURE ────────────────────────────────────────────────────── -->
+    <!-- ── ONGLETS ─────────────────────────────────────────────────────────── -->
     @if (!editMode) {
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab === 'infos'" (click)="tab = 'infos'">
+            <i class="bi bi-info-circle me-1"></i>Informations
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab === 'profil'" (click)="tab = 'profil'">
+            <i class="bi bi-person-vcard me-1"></i>Profil
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="tab === 'photos'" (click)="tab = 'photos'">
+            <i class="bi bi-images me-1"></i>Photos
+          </button>
+        </li>
+      </ul>
+    }
+
+    <!-- ── MODE LECTURE ────────────────────────────────────────────────────── -->
+    @if (!editMode && tab === 'infos') {
       <div class="row g-4">
 
         <div class="col-12 col-md-6">
@@ -258,6 +279,16 @@
         </div>
 
       </form>
+    }
+
+    <!-- Profil du participant (1L), lecture seule -->
+    @if (!editMode && tab === 'profil') {
+      <app-profil-summary [companyId]="company.id" />
+    }
+
+    <!-- Galerie d'images (lecture seule pour le manager) -->
+    @if (!editMode && tab === 'photos') {
+      <app-company-gallery [companyId]="company.id" />
     }
 
   } @else {

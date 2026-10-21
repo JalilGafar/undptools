@@ -30,6 +30,26 @@
 
   <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="row g-3">
 
+    <!-- ── Logo ────────────────────────────────────────────────────── -->
+    <div class="col-12">
+      <h5 class="ec-section-title"><i class="bi bi-image me-2"></i>Logo de l'entreprise</h5>
+      <div class="ec-logo">
+        <img [src]="logoPreview ?? (currentLogo | companyLogo)" (error)="onLogoError($event)" alt="Logo" class="ec-logo-img">
+        <div>
+          <input #logoInput type="file" class="d-none" accept="image/jpeg,image/png,image/webp"
+                 (change)="onLogoSelected($event)">
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="logoInput.click()">
+            <i class="bi bi-upload me-1"></i>{{ logoPreview ? 'Choisir une autre image' : 'Modifier le logo' }}
+          </button>
+          @if (logoPreview) {
+            <button type="button" class="btn btn-link btn-sm text-danger" (click)="cancelLogo()">Annuler</button>
+            <div class="form-text text-success">Le nouveau logo sera enregistré avec le formulaire.</div>
+          }
+          <div class="form-text">JPG, PNG ou WEBP — 10 Mo maximum.</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Informations générales ──────────────────────────────────── -->
     <div class="col-12">
       <h5 class="ec-section-title"><i class="bi bi-info-circle me-2"></i>Informations générales</h5>
@@ -48,6 +68,17 @@
       <label class="form-label">Année de création</label>
       <input class="form-control" type="number" min="1900" max="2030"
              formControlName="date_creation">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Secteur d'activité</label>
+      <select id="secteur" class="form-select" formControlName="secteur">
+          <option value="" disabled selected>Sélectionner...</option>
+          <option value="Agroalimentaire">Agroalimentaire</option>
+          <option value="Technologie">Technologie</option>
+          <option value="Eco-Matériaux">Eco-Matériaux</option>
+          <option value="Autre">Autre</option>
+      </select>
     </div>
 
     <div class="col-md-6">

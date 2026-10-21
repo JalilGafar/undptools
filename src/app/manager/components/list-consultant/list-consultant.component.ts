@@ -6,13 +6,15 @@ import { User } from '../../../core/model/user';
 import { UserService } from '../../../_services/user.service';
 import { ManagerService } from '../../manager.service';
 import { StorageService } from '../../../_services/storage.service';
+import { AvatarPipe } from '../../../core/company-logo.pipe';
 
 @Component({
   selector: 'app-list-consultant',
   standalone: true,
   imports: [
         CommonModule,
-        RouterLink
+        RouterLink,
+        AvatarPipe
   ],
   templateUrl: './list-consultant.component.html',
   styleUrl: './list-consultant.component.scss'

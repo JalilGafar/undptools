@@ -44,6 +44,12 @@ export class AuthService {
     );
   }
 
+  uploadPhoto(file: File): Observable<{ photo: string }> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return this.http.post<{ photo: string }>(AUTH_API + 'photo', formData, { withCredentials: true });
+  }
+
   logout(): Observable<any> {
     return this.http.post(AUTH_API + 'signout', {}, httpOptions);
   }

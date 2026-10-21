@@ -1,936 +1,333 @@
-<div class="container">
-    <div class="row">
+<div class="container td-wrapper">
 
-        <!-- ===== TITRE ===== -->
-        <div class="col-12">
-            <h3 class="mt-2">1D Diagnostic Intégrale de l'Entreprise</h3>
-        </div>
+  <!-- Retour -->
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
 
-        <!-- ===== BOUTONS ===== -->
-        <div class="col-12">
-            <button type="button" class="btn btn-secondary me-2"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseExample2"
-                aria-expanded="false"
-                aria-controls="collapseExample2">
-                <i class="bi bi-journal-text"></i> Consulter la matrice
-            </button>
-
-            <button type="button" class="btn btn-success"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseExample"
-                aria-expanded="false"
-                aria-controls="collapseExample">
-                <i class="bi bi-pencil"></i> Remplir la matrice
-            </button>
-        </div>
-
-        <!-- ===== SECTION FORMULAIRE (collapse) ===== -->
-        <div id="collapseGroup">
-            <div class="row">
-                <div class="collapse mt-4" id="collapseExample" data-bs-parent="#collapseGroup">
-
-                    <!-- Carte formulaire -->
-                    <div class="card text-center">
-
-                        <!-- Formulaire d'information sur le personnel de l'entreprise -->
-                        <form [formGroup]="infoEntrepriseForm" class="p-3">
-                            <h6 class="text-start fw-bold mb-3">Personnel de l'entreprise</h6>
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Nom du poste</th>
-                                            <th>Nom de la personne</th>
-                                            <th>Temps passé au poste</th>
-                                            <th>Activités réalisées</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    
-                                    <tbody formArrayName="personnel">
-                                        @for (row of personnelArray.controls; track $index; let i = $index) {
-                                            <tr [formGroupName]="i">
-                                                <td class="text-center text-muted">{{ i + 1 }}</td>
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        placeholder="Ex : Directeur commercial"
-                                                        formControlName="nom_poste" />
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        placeholder="Nom et prénom"
-                                                        formControlName="nom_personne" />
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm"
-                                                        placeholder="Ex : 2 ans"
-                                                        formControlName="temps_poste" />
-                                                </td>
-                                                <td>
-                                                    <textarea class="form-control form-control-sm"
-                                                        placeholder="Décrivez les activités principales…"
-                                                        formControlName="activites"
-                                                        rows="2">
-                                                    </textarea>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        (click)="removePersonnel(i)"
-                                                        [disabled]="personnelArray.length === 1"
-                                                        title="Supprimer cette ligne">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-primary" (click)="addPersonnel()">
-                                    <i class="bi bi-plus-circle"></i> Ajouter un personnel
-                                </button>
-                            </div>
-                        </form>
-
-                        <form action="" class="row g-3" [formGroup]="matIntegForm">
-                            <div class="card-header"></div>
-
-                            <div class="card-body" style="min-height: 450px;">
-                                @for (item of matIntegLabel$|async; track item.reper; let i = $index) {
-                                    <div class="ponderation-item" [class.active]="currentIndex === i">
-                                        <h5 class="mt-0 mb-2 card-title">{{item.domaine}}</h5>
-                                        <h6 class="mt-3">{{item.libele}}</h6>
-
-                                        <!-- Questions normales (reper 1–62) -->
-                                        @if (item.reper < 63) {
-                                            <div class="col-12">
-                                                <div class="row justify-content-md-center px-3">
-                                                    <div class="col-12">
-                                                        <!-- Graduations -->
-                                                        <div class="d-flex justify-content-between px-1 mt-2">
-                                                            @for (it of ticks; track $index) {
-                                                                <span>{{ it }}</span>
-                                                            }
-                                                        </div>
-
-                                                        <!-- Range lié au FormControl -->
-                                                        <input type="range" class="form-range"
-                                                            min="0" max="10" step="0.5"
-                                                            id="customRange3"
-                                                            [formControlName]="'note_' + ($index + 1)" />
-                                                    </div>
-
-                                                    <hr>
-
-                                                    <div class="col-9">
-                                                        <label class="form-label" [for]="'comt_' + ($index + 1)">Commentaire</label>
-                                                        <textarea class="form-control"
-                                                            placeholder="Ecrivez ici les raisons de cette note."
-                                                            [id]="'comt_' + ($index + 1)"
-                                                            [formControlName]="'comt_' + ($index + 1)"
-                                                            rows="2">
-                                                        </textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        <!-- Difficultés (reper 63) -->
-                                        } @else if (item.reper == 63) {
-                                            <div class="col-12">
-                                                <div class="row justify-content-md-center px-3">
-                                                    <div class="col-9">
-                                                        <table class="table table-bordered mt-1">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <th>Difficulté N°1</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="difficult_1" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Difficulté N°2</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="difficult_2" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Difficulté N°3</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="difficult_3" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        <!-- Forces (reper 64) -->
-                                        } @else if (item.reper == 64) {
-                                            <div class="col-12">
-                                                <div class="row justify-content-md-center px-3">
-                                                    <div class="col-9">
-                                                        <table class="table table-bordered mt-1">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <th>Force N°1</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="force_1" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Force N°2</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="force_2" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Force N°3</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="force_3" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        <!-- Faiblesses (reper 65) -->
-                                        } @else if (item.reper == 65) {
-                                            <div class="col-12">
-                                                <div class="row justify-content-md-center px-3">
-                                                    <div class="col-9">
-                                                        <table class="table table-bordered mt-1">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <th>Faiblesse N°1</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="faiblesse_1" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Faiblesse N°2</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="faiblesse_2" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Faiblesse N°3</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="faiblesse_3" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        <!-- Besoins (reper 66) -->
-                                        } @else if (item.reper == 66) {
-                                            <div class="col-12">
-                                                <div class="row justify-content-md-center px-3">
-                                                    <div class="col-9">
-                                                        <table class="table table-bordered mt-1">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <th>Besoin N°1</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="besoin_1" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Besoin N°2</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="besoin_2" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <th>Besoin N°3</th>
-                                                                    <td>
-                                                                        <textarea class="form-control" placeholder="à remplir."
-                                                                            formControlName="besoin_3" rows="2">
-                                                                        </textarea>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-
-                                    </div>
-                                }
-                            </div>
-                            <!-- / card-body -->
-
-                        </form>
-
-                        <div class="card-footer text-muted">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <button type="button" class="btn btn-outline-primary"
-                                    (click)="previousItem()"
-                                    [disabled]="currentIndex === 0">
-                                    <i class="bi bi-chevron-left"></i> Previous
-                                </button>
-
-                                <span class="fw-bold">
-                                    Élément {{ currentIndex + 1 }} / {{ matIntegLength }}
-                                </span>
-
-                                <button type="button" class="btn btn-outline-primary"
-                                    (click)="nextItem()"
-                                    [disabled]="currentIndex === matIntegLength - 1">
-                                    Next <i class="bi bi-chevron-right"></i>
-                                </button>
-                            </div>
-
-                            @if (currentIndex + 1 === matIntegLength) {
-                                @if (consultanId != userId) {
-                                    <button type="button" class="btn btn-lg btn-danger"
-                                        data-bs-toggle="popover"
-                                        title="Popover title"
-                                        data-bs-content="And here's some amazing content. It's very engaging. Right?">
-                                        Seul les consultants peuvent enregistrer les outils
-                                    </button>
-                                } @else {
-                                    <button type="submit" (click)="saveTool()" class="btn btn-success">
-                                        Enregistrer l'outil
-                                    </button>
-                                }
-                            }
-                        </div>
-                        <!-- / card-footer -->
-
-                    </div>
-                    <!-- / Carte formulaire -->
-
-                </div>
-                <!-- / #collapseExample -->
-            </div>
-        </div>
-        <!-- / #collapseGroup -->
-
-        <!-- ===== SECTION RÉSUMÉ (affiché par défaut) ===== -->
-        <div class="row mt-4">
-
-            <!-- Vue résumé -->
-            <div class="collapse show" id="collapseExample2" data-bs-parent="#collapseGroup">
-                @if (matDiagIntegData$|async; as data) {
-                    @if (data.length > 0) {
-                        @for (item of data; track $index) {
-                            <ng-container>
-                                <div class="row resum">
-
-                                    <!-- Résumé par critère -->
-                                    <div class="col-7">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                Résumé Diagnostic d'entreprise
-                                            </div>
-                                            <div class="card-body">
-                                                <ul class="list-group">
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Situation juridique et fiscale</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_1 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_1.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Leadership et Climat Organisationnel</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_2 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_2.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Organisation de l'entreprise</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_3 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_3.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Finance et comptabilité</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_4 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_4.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Planification stratégique</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_5 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_5.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Production et opérations</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_6 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_6.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Assurance qualité</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_7 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_7.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="list-group-item">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-7">Commercialisation</div>
-                                                            <div class="col-3">
-                                                                <div class="progress">
-                                                                    <div class="progress-bar" role="progressbar"
-                                                                        [style]="'width:' + crit_8 + '%'"
-                                                                        aria-valuemin="0" aria-valuemax="100">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-2 text-center ps-0">{{crit_8.toFixed(2)}} %</div>
-                                                        </div>
-                                                    </li>
-
-                                                </ul>
-
-                                                <div class="d-grid gap-2 col-6 mx-auto">
-                                                    <button type="button" class="btn btn-primary mt-3"
-                                                        data-bs-toggle="collapse"
-                                                        data-bs-target="#collapseExample3"
-                                                        aria-expanded="false"
-                                                        aria-controls="collapseExample3">
-                                                        Consulter en détail
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <!-- / card-body résumé -->
-                                        </div>
-                                    </div>
-                                    <!-- / col-7 -->
-
-                                    <!-- Diagramme polar -->
-                                    <div class="col-5">
-                                        <div class="card">
-                                            <div class="card-header">Score Total pondéré</div>
-                                            <div class="card-body">
-                                                <div class="container">
-                                                    <ngx-charts-polar-chart
-                                                        [view]="view"
-                                                        [results]="single"
-                                                        [tooltipDisabled]="false"
-                                                        [legend]="legend"
-                                                        [scheme]="colorScheme"
-                                                        [xAxis]="xAxis"
-                                                        [yAxis]="yAxis"
-                                                        [curve]="curveLinearClosed"
-                                                        [labelTrim]="false"
-                                                        [yAxisMinScale]="100"
-                                                        [legendPosition]="legendPosition">
-                                                    </ngx-charts-polar-chart>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- / col-5 -->
-
-                                </div>
-                                <!-- / .row.resum -->
-                            </ng-container>
-                        }
-                    } @else {
-                        <div class="text-center">aucune données enregistrée</div>
-                    }
-                } @else {
-                    <div class="text-center">aucune données enregistrée</div>
-                }
-            </div>
-            <!-- / #collapseExample2 -->
-
-            <!-- ===== SECTION DÉTAIL (collapse) ===== -->
-            <div class="collapse" id="collapseExample3">
-                @if (matDiagIntegData$|async; as data) {
-                    @for (item of data; track $index) {
-                        <div class="card mt-3">
-                            <div class="card-header text-center">Evaluation non pondéré</div>
-                            <div class="card-body">
-
-                                @if (matIntegLabel) {
-                                    <table class="table table-bordered table-dark mt-1">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th scope="col">Critères</th>
-                                                <th scope="col">Attributs</th>
-                                                <th scope="col">Évaluation</th>
-                                                <th scope="col">Moyenne</th>
-                                                <th scope="col">Commentaires</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="align-middle">
-
-                                            <!-- Situation Juridique et Fiscale (notes 1–4) -->
-                                            <tr>
-                                                <th scope="row" rowspan="4" class="text-center">Situation Juridique et Fiscale</th>
-                                                <td>{{ getItemsStartingWith(1)[0].libele }}</td>
-                                                <td>{{item.note_1}}/10</td>
-                                                <td scope="row" rowspan="4" class="text-center">
-                                                    {{((item.note_1+item.note_2+item.note_3+item.note_4)/4).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_1}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(2)[0].libele }}</td>
-                                                <td>{{item.note_2}}/10</td>
-                                                <td>{{item.comt_2}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(3)[0].libele }}</td>
-                                                <td>{{item.note_3}}/10</td>
-                                                <td>{{item.comt_3}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(4)[0].libele }}</td>
-                                                <td>{{item.note_4}}/10</td>
-                                                <td>{{item.comt_4}}</td>
-                                            </tr>
-
-                                            <!-- Leadership et Climat Organisationnel (notes 5–12) -->
-                                            <tr>
-                                                <th scope="row" rowspan="8" class="text-center">Leadership et Climat Organisationnelle</th>
-                                                <td>{{ getItemsStartingWith(5)[0].libele }}</td>
-                                                <td>{{item.note_5}}/10</td>
-                                                <td scope="row" rowspan="8" class="text-center">
-                                                    {{((item.note_5+item.note_6+item.note_7+item.note_8+item.note_9+item.note_10+item.note_11+item.note_12)/8).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_5}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(6)[0].libele }}</td>
-                                                <td>{{item.note_6}}/10</td>
-                                                <td>{{item.comt_6}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(7)[0].libele }}</td>
-                                                <td>{{item.note_7}}/10</td>
-                                                <td>{{item.comt_7}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(8)[0].libele }}</td>
-                                                <td>{{item.note_8}}/10</td>
-                                                <td>{{item.comt_8}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(9)[0].libele }}</td>
-                                                <td>{{item.note_9}}/10</td>
-                                                <td>{{item.comt_9}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(10)[0].libele }}</td>
-                                                <td>{{item.note_10}}/10</td>
-                                                <td>{{item.comt_10}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(11)[0].libele }}</td>
-                                                <td>{{item.note_11}}/10</td>
-                                                <td>{{item.comt_11}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(12)[0].libele }}</td>
-                                                <td>{{item.note_12}}/10</td>
-                                                <td>{{item.comt_12}}</td>
-                                            </tr>
-
-                                            <!-- Organisation de l'Entreprise (notes 13–20) -->
-                                            <tr>
-                                                <th scope="row" rowspan="8" class="text-center">Organisation de l'Entreprise</th>
-                                                <td>{{ getItemsStartingWith(13)[0].libele }}</td>
-                                                <td>{{item.note_13}}/10</td>
-                                                <td scope="row" rowspan="8" class="text-center">
-                                                    {{((item.note_13+item.note_14+item.note_15+item.note_16+item.note_17+item.note_18+item.note_19+item.note_20)/8).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_13}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(14)[0].libele }}</td>
-                                                <td>{{item.note_14}}/10</td>
-                                                <td>{{item.comt_14}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(15)[0].libele }}</td>
-                                                <td>{{item.note_15}}/10</td>
-                                                <td>{{item.comt_15}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(16)[0].libele }}</td>
-                                                <td>{{item.note_16}}/10</td>
-                                                <td>{{item.comt_16}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(17)[0].libele }}</td>
-                                                <td>{{item.note_17}}/10</td>
-                                                <td>{{item.comt_17}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(18)[0].libele }}</td>
-                                                <td>{{item.note_18}}/10</td>
-                                                <td>{{item.comt_18}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(19)[0].libele }}</td>
-                                                <td>{{item.note_19}}/10</td>
-                                                <td>{{item.comt_19}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(20)[0].libele }}</td>
-                                                <td>{{item.note_20}}/10</td>
-                                                <td>{{item.comt_20}}</td>
-                                            </tr>
-
-                                            <!-- Finance et Comptabilité (notes 21–28) -->
-                                            <tr>
-                                                <th scope="row" rowspan="8" class="text-center">Finance et Comptabilité</th>
-                                                <td>{{ getItemsStartingWith(21)[0].libele }}</td>
-                                                <td>{{item.note_21}}/10</td>
-                                                <td scope="row" rowspan="8" class="text-center">
-                                                    {{((item.note_21+item.note_22+item.note_23+item.note_24+item.note_25+item.note_26+item.note_27+item.note_28)/8).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_21}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(22)[0].libele }}</td>
-                                                <td>{{item.note_22}}/10</td>
-                                                <td>{{item.comt_22}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(23)[0].libele }}</td>
-                                                <td>{{item.note_23}}/10</td>
-                                                <td>{{item.comt_23}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(24)[0].libele }}</td>
-                                                <td>{{item.note_24}}/10</td>
-                                                <td>{{item.comt_24}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(25)[0].libele }}</td>
-                                                <td>{{item.note_25}}/10</td>
-                                                <td>{{item.comt_25}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(26)[0].libele }}</td>
-                                                <td>{{item.note_26}}/10</td>
-                                                <td>{{item.comt_26}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(27)[0].libele }}</td>
-                                                <td>{{item.note_27}}/10</td>
-                                                <td>{{item.comt_27}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(28)[0].libele }}</td>
-                                                <td>{{item.note_28}}/10</td>
-                                                <td>{{item.comt_28}}</td>
-                                            </tr>
-
-                                            <!-- Planification Stratégique (notes 29–35) -->
-                                            <tr>
-                                                <th scope="row" rowspan="7" class="text-center">Planification Stratégique</th>
-                                                <td>{{ getItemsStartingWith(29)[0].libele }}</td>
-                                                <td>{{item.note_29}}/10</td>
-                                                <td scope="row" rowspan="7" class="text-center">
-                                                    {{((item.note_29+item.note_30+item.note_31+item.note_32+item.note_33+item.note_34+item.note_35)/7).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_29}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(30)[0].libele }}</td>
-                                                <td>{{item.note_30}}/10</td>
-                                                <td>{{item.comt_30}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(31)[0].libele }}</td>
-                                                <td>{{item.note_31}}/10</td>
-                                                <td>{{item.comt_31}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(32)[0].libele }}</td>
-                                                <td>{{item.note_32}}/10</td>
-                                                <td>{{item.comt_32}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(33)[0].libele }}</td>
-                                                <td>{{item.note_33}}/10</td>
-                                                <td>{{item.comt_33}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(34)[0].libele }}</td>
-                                                <td>{{item.note_34}}/10</td>
-                                                <td>{{item.comt_34}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(35)[0].libele }}</td>
-                                                <td>{{item.note_35}}/10</td>
-                                                <td>{{item.comt_35}}</td>
-                                            </tr>
-
-                                            <!-- Production et Opérations (notes 36–43) -->
-                                            <tr>
-                                                <th scope="row" rowspan="8" class="text-center">Production et Opérations</th>
-                                                <td>{{ getItemsStartingWith(36)[0].libele }}</td>
-                                                <td>{{item.note_36}}/10</td>
-                                                <td scope="row" rowspan="8" class="text-center">
-                                                    {{((item.note_36+item.note_37+item.note_38+item.note_39+item.note_40+item.note_41+item.note_42+item.note_43)/8).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_36}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(37)[0].libele }}</td>
-                                                <td>{{item.note_37}}/10</td>
-                                                <td>{{item.comt_37}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(38)[0].libele }}</td>
-                                                <td>{{item.note_38}}/10</td>
-                                                <td>{{item.comt_38}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(39)[0].libele }}</td>
-                                                <td>{{item.note_39}}/10</td>
-                                                <td>{{item.comt_39}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(40)[0].libele }}</td>
-                                                <td>{{item.note_40}}/10</td>
-                                                <td>{{item.comt_40}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(41)[0].libele }}</td>
-                                                <td>{{item.note_41}}/10</td>
-                                                <td>{{item.comt_41}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(42)[0].libele }}</td>
-                                                <td>{{item.note_42}}/10</td>
-                                                <td>{{item.comt_42}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(43)[0].libele }}</td>
-                                                <td>{{item.note_43}}/10</td>
-                                                <td>{{item.comt_43}}</td>
-                                            </tr>
-
-                                            <!-- Assurance Qualité (notes 44–51) -->
-                                            <tr>
-                                                <th scope="row" rowspan="8" class="text-center">Assurance Qualité</th>
-                                                <td>{{ getItemsStartingWith(44)[0].libele }}</td>
-                                                <td>{{item.note_44}}/10</td>
-                                                <td scope="row" rowspan="8" class="text-center">
-                                                    {{((item.note_44+item.note_45+item.note_46+item.note_47+item.note_48+item.note_49+item.note_50+item.note_51)/8).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_44}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(45)[0].libele }}</td>
-                                                <td>{{item.note_45}}/10</td>
-                                                <td>{{item.comt_45}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(46)[0].libele }}</td>
-                                                <td>{{item.note_46}}/10</td>
-                                                <td>{{item.comt_46}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(47)[0].libele }}</td>
-                                                <td>{{item.note_47}}/10</td>
-                                                <td>{{item.comt_47}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(48)[0].libele }}</td>
-                                                <td>{{item.note_48}}/10</td>
-                                                <td>{{item.comt_48}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(49)[0].libele }}</td>
-                                                <td>{{item.note_49}}/10</td>
-                                                <td>{{item.comt_49}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(50)[0].libele }}</td>
-                                                <td>{{item.note_50}}/10</td>
-                                                <td>{{item.comt_50}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(51)[0].libele }}</td>
-                                                <td>{{item.note_51}}/10</td>
-                                                <td>{{item.comt_51}}</td>
-                                            </tr>
-
-                                            <!-- Commercialisation (notes 52–62) -->
-                                            <tr>
-                                                <th scope="row" rowspan="11" class="text-center">Commercialisation</th>
-                                                <td>{{ getItemsStartingWith(52)[0].libele }}</td>
-                                                <td>{{item.note_52}}/10</td>
-                                                <td scope="row" rowspan="11" class="text-center">
-                                                    {{((item.note_52+item.note_53+item.note_54+item.note_55+item.note_56+item.note_57+item.note_58+item.note_59+item.note_60+item.note_61+item.note_62)/11).toFixed(1)}}/10
-                                                </td>
-                                                <td>{{item.comt_52}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(53)[0].libele }}</td>
-                                                <td>{{item.note_53}}/10</td>
-                                                <td>{{item.comt_53}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(54)[0].libele }}</td>
-                                                <td>{{item.note_54}}/10</td>
-                                                <td>{{item.comt_54}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(55)[0].libele }}</td>
-                                                <td>{{item.note_55}}/10</td>
-                                                <td>{{item.comt_55}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(56)[0].libele }}</td>
-                                                <td>{{item.note_56}}/10</td>
-                                                <td>{{item.comt_56}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(57)[0].libele }}</td>
-                                                <td>{{item.note_57}}/10</td>
-                                                <td>{{item.comt_57}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(58)[0].libele }}</td>
-                                                <td>{{item.note_58}}/10</td>
-                                                <td>{{item.comt_58}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(59)[0].libele }}</td>
-                                                <td>{{item.note_59}}/10</td>
-                                                <td>{{item.comt_59}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(60)[0].libele }}</td>
-                                                <td>{{item.note_60}}/10</td>
-                                                <td>{{item.comt_60}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(61)[0].libele }}</td>
-                                                <td>{{item.note_61}}/10</td>
-                                                <td>{{item.comt_61}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ getItemsStartingWith(62)[0].libele }}</td>
-                                                <td>{{item.note_62}}/10</td>
-                                                <td>{{item.comt_62}}</td>
-                                            </tr>
-
-                                        </tbody>
-                                    </table>
-                                }
-
-                            </div>
-                            <!-- / card-body détail -->
-                        </div>
-                        <!-- / .card -->
-                    }
-                }
-            </div>
-            <!-- / #collapseExample3 -->
-
-        </div>
-        <!-- / .row.mt-4 -->
-
+  <!-- En-tête -->
+  <div class="td-header">
+    <div class="td-header-icon"><i class="bi bi-clipboard2-data"></i></div>
+    <div>
+      <h2 class="td-title">1D Diagnostic intégral de l'entreprise</h2>
+      <p class="td-subtitle">{{ totalQuestions }} questions réparties en 8 domaines, plus difficultés, forces, faiblesses et besoins</p>
     </div>
-    <!-- / .row -->
+  </div>
+
+  <!-- Alerte (enregistrement) -->
+  @if (showAlert) {
+    <div class="alert alert-{{ alertType }} alert-dismissible fade show" role="alert">
+      {{ alertMessage }}
+      <button type="button" class="btn-close" aria-label="Fermer" (click)="showAlert = false"></button>
+    </div>
+  }
+
+  <!-- Bascule Résumé / Questionnaire -->
+  <div class="td-tabs" role="tablist">
+    <button type="button" role="tab" [class.active]="mode === 'resume'" [attr.aria-selected]="mode === 'resume'"
+            (click)="mode = 'resume'">
+      <i class="bi bi-journal-text me-1"></i>Résumé
+    </button>
+    <button type="button" role="tab" [class.active]="mode === 'form'" [attr.aria-selected]="mode === 'form'"
+            (click)="mode = 'form'">
+      <i class="bi" [class.bi-pencil]="!readOnly" [class.bi-eye]="readOnly"></i>
+      {{ readOnly ? 'Consulter la matrice' : 'Remplir la matrice' }}
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════ RÉSUMÉ ═══════════════════════════ -->
+  @if (mode === 'resume') {
+
+    @if (matDiagIntegData$ | async; as data) {
+      @if (data.length > 0) {
+        @for (item of data; track $index) {
+
+          <div class="row g-3">
+
+            <!-- Scores par domaine -->
+            <div class="col-12 col-lg-7">
+              <div class="td-card">
+                <h6 class="td-card-title">Résumé du diagnostic d'entreprise</h6>
+
+                @if (answeredTotal(item) < totalQuestions) {
+                  <p class="td-incomplete">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    {{ answeredTotal(item) }} / {{ totalQuestions }} questions répondues : les scores ne tiennent compte que des réponses données.
+                  </p>
+                }
+
+                @for (d of domaines; track d.label; let i = $index) {
+                  <div class="td-score">
+                    <div class="td-score-label">{{ d.label }}</div>
+                    <div class="td-score-line">
+                      <div class="progress td-progress">
+                        <div class="progress-bar" [ngClass]="'lvl-' + levelOfPct(score(i))"
+                             role="progressbar" [style.width.%]="score(i)"
+                             [attr.aria-valuenow]="score(i)" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                      <span class="td-score-value">{{ score(i).toFixed(1) }} %</span>
+                    </div>
+                  </div>
+                }
+
+                <button type="button" class="btn btn-primary w-100 mt-3" (click)="showDetail = !showDetail">
+                  <i class="bi" [class.bi-chevron-up]="showDetail" [class.bi-list-ul]="!showDetail"></i>
+                  {{ showDetail ? 'Masquer le détail' : 'Consulter en détail' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Graphique : s'adapte à la largeur de l'écran -->
+            <div class="col-12 col-lg-5">
+              <div class="td-card">
+                <h6 class="td-card-title">Score par domaine</h6>
+                <div class="td-chart">
+                  <ngx-charts-polar-chart
+                    [results]="single"
+                    [tooltipDisabled]="false"
+                    [legend]="false"
+                    [scheme]="colorScheme"
+                    [xAxis]="xAxis"
+                    [yAxis]="yAxis"
+                    [curve]="curveLinearClosed"
+                    [labelTrim]="true"
+                    [labelTrimSize]="14"
+                    [rangeFillOpacity]="0.3"
+                    [yAxisMinScale]="100"
+                    [yAxisTickFormatting]="pctTick">
+                  </ngx-charts-polar-chart>
+                </div>
+                <p class="td-radar-key">
+                  Chaque anneau est un niveau de réponse :
+                  <span>20&nbsp;% Insuffisant</span> · <span>40&nbsp;% À améliorer</span> · <span>60&nbsp;% Suffisant</span> ·
+                  <span>80&nbsp;% Bon</span> · <span>100&nbsp;% Excellent</span>
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Détail : évaluation, domaine par domaine -->
+          @if (showDetail && matIntegLabel) {
+            <h6 class="td-section-title mt-4"><i class="bi bi-list-check me-2"></i>Évaluation détaillée</h6>
+
+            @for (d of domaines; track d.label) {
+              <div class="td-card td-domain">
+                <div class="td-domain-head">
+                  <strong>{{ d.label }}</strong>
+                  <span class="td-chip" [ngClass]="'lvl-' + levelOfNote(average(item, d))">
+                    @if (answered(item, d) > 0) { Moyenne {{ fmtNote(average(item, d)) }} / 5 } @else { Sans réponse }
+                  </span>
+                </div>
+
+                @for (n of range(d); track n) {
+                  <div class="td-item">
+                    <p class="td-item-q">{{ libelle(n) }}</p>
+                    <div class="td-item-row">
+                      <span class="td-chip sm" [ngClass]="'lvl-' + levelOfNote(note(item, n))">
+                        {{ reponseLabel(note(item, n)) }}@if (note(item, n) > 0) { · {{ note(item, n) }} / 5 }
+                      </span>
+                      @if (comment(item, n)) { <span class="td-item-c">{{ comment(item, n) }}</span> }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Difficultés, forces, faiblesses, besoins -->
+            <div class="td-card td-domain">
+              <div class="td-domain-head"><strong>Difficultés, forces, faiblesses et besoins</strong></div>
+              @for (rep of swotReps; track rep) {
+                <div class="td-item">
+                  <p class="td-item-q fw-semibold">{{ swot[rep].label }}s</p>
+                  <ol class="td-swot-list">
+                    @for (row of swotRows; track row) {
+                      @if (item[swot[rep].key + '_' + row]) { <li>{{ item[swot[rep].key + '_' + row] }}</li> }
+                    }
+                  </ol>
+                </div>
+              }
+            </div>
+          }
+
+        }
+      } @else {
+        <div class="td-empty">
+          <i class="bi bi-inbox"></i>
+          <p>Aucune donnée enregistrée pour cette entreprise.</p>
+          @if (!readOnly) {
+            <button type="button" class="btn btn-success" (click)="mode = 'form'">
+              <i class="bi bi-pencil me-1"></i>Remplir la matrice
+            </button>
+          }
+        </div>
+      }
+    } @else {
+      <div class="td-empty"><i class="bi bi-inbox"></i><p>Aucune donnée enregistrée.</p></div>
+    }
+
+  }
+
+  <!-- ═══════════════════════════ QUESTIONNAIRE ═══════════════════════════ -->
+  @if (mode === 'form') {
+
+    @if (readOnly) {
+      <div class="alert alert-info py-2">
+        <i class="bi bi-eye me-1"></i>Consultation en lecture seule : seul le consultant concerné peut modifier cette matrice.
+      </div>
+    }
+
+    <!-- Personnel de l'entreprise : une fiche par personne -->
+    <form [formGroup]="infoEntrepriseForm">
+      <div class="td-card">
+        <h6 class="td-card-title"><i class="bi bi-people me-2"></i>Personnel de l'entreprise</h6>
+
+        <div formArrayName="personnel" class="td-people">
+          @for (row of personnelArray.controls; track $index; let i = $index) {
+            <div class="td-person" [formGroupName]="i">
+              <div class="td-person-head">
+                <span class="td-badge">{{ i + 1 }}</span>
+                @if (!readOnly) {
+                  <button type="button" class="td-person-del" (click)="removePersonnel(i)"
+                          [disabled]="personnelArray.length === 1" title="Retirer cette personne"
+                          aria-label="Retirer cette personne">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+              <div class="row g-2">
+                <div class="col-12 col-md-6">
+                  <label class="form-label" [for]="'poste-' + i">Nom du poste</label>
+                  <input [id]="'poste-' + i" type="text" class="form-control" formControlName="nom_poste"
+                         placeholder="ex. Directeur commercial" autocomplete="off">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label" [for]="'personne-' + i">Nom de la personne</label>
+                  <input [id]="'personne-' + i" type="text" class="form-control" formControlName="nom_personne"
+                         placeholder="Nom et prénom" autocomplete="off">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" [for]="'temps-' + i">Temps passé au poste</label>
+                  <input [id]="'temps-' + i" type="text" class="form-control" formControlName="temps_poste"
+                         placeholder="ex. 2 ans" autocomplete="off">
+                </div>
+                <div class="col-12 col-md-8">
+                  <label class="form-label" [for]="'activites-' + i">Activités réalisées</label>
+                  <textarea [id]="'activites-' + i" class="form-control" rows="2" formControlName="activites"
+                            placeholder="Décrivez les activités principales…"></textarea>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (!readOnly) {
+          <button type="button" class="btn btn-outline-primary td-add" (click)="addPersonnel()">
+            <i class="bi bi-person-plus me-1"></i>Ajouter une personne
+          </button>
+        }
+      </div>
+    </form>
+
+    <!-- Questionnaire : une question à la fois -->
+    <form [formGroup]="matIntegForm" (ngSubmit)="saveTool()" novalidate>
+      <div class="td-card td-quiz">
+
+        <!-- Progression -->
+        <div #qTop class="td-progress-head">
+          <span class="td-count">Élément {{ currentIndex + 1 }} / {{ matIntegLength }}</span>
+          <span class="td-percent">{{ answeredCount }} / {{ totalQuestions }} questions répondues</span>
+        </div>
+        <div class="progress td-progress-global">
+          <div class="progress-bar" role="progressbar" [style.width.%]="progress"></div>
+        </div>
+
+        @if (answeredCount < totalQuestions && answeredCount > 0) {
+          <button type="button" class="btn btn-link btn-sm p-0 mb-2" (click)="goToFirstUnanswered(); qTop.scrollIntoView({ behavior: 'smooth' })">
+            <i class="bi bi-skip-forward me-1"></i>Aller à la première question sans réponse
+          </button>
+        }
+
+        @for (item of matIntegLabel$ | async; track item.reper; let i = $index) {
+          @if (currentIndex === i) {
+            <div class="td-question">
+              <span class="td-domain-chip">{{ item.domaine }}</span>
+              <h5 class="td-q">{{ item.libele }}</h5>
+
+              <!-- Questions à choix (éléments 1 à 60) : la note est attribuée par la réponse -->
+              @if (item.reper <= totalQuestions) {
+
+                <div class="td-choices" role="radiogroup" [attr.aria-label]="'Réponse à la question ' + item.reper">
+                  @for (r of reponses; track r.value) {
+                    <label class="td-choice" [ngClass]="'lvl-' + r.value"
+                           [class.selected]="noteValue(item.reper) === r.value"
+                           [class.disabled]="readOnly">
+                      <input type="radio" class="td-choice-input" [formControlName]="'note_' + item.reper" [value]="r.value">
+                      <span class="td-choice-dot"></span>
+                      <span class="td-choice-label">{{ r.label }}</span>
+                    </label>
+                  }
+                </div>
+
+                <!-- Note correspondante : affichée, non modifiable -->
+                <div class="td-note-result" [ngClass]="'lvl-' + levelOfNote(noteValue(item.reper))">
+                  @if (noteValue(item.reper) > 0) {
+                    <span>Note attribuée</span>
+                    <strong>{{ noteValue(item.reper) }} <small>/ 5</small></strong>
+                  } @else {
+                    <span class="text-muted">Choisissez une réponse pour voir la note correspondante.</span>
+                  }
+                </div>
+
+                <div class="mt-3">
+                  <label class="form-label" [for]="'comt_' + item.reper">Commentaire</label>
+                  <textarea class="form-control" rows="3" [id]="'comt_' + item.reper"
+                            placeholder="Écrivez ici les raisons de cette réponse."
+                            [formControlName]="'comt_' + item.reper"></textarea>
+                </div>
+
+              } @else {
+
+                <!-- Difficultés, forces, faiblesses, besoins (éléments 61 à 64) -->
+                <div class="row g-3 mt-1">
+                  @for (row of swotRows; track row) {
+                    <div class="col-12">
+                      <label class="form-label" [for]="swot[item.reper].key + '_' + row">
+                        {{ swot[item.reper].label }} n°{{ row }}
+                      </label>
+                      <textarea class="form-control" rows="3" [id]="swot[item.reper].key + '_' + row"
+                                placeholder="À remplir."
+                                [formControlName]="swot[item.reper].key + '_' + row"></textarea>
+                    </div>
+                  }
+                </div>
+
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Navigation collée en bas de l'écran -->
+      <div class="td-nav">
+        <button type="button" class="btn btn-outline-primary" (click)="previousItem(); qTop.scrollIntoView({ behavior: 'smooth' })"
+                [disabled]="currentIndex === 0">
+          <i class="bi bi-chevron-left"></i> Précédent
+        </button>
+
+        @if (currentIndex + 1 < matIntegLength) {
+          <button type="button" class="btn btn-primary" (click)="nextItem(); qTop.scrollIntoView({ behavior: 'smooth' })">
+            Suivant <i class="bi bi-chevron-right"></i>
+          </button>
+        } @else if (!readOnly) {
+          <button type="submit" class="btn btn-success" [disabled]="isSaving">
+            @if (isSaving) { <span class="spinner-border spinner-border-sm me-2"></span>Enregistrement… }
+            @else { <i class="bi bi-check-circle me-1"></i>Enregistrer l'outil }
+          </button>
+        }
+      </div>
+    </form>
+
+  }
+
 </div>
-<!-- / .container -->

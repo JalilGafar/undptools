@@ -1,73 +1,291 @@
- <div class="container">
-     <button type="button" class="btn btn-primary" onclick="history.back()">
-            ← Retour
-        </button>
-    <div class="dashboard">
-    
-      <h2 class="dashboard-title">Monitoring & Evaluation Dashboard</h2>
-    
-      <!-- ===== CHARTS GRID ===== -->
-      <div class="charts-grid">
-    
-        <!-- BAR CHART -->
-        <div class="card">
-          <h3>Impact Humain global</h3>
-          <ngx-charts-bar-vertical
-            [results]="barData"
-            [view]="view"
-            [xAxis]="true"
-            [yAxis]="true"
-            [roundEdges]="true">
-          </ngx-charts-bar-vertical>
-        </div>
-    
-        <!-- LINE CHART -->
-        <div class="card">
-          <h3>Nombre d'heure global d'échange entre consultants et entreprises</h3>
-          <ngx-charts-line-chart
-            [results]="lineData"
-            [yScaleMin]="yScaleMin"
-            [view]="view"
-            [xAxis]="true"
-            [yAxis]="true"
-            [autoScale]="false">
-          </ngx-charts-line-chart>
-        </div>
-    
-        <!-- PIE CHART -->
-        <div class="card">
-          <h3>Evolution globale des livrables</h3>
-          <ngx-charts-pie-chart
-            [results]="pieData"
-            [view]="view"
-            [legend]="true"
-            [labels]="true">
-          </ngx-charts-pie-chart>
-        </div>
-    
+<div class="container gd-wrapper">
+
+  <div class="gd-toolbar">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <div class="ms-auto d-flex flex-wrap gap-3 align-items-center">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="gdUsd" [checked]="showUsd" (change)="showUsd = !showUsd">
+        <label class="form-check-label small" for="gdUsd">
+          Montants en USD <span class="text-muted">(1 USD = {{ fx.xafPerUsd }} FCFA, moyenne {{ fx.year }})</span>
+        </label>
       </div>
-    
-      <!-- ===== TABLE ===== -->
-      <div class="table-card table-responsive">
-        <h3>Companies Overview</h3>
-    
-        <table>
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Status</th>
-              <th>Progress</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of tableData">
-              <td>{{ row.project }}</td>
-              <td>{{ row.status }}</td>
-              <td>{{ row.progress }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    
+      <button type="button" class="btn btn-success btn-sm" (click)="exportCsv()" [disabled]="!filtered.length">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i>Exporter (CSV)
+      </button>
     </div>
- </div>
+  </div>
+
+  <div class="gd-header">
+    <div class="gd-header-icon"><i class="bi bi-bar-chart-line"></i></div>
+    <div>
+      <h2 class="gd-title">Tableau de bord global</h2>
+      <p class="gd-subtitle">Statistiques de toutes les entreprises de la plateforme</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (loadError) {
+    <div class="alert alert-danger">Impossible de charger les statistiques. Veuillez réessayer.</div>
+  } @else {
+
+  <!-- ── Filtres ───────────────────────────────────────────────────────── -->
+  <div class="gd-filters">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Recherche</label>
+        <input type="search" class="form-control form-control-sm" placeholder="Entreprise ou consultant"
+               [(ngModel)]="search" (ngModelChange)="applyFilters()">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Région</label>
+        <select class="form-select form-select-sm" [(ngModel)]="fRegion" (ngModelChange)="applyFilters()">
+          <option value="">Toutes</option>
+          @for (r of regions; track r) { <option [value]="r">{{ r }}</option> }
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Secteur</label>
+        <select class="form-select form-select-sm" [(ngModel)]="fSecteur" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          @for (s of secteurs; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Consultant</label>
+        <select class="form-select form-select-sm" [(ngModel)]="fConsultant" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          @for (c of consultants; track c) { <option [value]="c">{{ c }}</option> }
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Type d'entreprise</label>
+        <select class="form-select form-select-sm" [(ngModel)]="fType" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          @for (t of typesEntreprise; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Profil (1L)</label>
+        <select class="form-select form-select-sm" [(ngModel)]="fProfil" (ngModelChange)="applyFilters()">
+          <option value="">Tous</option>
+          <option value="avec">Profil rempli</option>
+          <option value="sans">Profil non rempli</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        @if (hasFilters) {
+          <button type="button" class="btn btn-link btn-sm" (click)="resetFilters()">
+            <i class="bi bi-x-circle me-1"></i>Réinitialiser les filtres
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (!rows.length) {
+    <div class="gd-empty"><i class="bi bi-inbox"></i><p>Aucune entreprise enregistrée.</p></div>
+  } @else if (!filtered.length) {
+    <div class="gd-empty"><i class="bi bi-funnel"></i><p>Aucune entreprise ne correspond à ces filtres.</p></div>
+  } @else {
+
+  <!-- ── Indicateurs ───────────────────────────────────────────────────── -->
+  <div class="row g-3 gd-kpis">
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Entreprises</span>
+        <strong>{{ kpi.entreprises }}</strong></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Profils remplis</span>
+        <strong>{{ kpi.avecProfil }}</strong>
+        <small>{{ kpi.pctProfil !== null ? kpi.pctProfil + ' % des entreprises' : '' }}</small></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Effectif total</span>
+        <strong>{{ fmt(kpi.effectif) }}</strong>
+        <small>{{ kpi.pctFemmes !== null ? kpi.pctFemmes + ' % de femmes' : '' }}</small></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Clients réguliers (B2C)</span>
+        <strong>{{ fmt(kpi.clients) }}</strong></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">CA mensuel cumulé</span>
+        <strong class="gd-money">{{ money(kpi.caTotal) }}</strong></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">CA mensuel moyen</span>
+        <strong class="gd-money">{{ money(kpi.caMoyen) }}</strong>
+        <small>par entreprise avec profil</small></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Enregistrement fiscal</span>
+        <strong>{{ kpi.fiscal.pct !== null ? kpi.fiscal.pct + ' %' : '—' }}</strong>
+        <small>{{ kpi.fiscal.yes }} / {{ kpi.fiscal.total }}</small></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="gd-kpi"><span class="gd-kpi-label">Compte bancaire</span>
+        <strong>{{ kpi.banque.pct !== null ? kpi.banque.pct + ' %' : '—' }}</strong>
+        <small>{{ kpi.banque.yes }} / {{ kpi.banque.total }}</small></div>
+    </div>
+  </div>
+
+  <!-- ── Graphiques ────────────────────────────────────────────────────── -->
+  <div class="row g-3 gd-charts">
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Entreprises par région</h6>
+        @if (parRegion.length) {
+          <div class="gd-chart">
+            <ngx-charts-bar-horizontal [results]="parRegion" [scheme]="colors" [xAxis]="true" [yAxis]="true"
+              [showDataLabel]="true" [roundEdges]="false" [xAxisTickFormatting]="intTick"></ngx-charts-bar-horizontal>
+          </div>
+        }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Entreprises par secteur</h6>
+        @if (parSecteur.length) {
+          <div class="gd-chart">
+            <ngx-charts-pie-chart [results]="parSecteur" [scheme]="colors" [labels]="true" [legend]="true"
+              [legendPosition]="legendBelow"></ngx-charts-pie-chart>
+          </div>
+        }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Hommes / femmes dans les effectifs</h6>
+        @if (parGenre.length) {
+          <div class="gd-chart">
+            <ngx-charts-pie-chart [results]="parGenre" [scheme]="colors" [labels]="true" [doughnut]="true"
+              [legend]="true" [legendPosition]="legendBelow"></ngx-charts-pie-chart>
+          </div>
+        } @else { <p class="gd-nodata">Aucune donnée d'effectif.</p> }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Type d'entreprise</h6>
+        @if (parType.length) {
+          <div class="gd-chart">
+            <ngx-charts-pie-chart [results]="parType" [scheme]="colors" [labels]="true" [legend]="true"
+              [legendPosition]="legendBelow"></ngx-charts-pie-chart>
+          </div>
+        } @else { <p class="gd-nodata">Aucune donnée.</p> }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Accès aux services et au soutien (% des profils)</h6>
+        @if (accesServices.length) {
+          <div class="gd-chart">
+            <ngx-charts-bar-horizontal [results]="accesServices" [scheme]="colors" [xAxis]="true" [yAxis]="true"
+              [showDataLabel]="true" [xScaleMax]="100" [xScaleMin]="0" [dataLabelFormatting]="pctLabel"
+              [roundEdges]="false"></ngx-charts-bar-horizontal>
+          </div>
+        } @else { <p class="gd-nodata">Aucune donnée.</p> }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Livrables : entreprises concernées</h6>
+        <div class="gd-chart">
+          <ngx-charts-bar-horizontal [results]="livrables" [scheme]="colors" [xAxis]="true" [yAxis]="true"
+            [showDataLabel]="true" [roundEdges]="false" [xAxisTickFormatting]="intTick"></ngx-charts-bar-horizontal>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Clientèle principale</h6>
+        @if (parClientele.length) {
+          <div class="gd-chart">
+            <ngx-charts-bar-horizontal [results]="parClientele" [scheme]="colors" [xAxis]="true" [yAxis]="true"
+              [showDataLabel]="true" [roundEdges]="false" [xAxisTickFormatting]="intTick"></ngx-charts-bar-horizontal>
+          </div>
+        } @else { <p class="gd-nodata">Aucune donnée.</p> }
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="gd-card">
+        <h6>Canaux de vente</h6>
+        @if (parCanal.length) {
+          <div class="gd-chart">
+            <ngx-charts-bar-horizontal [results]="parCanal" [scheme]="colors" [xAxis]="true" [yAxis]="true"
+              [showDataLabel]="true" [roundEdges]="false" [xAxisTickFormatting]="intTick"></ngx-charts-bar-horizontal>
+          </div>
+        } @else { <p class="gd-nodata">Aucune donnée.</p> }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tableau ───────────────────────────────────────────────────────── -->
+  <div class="gd-card gd-table">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">Détail par entreprise <span class="text-muted fw-normal">({{ filtered.length }})</span></h6>
+    </div>
+    <div class="table-responsive scroll-visible" appScrollHint>
+      <table class="table table-hover table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th><button type="button" (click)="sortBy('name')">Entreprise <i class="bi {{ sortIcon('name') }}"></i></button></th>
+            <th><button type="button" (click)="sortBy('consultant')">Consultant <i class="bi {{ sortIcon('consultant') }}"></i></button></th>
+            <th><button type="button" (click)="sortBy('region')">Région <i class="bi {{ sortIcon('region') }}"></i></button></th>
+            <th><button type="button" (click)="sortBy('secteur')">Secteur <i class="bi {{ sortIcon('secteur') }}"></i></button></th>
+            <th class="text-end"><button type="button" (click)="sortBy('effectif')">Effectif <i class="bi {{ sortIcon('effectif') }}"></i></button></th>
+            <th class="text-end"><button type="button" (click)="sortBy('ca')">CA mensuel <i class="bi {{ sortIcon('ca') }}"></i></button></th>
+            <th class="text-center">Fisc.</th>
+            <th class="text-center">Banque</th>
+            <th class="text-center">Livrables</th>
+            <th><button type="button" (click)="sortBy('profil')">Profil mis à jour <i class="bi {{ sortIcon('profil') }}"></i></button></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of pageRows; track r.id) {
+            <tr>
+              <td><a [routerLink]="['/manager/company', r.id]" class="fw-semibold">{{ r.name }}</a></td>
+              <td>{{ r.consultant || '—' }}</td>
+              <td>{{ r.region || '—' }}</td>
+              <td>{{ r.secteur || '—' }}</td>
+              <td class="text-end">{{ r.profil_id !== null ? (r.effectif_total ?? '—') : '—' }}</td>
+              <td class="text-end">{{ r.profil_id !== null ? money(r.ca_total_fcfa) : '—' }}</td>
+              <td class="text-center">{{ r.profil_id !== null ? yesNo(r.enregistrement_fiscal) : '—' }}</td>
+              <td class="text-center">{{ r.profil_id !== null ? yesNo(r.compte_bancaire) : '—' }}</td>
+              <td class="text-center text-nowrap">
+                <span class="badge" [class.bg-primary-subtle]="r.nb_predia" [class.text-primary]="r.nb_predia"
+                      [class.bg-light]="!r.nb_predia" [class.text-secondary]="!r.nb_predia" title="Prédiagnostic">P</span>
+                <span class="badge" [class.bg-success-subtle]="r.nb_diag" [class.text-success]="r.nb_diag"
+                      [class.bg-light]="!r.nb_diag" [class.text-secondary]="!r.nb_diag" title="Diagnostic intégral">D</span>
+                <span class="badge" [class.bg-warning-subtle]="r.profil_id !== null" [class.text-warning-emphasis]="r.profil_id !== null"
+                      [class.bg-light]="r.profil_id === null" [class.text-secondary]="r.profil_id === null" title="Profil 1L">1L</span>
+              </td>
+              <td class="text-muted small">{{ r.profil_updated_at ? (r.profil_updated_at | date:'dd/MM/yyyy') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement</p>
+
+    @if (pageCount > 1) {
+      <nav class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted">Page {{ page }} / {{ pageCount }}</small>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-outline-secondary" [disabled]="page === 1" (click)="goToPage(page - 1)">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary" [disabled]="page === pageCount" (click)="goToPage(page + 1)">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </nav>
+    }
+  </div>
+
+  }
+  }
+</div>

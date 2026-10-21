@@ -115,7 +115,7 @@ nav.navbar {
   padding: 0;
 
   &.open {
-    max-height: 600px;
+    max-height: 1000px;
     opacity: 1;
   }
 }
@@ -135,4 +135,31 @@ nav.navbar {
     padding: 0.6rem 1rem;
     border-bottom: 1px solid rgba(255,255,255,0.05);
   }
+}
+
+// ── État des outils (menu sombre) : pastille verte = actif, ligne grisée = pas encore disponible ──
+
+.sidebar-nav li a.tool-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+}
+
+.tool-label { min-width: 0; }
+
+.tool-dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+}
+
+// Outil pas encore disponible : ligne atténuée, toujours cliquable
+.sidebar-nav li a.tool-soon {
+  color: #6b7280;
+
+  &:hover { color: #cbd5e1; }
 }

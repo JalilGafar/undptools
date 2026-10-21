@@ -18,6 +18,16 @@
                 </div>
 
                 <div class="col-md-6">
+                    <label for="secteur" class="form-label">Secteur d'activité</label>
+                    <select id="secteur" class="form-select" formControlName="secteur">
+                        <option value="" disabled selected>Sélectionner...</option>
+                        <option value="Agroalimentaire">Agroalimentaire</option>
+                        <option value="Technologie">Technologie</option>
+                        <option value="Eco-Matériaux">Eco-Matériaux</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
                     <label for="produits" class="form-label">Produits vendus</label>
                     <textarea class="form-control" formControlName="produits" id="produits" rows="2"></textarea>
                 </div>

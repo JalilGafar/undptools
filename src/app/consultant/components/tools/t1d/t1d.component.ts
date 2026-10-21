@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Color, NgxChartsModule, ScaleType, LegendPosition } from '@swimlane/ngx-charts';
 import { map, Observable, tap } from 'rxjs';
@@ -10,6 +11,30 @@ import { ConsultantService } from '../../../consultant.service';
 import { IntegLabel } from '../../../../core/model/mat_integ_label';
 import { ToolMatDiagInteg } from '../../../../core/model/tool1D';
 import { curveLinearClosed } from 'd3-shape';
+
+/** Domaines évalués : plages de questions (reper). 60 questions au total ; les éléments 61 à 64 sont les rubriques SWOT. */
+const DOMAINES = [
+  { label: 'Situation juridique et fiscale', short: 'Juridique et fiscal', from: 1, to: 4 },
+  { label: 'Leadership et climat organisationnel', short: 'Leadership', from: 5, to: 12 },
+  { label: "Organisation de l'entreprise", short: 'Organisation', from: 13, to: 20 },
+  { label: 'Finance et comptabilité', short: 'Finance', from: 21, to: 28 },
+  { label: 'Planification stratégique', short: 'Planification', from: 29, to: 35 },
+  { label: 'Production et opérations', short: 'Production', from: 36, to: 43 },
+  { label: 'Assurance qualité', short: 'Qualité', from: 44, to: 50 },
+  { label: 'Commercialisation', short: 'Commercial', from: 51, to: 60 },
+];
+
+/** Les 5 réponses possibles ; la note correspondante est attribuée automatiquement (non modifiable). */
+const REPONSES = [
+  { value: 1, label: 'Insuffisant' },
+  { value: 2, label: 'À améliorer' },
+  { value: 3, label: 'Suffisant' },
+  { value: 4, label: 'Bon' },
+  { value: 5, label: 'Excellent' },
+];
+
+const QUESTION_COUNT = 60;
+const MAX_NOTE = 5;
 
 
 @Component({
@@ -26,6 +51,8 @@ import { curveLinearClosed } from 'd3-shape';
 })
 export class T1dComponent implements OnInit,  OnDestroy {
 
+  private destroyRef = inject(DestroyRef);
+
   showAlert: boolean = false;
   alertType: string = 'info'; // e.g., 'success', 'danger', 'warning'
   alertMessage: string = '';
@@ -37,159 +64,15 @@ export class T1dComponent implements OnInit,  OnDestroy {
 
   // ********* NGX CHART
   // single: any[];
+  // Graphique polaire : un seul polygone, le score (%) de chaque domaine. Les anneaux de la grille tombent
+  // tous les 20 % et correspondent donc aux 5 niveaux de réponse (Insuffisant 20 % … Excellent 100 %).
   single = [
-    {
-      "name": "Data",
-      "series": [
-        {
-          "name": "siruattion juriqique",
-          "value": 0
-        },
-        {
-          "name": "Leadership et Climat Organisationnel",
-          "value": 0
-        },
-        {
-          "name": "Organisation de l'entreprise",
-          "value": 0
-        },
-        {
-          "name": "Finance et Comptabilité",
-          "value": 0
-        },
-        {
-          "name": "Planification Stratégique",
-          "value": 0
-        },
-        {
-          "name": "Production et Opération",
-          "value": 0
-        },
-        {
-          "name": "Assurance qualité",
-          "value": 0
-        },
-        {
-          "name": "Commercialisation",
-          "value": 0
-        }
-      ]
-    },
-    {
-      "name": "Déficient",
-      "series": [
-        {
-          "name": "siruattion juriqique",
-          "value": 40
-        },
-        {
-          "name": "Leadership et Climat Organisationnel",
-          "value": 40
-        },
-        {
-          "name": "Organisation de l'entreprise",
-          "value": 40
-        },
-        {
-          "name": "Finance et Comptabilité",
-          "value": 40
-        },
-        {
-          "name": "Planification Stratégique",
-          "value": 40
-        },
-        {
-          "name": "Production et Opération",
-          "value": 40
-        },
-        {
-          "name": "Assurance qualité",
-          "value": 40
-        },
-        {
-          "name": "Commercialisation",
-          "value": 40
-        }
-      ]
-    },
-    {
-      "name": "A Améliorer",
-      "series": [
-        {
-          "name": "siruattion juriqique",
-          "value": 70
-        },
-        {
-          "name": "Leadership et Climat Organisationnel",
-          "value": 70
-        },
-        {
-          "name": "Organisation de l'entreprise",
-          "value": 70
-        },
-        {
-          "name": "Finance et Comptabilité",
-          "value": 70
-        },
-        {
-          "name": "Planification Stratégique",
-          "value": 70
-        },
-        {
-          "name": "Production et Opération",
-          "value": 70
-        },
-        {
-          "name": "Assurance qualité",
-          "value": 70
-        },
-        {
-          "name": "Commercialisation",
-          "value": 70
-        }
-      ]
-    },
-    {
-      "name": "Suffisant",
-      "series": [
-        {
-          "name": "siruattion juriqique",
-          "value": 80
-        },
-        {
-          "name": "Leadership et Climat Organisationnel",
-          "value": 80
-        },
-        {
-          "name": "Organisation de l'entreprise",
-          "value": 80
-        },
-        {
-          "name": "Finance et Comptabilité",
-          "value": 80
-        },
-        {
-          "name": "Planification Stratégique",
-          "value": 80
-        },
-        {
-          "name": "Production et Opération",
-          "value": 80
-        },
-        {
-          "name": "Assurance qualité",
-          "value": 80
-        },
-        {
-          "name": "Commercialisation",
-          "value": 80
-        }
-      ]
-    }
+    { name: 'Score', series: DOMAINES.map(d => ({ name: d.short, value: 0 })) }
   ];
 
   // options
-  legend: boolean = true;
+  legend: boolean = false;
+  readonly pctTick = (v: number | string): string => `${v} %`;
   showLabels: boolean = false;
   animations: boolean = false;
   xAxis: boolean = true;
@@ -209,7 +92,7 @@ export class T1dComponent implements OnInit,  OnDestroy {
     name: 'customScheme',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#000085ff', '#f73b3bff', '#ffd919ff', '#1e9908ff', '#A8385B']
+    domain: ['#1a56db']
   };
 
 
@@ -246,6 +129,131 @@ export class T1dComponent implements OnInit,  OnDestroy {
 
   currentIndex: number = 0; //  index de l'attribut affiché
   visited = new Set<number>();
+
+  // ── Affichage (mobile-first) ────────────────────────────────────────────────
+  /** « resume » : scores et graphique ; « form » : questionnaire (une question à la fois) */
+  mode: 'resume' | 'form' = 'resume';
+  showDetail = false;
+  isSaving = false;
+
+  readonly domaines = DOMAINES;
+  readonly reponses = REPONSES;
+  readonly totalQuestions = QUESTION_COUNT;
+
+  /** Rubriques SWOT : éléments 61 à 64 du questionnaire */
+  readonly swot: Record<number, { key: string; label: string }> = {
+    61: { key: 'difficult', label: 'Difficulté' },
+    62: { key: 'force', label: 'Force' },
+    63: { key: 'faiblesse', label: 'Faiblesse' },
+    64: { key: 'besoin', label: 'Besoin' },
+  };
+  readonly swotReps = [61, 62, 63, 64];
+  readonly swotRows = [1, 2, 3];
+
+  /** Seul le consultant concerné modifie ; un manager (ou un autre utilisateur) consulte en lecture seule. */
+  get readOnly(): boolean {
+    return this.consultanId !== 0 && this.consultanId != this.userId;
+  }
+
+  /** Score d'un domaine, en % (0–100) */
+  score(index: number): number {
+    return [this.crit_1, this.crit_2, this.crit_3, this.crit_4, this.crit_5, this.crit_6, this.crit_7, this.crit_8][index] ?? 0;
+  }
+
+  /** Numéros de questions d'un domaine */
+  range(d: { from: number; to: number }): number[] {
+    return Array.from({ length: d.to - d.from + 1 }, (_, i) => d.from + i);
+  }
+
+  libelle(n: number): string {
+    return this.matIntegLabel?.find(l => l.reper === n)?.libele ?? '';
+  }
+
+  /** Note enregistrée (1 à 5) ; 0 = question sans réponse */
+  note(data: ToolMatDiagInteg, n: number): number {
+    return Number(data['note_' + n]) || 0;
+  }
+
+  comment(data: ToolMatDiagInteg, n: number): string {
+    return (data['comt_' + n] ?? '').toString().trim();
+  }
+
+  /** Nombre de questions répondues dans un domaine */
+  answered(data: ToolMatDiagInteg, d: { from: number; to: number }): number {
+    return this.range(d).filter(n => this.note(data, n) > 0).length;
+  }
+
+  /** Nombre total de questions répondues dans une évaluation enregistrée */
+  answeredTotal(data: ToolMatDiagInteg): number {
+    return DOMAINES.reduce((sum, d) => sum + this.answered(data, d), 0);
+  }
+
+  /** Moyenne /5 d'un domaine, calculée sur les questions répondues (0 si aucune) */
+  average(data: ToolMatDiagInteg, d: { from: number; to: number }): number {
+    const notes = this.range(d).map(n => this.note(data, n)).filter(v => v > 0);
+    return notes.length ? notes.reduce((a, b) => a + b, 0) / notes.length : 0;
+  }
+
+  /** Libellé de la réponse correspondant à une note */
+  reponseLabel(v: number): string {
+    return REPONSES.find(r => r.value === Math.round(v))?.label ?? 'Sans réponse';
+  }
+
+  /** Niveau de couleur de 0 (sans réponse) à 5, d'après une note de 1 à 5 */
+  levelOfNote(v: number): number {
+    return v > 0 ? Math.min(5, Math.max(1, Math.round(v))) : 0;
+  }
+
+  /** Niveau de couleur de 0 à 5, d'après un pourcentage */
+  levelOfPct(p: number): number {
+    return p > 0 ? Math.min(5, Math.max(1, Math.ceil(p / 20))) : 0;
+  }
+
+  get progress(): number {
+    return this.matIntegLength ? Math.round((this.currentIndex + 1) * 100 / this.matIntegLength) : 0;
+  }
+
+  /** Note de la question n dans le formulaire (0 = sans réponse) */
+  noteValue(n: number): number {
+    return Number(this.matIntegForm.get('note_' + n)?.value) || 0;
+  }
+
+  /** Nombre de questions répondues dans le formulaire */
+  get answeredCount(): number {
+    let count = 0;
+    for (let n = 1; n <= QUESTION_COUNT; n++) if (this.noteValue(n) > 0) count++;
+    return count;
+  }
+
+  /** Va à la première question sans réponse (pour reprendre un remplissage partiel) */
+  goToFirstUnanswered(): void {
+    for (let n = 1; n <= QUESTION_COUNT; n++) {
+      if (this.noteValue(n) === 0) {
+        this.currentIndex = n - 1;
+        return;
+      }
+    }
+  }
+
+  fmtNote(v: number): string {
+    return v.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  }
+
+  /** Score d'un domaine en %, d'après les questions répondues : moyenne ÷ 5 × 100 */
+  private computeScores(el: ToolMatDiagInteg): void {
+    const pct = DOMAINES.map(d => Math.round(this.average(el, d) * 100 / MAX_NOTE * 10) / 10);
+    [this.crit_1, this.crit_2, this.crit_3, this.crit_4, this.crit_5, this.crit_6, this.crit_7, this.crit_8] = pct;
+    // Nouvelle référence : ngx-charts ne redessine pas toujours après une mutation en place
+    this.single = [{ name: 'Score', series: DOMAINES.map((d, i) => ({ name: d.short, value: pct[i] })) }];
+  }
+
+  /** Les notes lues en base doivent être des nombres pour que la réponse correspondante soit cochée. */
+  private normalizeNotes(): void {
+    for (let n = 1; n <= QUESTION_COUNT; n++) {
+      const c = this.matIntegForm.get('note_' + n);
+      if (c) c.setValue(Number(c.value) || 0, { emitEvent: false });
+    }
+  }
 
   matDiagIntegData$!: Observable<ToolMatDiagInteg[]>;
   matDiagIntegData!: ToolMatDiagInteg[];
@@ -448,6 +456,11 @@ private _: any;
     this.consultanId = this.storageService.ConsultantId;
     this.userId = this.storageService.getUser().id
 
+    if (this.readOnly) {
+      this.matIntegForm.disable();
+      this.infoEntrepriseForm.disable();
+    }
+
     this.matIntegForm.patchValue({
       cons_id: this.storageService.getUser().id,
       comp_id: this.storageService.CompanyId
@@ -475,6 +488,8 @@ private _: any;
       map(items => items.sort((a, b) => a.reper - b.reper))
 
     )
+    // Abonnement dans le composant : le résumé détaillé a besoin des libellés même quand le questionnaire n'est pas affiché
+    this.matIntegLabel$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
     
 
@@ -485,23 +500,7 @@ private _: any;
         this.matDiagIntegData = data;
         if (this.matDiagIntegData) {
           this.matDiagIntegData.forEach(element => {
-            this.crit_1 = (element.note_1 + element.note_2 + element.note_3 + element.note_4) * 10 / 4;
-            this.single[0].series[0].value = this.crit_1
-            this.crit_2 = (element.note_5 + element.note_6 + element.note_7 + element.note_8 + element.note_9 + element.note_10 + element.note_11 + element.note_12) * 10 / 8;
-            this.single[0].series[1].value = this.crit_2
-            this.crit_3 = (element.note_13 + element.note_14 + element.note_15 + element.note_16 + element.note_17 + element.note_18 + element.note_19 + element.note_20) * 10 / 8;
-            this.single[0].series[2].value = this.crit_3
-            this.crit_4 = (element.note_21 + element.note_22 + element.note_23 + element.note_24 + element.note_25 + element.note_26 + element.note_27 + element.note_28) * 10 / 8;
-            this.single[0].series[3].value = this.crit_4
-            this.crit_5 = (element.note_29 + element.note_30 + element.note_31 + element.note_32 + element.note_33 + element.note_34 + element.note_35) * 10 / 7;
-            this.single[0].series[4].value = this.crit_5
-            this.crit_6 = (element.note_36 + element.note_37 + element.note_38 + element.note_39 + element.note_40 + element.note_41 + element.note_42 + element.note_43) * 10 / 8;
-            this.single[0].series[5].value = this.crit_6
-            this.crit_7 = (element.note_44 + element.note_45 + element.note_46 + element.note_47 + element.note_48 + element.note_49 + element.note_50 + element.note_51) * 10 / 8;
-            this.single[0].series[6].value = this.crit_7
-            this.crit_8 = (element.note_52 + element.note_53 + element.note_54 + element.note_55 + element.note_56 + element.note_57 + element.note_58 + element.note_59 + element.note_60 + element.note_61 + element.note_62) * 10 / 11;
-            
-            this.single[0].series[7].value = this.crit_8
+            this.computeScores(element);
             // this.eval_total = ((this.crit_1 * 25) + (this.crit_2 * 20) + (this.crit_3 * 20) + (this.crit_4 * 25) + (this.crit_5 * 10)) / 100
 
             this.matIntegForm.patchValue({
@@ -648,8 +647,10 @@ private _: any;
           });
 
         }
+        this.normalizeNotes();
 
       }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
     this.convertJson()
@@ -692,13 +693,31 @@ private _: any;
 
 
   saveTool() {
-    this.toolService.saveToolMatDiagInteg(this.matIntegForm.value).subscribe();
-    // this.appRout.navigateByUrl('consultant/tool/attribut');
-    this.showAlertMessage()
-    setTimeout(() => {
-      window.location.reload();
-    }, 2500);
-
+    if (this.readOnly || this.isSaving) return;
+    this.isSaving = true;
+    this.toolService.saveToolMatDiagInteg(this.matIntegForm.value).subscribe({
+      next: () => {
+        this.isSaving = false;
+        const done = this.answeredCount;
+        this.alertMessage = done === QUESTION_COUNT
+          ? 'La matrice a été enregistrée : les 60 questions ont une réponse.'
+          : `La matrice a été enregistrée (${done} / ${QUESTION_COUNT} questions répondues). Vous pourrez la compléter plus tard.`;
+        this.alertType = 'success';
+        this.showAlert = true;
+        // Rafraîchit les scores et revient au résumé
+        const id = this.consultanId === 0 ? this.userId : this.consultanId;
+        this.toolService.getMatIntegDataById(id, this.storageService.CompanyId);
+        this.mode = 'resume';
+        this.currentIndex = 0;
+        if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+      error: () => {
+        this.isSaving = false;
+        this.alertMessage = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
+        this.alertType = 'danger';
+        this.showAlert = true;
+      }
+    });
   }
 
   logAll() {
@@ -710,6 +729,10 @@ private _: any;
     this.alertType = 'success';
     this.showAlert = true;
     this.dismissible = true;
+  }
+
+  goBack(): void {
+    history.back();
   }
 
 }
