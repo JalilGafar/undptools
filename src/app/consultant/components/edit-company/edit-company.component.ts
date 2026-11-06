@@ -25,6 +25,9 @@ export class EditCompanyComponent implements OnInit, OnDestroy {
   companyForm!: FormGroup;
   companyId!: number;
   companyName = '';
+  waveName = '';
+  /** Vague clôturée : la fiche est en lecture seule */
+  locked = false;
   isLoading = true;
   isSaving = false;
   formSubmitted = false;
@@ -35,7 +38,7 @@ export class EditCompanyComponent implements OnInit, OnDestroy {
   isLocating = false;
 
   // ── Logo ────────────────────────────────────────────────────────────────────
-  private readonly LOGO_MAX_BYTES = 10 * 1024 * 1024;
+  private readonly LOGO_MAX_BYTES = 25 * 1024 * 1024;
   private readonly LOGO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   currentLogo: string | null = null;
   logoPreview: string | null = null;
@@ -79,6 +82,9 @@ export class EditCompanyComponent implements OnInit, OnDestroy {
         this.companyName = company.name;
         this.currentLogo = company.logo ?? null;
         this.companyForm.patchValue(company);
+        this.waveName = company.vague_nom ?? '';
+        this.locked = company.vague_statut === 'cloturee';
+        if (this.locked) this.companyForm.disable();
         this.isLoading = false;
       },
       error: () => {
@@ -107,7 +113,7 @@ export class EditCompanyComponent implements OnInit, OnDestroy {
       return;
     }
     if (file.size > this.LOGO_MAX_BYTES) {
-      this.messageService.add({ severity: 'error', summary: 'Logo', detail: 'Image trop volumineuse (10 Mo maximum).', life: 5000 });
+      this.messageService.add({ severity: 'error', summary: 'Logo', detail: 'Image trop volumineuse (25 Mo maximum).', life: 5000 });
       return;
     }
     this.cancelLogo();
@@ -182,12 +188,12 @@ export class EditCompanyComponent implements OnInit, OnDestroy {
         });
         setTimeout(() => this.router.navigateByUrl(`/consultant/dashbord/${this.companyId}`), 2000);
       },
-      error: () => {
+      error: err => {
         this.isSaving = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Une erreur est survenue. Veuillez réessayer.',
+          detail: err.error?.message ?? 'Une erreur est survenue. Veuillez réessayer.',
           life: 5000,
         });
       }

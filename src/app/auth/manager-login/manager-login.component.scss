@@ -1,7 +1,7 @@
 // login.component.scss
 .login-container {
   background: linear-gradient(135deg, #f5f7fa 0%, #032456 100%);
-  min-height: 100vh;
+  min-height: var(--app-page-h);
 }
 
 .card {

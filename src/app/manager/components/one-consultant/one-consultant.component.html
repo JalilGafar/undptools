@@ -3,7 +3,11 @@
     ← Retour
 </button>
 
-@if (companies$ |async; as data) {
+@if ((state$ | async)?.loading) {
+    <app-loading message="Chargement…" />
+} @else if ((state$ | async)?.error) {
+    <app-load-error message="Impossible de charger les entreprises." />
+} @else if (companies$ |async; as data) {
     @for (item of data; track $index) {
         <ul>
             <li> {{item.name}} </li>

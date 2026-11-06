@@ -3,9 +3,27 @@
     <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
         ← Retour
     </button>
-    <h3>Tous les livrables</h3>
+    <div class="lt-head">
+        <h3 class="mb-0">Tous les livrables</h3>
+        <!-- Deux façons de parcourir les livrables : par type (cartes) ou tous ensemble (tableau) -->
+        <div class="lt-modes" role="group" aria-label="Affichage">
+            <button type="button" [class.on]="mode === 'types'" [attr.aria-pressed]="mode === 'types'" (click)="setMode('types')">
+                <i class="bi bi-grid"></i>Par type
+            </button>
+            <button type="button" [class.on]="mode === 'table'" [attr.aria-pressed]="mode === 'table'" (click)="setMode('table')">
+                <i class="bi bi-table"></i>Tableau
+            </button>
+        </div>
+    </div>
 
-    @if (livrables$ | async; as data) {
+    @if ((state$ | async)?.loading) {
+        <app-loading message="Chargement des livrables…" />
+    } @else if ((state$ | async)?.error) {
+        <app-load-error message="Impossible de charger les livrables." />
+    } @else if (livrables$ | async; as data) {
+      @if (mode === 'table') {
+        <app-livrables-table [livrables]="data" />
+      } @else {
         <div class="row gy-3 gx-3">
             @for (type of types; track type.tool_code) {
                 <div class="col-12 col-sm-6 col-lg-4">
@@ -18,5 +36,6 @@
                 </div>
             }
         </div>
+      }
     }
 </div>

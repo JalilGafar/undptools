@@ -1,0 +1,118 @@
+// Même charte que les autres outils (5S, Quick Wins) — pensé d'abord pour le mobile.
+$primary: #1a56db;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$surface: #f8fafc;
+$ok:      #0f9d58;
+$radius:  12px;
+
+.tse-wrapper { max-width: 900px; padding-top: 1.25rem; padding-bottom: 2.5rem; }
+.tse-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+
+.tse-header {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding: 1.25rem 1.75rem; color: #fff;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%); border-radius: $radius;
+}
+.tse-header-icon { font-size: 2rem; flex-shrink: 0; opacity: .9; }
+.tse-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+.tse-subtitle { font-size: .875rem; margin: 0; color: rgba(255, 255, 255, .85); }
+.tse-empty { text-align: center; padding: 3rem 1rem; color: $muted; }
+.tse-intro { font-size: .9rem; color: #475569; }
+
+.tse-progress { height: 10px; border-radius: 6px; background: #e8edf3; overflow: hidden; }
+.tse-progress-fill { display: block; height: 100%; border-radius: 6px; background: $ok; transition: width .3s ease; }
+.tse-progress-text { margin: .35rem 0 1rem; font-size: .85rem; color: $muted; }
+
+// ── Rubriques ─────────────────────────────────────────────────────────────────
+.tse-section { margin-bottom: .9rem; border-radius: $radius; overflow: hidden; background: #eef2f7; box-shadow: 0 2px 8px rgba(15, 23, 42, .08); }
+
+.tse-section-head {
+  display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 62px; padding: .6rem 1rem; text-align: left; color: #fff;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%); border: 0;
+}
+.tse-section.complete .tse-section-head { background: linear-gradient(135deg, #0f9d58 0%, #0a7a44 100%); }
+.tse-section-badge {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 38px; height: 38px;
+  border-radius: 50%; background: #fff; color: $primary; font-size: 1.2rem;
+}
+.tse-section.complete .tse-section-badge { color: $ok; }
+.tse-section-title { flex: 1; display: flex; flex-direction: column; font-weight: 700; font-size: 1rem; line-height: 1.25; small { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .8; } }
+.tse-section-count { padding: .15rem .6rem; border-radius: 999px; font-size: .78rem; font-weight: 700; background: rgba(255, 255, 255, .22); white-space: nowrap; }
+.tse-section-count.ok { background: #fff; color: $ok; }
+
+.tse-section-body { padding: .85rem; }
+.tse-section-note { margin: 0 0 .85rem; font-size: .88rem; color: #475569; font-style: italic; }
+.tse-fixed { margin-bottom: .75rem; padding: .6rem .85rem; font-size: .92rem; background: #fff; border: 1px solid $border; border-radius: 10px; }
+
+// ── Questions ─────────────────────────────────────────────────────────────────
+.tse-q { margin-bottom: .65rem; padding: .85rem; background: #fff; border: 1px solid $border; border-left: 4px solid #94a3b8; border-radius: 10px; }
+.tse-q.done { border-left-color: $ok; }
+.tse-q-head { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .6rem; }
+.tse-q-num {
+  flex-shrink: 0; min-width: 28px; height: 28px; padding: 0 .35rem; border-radius: 14px; background: #e0e7ff; color: $primary;
+  font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  &.dot { background: transparent; font-size: 1.6rem; color: #94a3b8; }
+}
+.tse-q-label { flex: 1; margin: 0; font-size: .95rem; font-weight: 600; color: #1e293b; line-height: 1.4; white-space: pre-line; overflow-wrap: anywhere; }
+.tse-optional { font-weight: 500; color: $muted; font-size: .82rem; }
+
+.tse-was { margin-bottom: .6rem; padding: .45rem .7rem; font-size: .84rem; color: #1e3a8a; background: #eef3ff; border-radius: 8px; }
+.tse-delta { margin-left: .5rem; font-weight: 700; &.up { color: $ok; } &.down { color: #dc3545; } &.same { color: $muted; } }
+.tse-prefill { margin-bottom: .5rem; font-size: .8rem; color: #92400e; }
+
+// Réponses : de gros boutons, faciles au doigt
+.tse-opts { display: flex; flex-direction: column; gap: .45rem; }
+.tse-yn { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+
+.tse-opt {
+  display: flex; align-items: flex-start; gap: .65rem; width: 100%; min-height: 50px; padding: .6rem .8rem; text-align: left;
+  font-size: .9rem; line-height: 1.35; color: #1e293b; background: #fff; border: 1.5px solid $border; border-radius: 10px;
+
+  &.compact { justify-content: center; align-items: center; text-align: center; font-size: 1rem; font-weight: 700; min-height: 52px; }
+  &:hover:not(:disabled) { border-color: $primary; }
+  &:disabled { opacity: 1; cursor: default; }
+  &.on { color: #0e3fa3; background: #eef3ff; border-color: $primary; font-weight: 600; }
+  &.compact.on { color: #fff; background: $primary; }
+}
+.tse-radio { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border: 2px solid #94a3b8; border-radius: 50%; background: #fff; }
+.tse-opt.on .tse-radio { border-color: $primary; background: radial-gradient(circle, $primary 0 45%, #fff 50%); }
+.tse-check { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; display: flex; align-items: center; justify-content: center; border: 2px solid #94a3b8; border-radius: 5px; background: #fff; color: transparent; font-size: .85rem; }
+.tse-opt.on .tse-check { border-color: $primary; background: $primary; color: #fff; }
+
+.tse-input-row { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.tse-num { max-width: 190px; }
+.tse-unit { font-size: .85rem; font-weight: 600; color: $muted; }
+.tse-usd { font-size: .82rem; color: $muted; }
+
+.form-control {
+  border: 1.5px solid $border; border-radius: 8px; font-size: 1rem;
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { background-color: $surface; color: #1e293b; }
+}
+textarea.form-control { resize: vertical; line-height: 1.45; }
+
+.tse-next { width: 100%; min-height: 48px; margin-top: .35rem; font-weight: 600; border-radius: $radius; }
+
+// ── Barre du bas ──────────────────────────────────────────────────────────────
+.tse-actions {
+  position: sticky; bottom: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  padding: .75rem 0; margin-top: 1.25rem; background: #fff; border-top: 1px solid $border; box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, .15);
+}
+.tse-live { display: flex; flex-direction: column; line-height: 1.2; span { font-size: .75rem; color: $muted; } strong { font-size: 1.15rem; color: $ok; } }
+.tse-btn-save { font-weight: 600; padding: .5rem 1.5rem; min-height: 46px; display: inline-flex; align-items: center; }
+
+@media (max-width: 576px) {
+  .tse-header { padding: 1rem 1.1rem; }
+  .tse-actions .btn { min-height: 48px; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .tse-header { background: none !important; color: #000 !important; border: 1px solid #999; }
+  .tse-title, .tse-subtitle { color: #000 !important; }
+  .tse-section { box-shadow: none; break-inside: avoid-page; }
+  .tse-section-head { background: #ddd !important; color: #000 !important; }
+  .tse-q { break-inside: avoid; }
+  .tse-opt:not(.on) { display: none; }
+  .tse-opt.on { color: #000 !important; background: none !important; border: 1px solid #000; }
+}

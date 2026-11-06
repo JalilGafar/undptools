@@ -20,8 +20,9 @@ export class ManHomeComponent implements OnInit {
 
   content?: string;
   user$!: Observable<User[]>;
-  visibleTools$!: Observable<boolean>;
   currentUser$!: Observable<User | null>;
+  /** Seul l'administrateur gère les vagues du programme */
+  isAdmin = false;
 
 
   // private router = inject(Router);
@@ -33,6 +34,7 @@ export class ManHomeComponent implements OnInit {
     private router: Router   
   ) { 
     this.currentUser$ = this.storageService.currentUser$;  // Initialize here
+    this.isAdmin = ((this.storageService.getUser()?.roles ?? []) as string[]).includes('ROLE_ADMIN');
   }
 
   ngOnInit(): void {
@@ -57,8 +59,6 @@ export class ManHomeComponent implements OnInit {
     this.managerService.getUserFromServer();
 
     this.user$ = this.managerService.persona$;
-
-    this.visibleTools$ = this.storageService.visibleTools$;
   }
 
   seeConsultants(){
@@ -72,6 +72,17 @@ export class ManHomeComponent implements OnInit {
   }
   seeGlobal(){
     this.router.navigateByUrl('manager/global');
+  }
+  seeSuivi(){
+    this.router.navigateByUrl('manager/suivi-global');
+  }
+
+  seeUtilisateurs(){
+    this.router.navigateByUrl('manager/utilisateurs');
+  }
+
+  seeVagues(){
+    this.router.navigateByUrl('manager/vagues');
   }
 
   seeTools(){

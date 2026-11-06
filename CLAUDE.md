@@ -262,7 +262,7 @@ this.toolService.getXById(id, this.storageService.CompanyId);
 | `t1b` | `T1bComponent` | — | Compte-rendu de réunion |
 | `t1c` | `T1cComponent` | POST/GET `/api/tools/activities` + PUT `/:id`* | Suivi d'activités Gantt (frappe-gantt), drag pour modifier dates/progress |
 | `t1d` | `T1dComponent` | POST/GET `/api/tools/integral` | Diagnostic intégral 62 questions (note + commentaire `comt_N`) + SWOT + radar chart ngx-charts |
-| `t1ea` | `T1eaComponent` | — | Diagnostic BPF |
+| `t1ea` | `T1eaComponent` | GET/POST `/api/bpf` | Diagnostic BPF : 92 exigences en 9 catégories, scores calculés en direct (voir « Outil 1E_a » plus bas) |
 | `t1eb` | `T1ebComponent` | — | Diagnostic BPA |
 | `t1a` | `T1aComponent` | — | Rapport final étape 1 (🚧 en construction) |
 | `t1f` | `T1fComponent` | — | Capacité de production (🚧) |
@@ -513,12 +513,52 @@ RewriteRule ^ /index.html [L]
 
 ---
 
+## Envoi d'images (galerie, logo, photo de profil)
+
+L'hébergeur (LWS) refuse les POST `multipart/form-data` : les images sont réduites dans le navigateur (`src/app/shared/image-compress.ts`, `compressImage`) puis envoyées en JSON (data URL base64) vers les routes `…/json`, `…/logo-json` et `/api/auth/photo-json`. Galerie : une requête par image (`GalleryService.upload`) ; si l'une échoue, le message indique combien sont déjà enregistrées. Taille d'entrée acceptée : 25 Mo avant réduction. Ne pas repasser en `FormData` sans vérifier que le filtre de l'hébergeur a été levé.
+
 ## Outil 1L — Profil du participant (`T1lComponent`)
 
 - Route `/consultant/tool/t1l`, service `ConsultantService.fetchProfil()` / `saveProfil()`, modèle `core/model/entreprise-profil.ts`. Formulaire en 7 sections (équivalent du classeur Excel), lignes de ventes dynamiques (FormArray).
 - Lecture seule pour les managers (`ROLE_ADMIN`/`ROLE_MODERATOR`) ou si `ConsultantId` ≠ utilisateur ; ceux-ci disposent d'un interrupteur **« Afficher en USD »** (taux fixe `fx` renvoyé par l'API). Les montants restent en FCFA partout ailleurs.
 - Impression : bouton « Imprimer / PDF » (`window.print()`), mise en page dans le `@media print` du composant ; la classe `print-profil` posée sur `<body>` masque l'en-tête/pied de page du site (règle dans `styles.scss`).
 - Prévu ensuite : outils 1i et 5E (même famille, beaucoup plus de champs : réutiliser les sections communes), onglet « Profil » dans `company-detail`, tableau de bord statistique global (managers/moderators).
+
+## Outil 1J — Profil de productivité (`T1jComponent`)
+
+- Étape 1 du menu (`1J Profil de productivité`, route `t1j`). Même architecture et mêmes styles que 1L (`pf-*`) : lecture seule pour les managers avec interrupteur USD, impression, évaluation (`<app-livrable-review toolCode="t1j" />`).
+- Cinq sections : produits (tableau + gammes / variantes), volumes de production, installations, effectif, goulets et saisonnalité. Les questions « oui » ouvrent un champ de précision (formés BPF, saisonnalité, commandes refusées). Bornes des champs numériques dans `NUMBER_FIELDS` (mêmes règles que le serveur).
+- Service : `fetchProductivite` / `saveProductivite` ; modèle `core/model/productivite.ts`.
+
+## Outil 1K — Diagnostic d'image commerciale (`T1kComponent`)
+
+- Étape 1 du menu (`1K Diagnostic d'image commerciale`, route `t1k`). 11 éléments en deux sections (identité de marque et supports visuels ; présence numérique), définis dans `core/model/image-commerciale.ts` (`IMAGE_SECTIONS`).
+- Un élément = une carte : « Existe-t-il ? » (oui / partiellement / non), « Situation actuelle » (bonne / moyenne / médiocre), « Besoin d'un accompagnement ? » (oui / non) en gros boutons (toucher à nouveau la valeur l'efface), et observations. Le résumé (Existant, Besoin d'aide, Inexistant) se calcule en direct ; « Partiellement » n'est compté ni existant ni inexistant (comme la fiche papier).
+- Lecture seule pour les managers, impression (seules les réponses choisies sont imprimées), évaluation (`<app-livrable-review toolCode="t1k" />`).
+
+## Outil 1E_a — Diagnostic BPF (`T1eaComponent`)
+
+- Route `/consultant/tool/t1ea`, service `ConsultantService.fetchBpf()` / `saveBpf()`, modèle `core/model/bpf.ts` (types, échelle, **calcul des scores**, mode d'emploi) et contenu `core/model/bpf-content.ts` (9 catégories, 92 exigences : numéro, texte, points maximum, consigne « Comment vérifier » ; identifiant interne 1-92 qui ne change jamais). Un seul passage par consultant et par entreprise.
+- Deux onglets : **Inspection** (la grille ; une catégorie dépliée à la fois ; bloc « Résultats en direct » replié sur le résultat global) et **Rapport** (résultat global, une fiche par catégorie, échelle, conclusions / recommandations par catégorie, remarques, actions prioritaires, 10 au plus). Ouvrir le rapport enregistre d'abord la fiche si elle a changé. Barre d'enregistrement collée en bas, enregistrement partiel autorisé.
+- Une réponse = des points entiers de 0 au maximum de l'exigence, ou « non applicable » : boutons Conforme (= maximum) / Partiel (commence à la moitié, réglage − / + ou saisie, ramenée entre 0 et le maximum) / Non conforme (= 0) / Non applicable ; toucher à nouveau une réponse l'efface. L'état (conforme, partiel…) se **déduit** des points : on ne le stocke pas, donc aucune liste de valeurs à garder identique côté serveur.
+- **Calcul (`bpfScore`, `bpfTotal`)** : « non applicable » retire l'exigence du maximum ; une exigence non évaluée ne compte ni dans les points ni dans le maximum (résultat « provisoire »). Une fois tout évalué et sans non applicable, identique au classeur Excel. Appréciation : ≥ 80 % BON, ≥ 60 % ACCEPTABLE, sinon À AMÉLIORER, comparaison en entiers (80 % pile = BON), `null` si rien d'évalué (« Non évalué » ; « Sans objet » si tout est non applicable). Le taux global est pondéré par les maxima.
+- Les points maximum existent **aussi côté serveur** (`BPF_MAX`, `bpf.routes.js`) : les deux listes doivent rester identiques.
+- Lecture seule pour les managers, aperçu vierge depuis le menu Tools (jamais enregistré), évaluation (`<app-livrable-review toolCode="t1ea" />`). Impression : rapport d'abord, puis le détail des 92 réponses en toutes lettres ; seules les catégories rédigées sont imprimées (`printing` déplie tout, `afterprint` le remet).
+
+## Outil 5S — Mise en œuvre des 5S (`T5sComponent`)
+
+- Deux évaluations sur la même fiche, même composant : initiale à l'étape 1 (`5S Mise en œuvre des 5S – initial`, route `t5s`) et finale à l'étape 4 (`… – final`, route `t5sf`) ; la phase vient de `data.phase` de la route. L'évaluation finale affiche, dans le panneau des résultats, la moyenne initiale et la progression par S. Contenu de la fiche (objectifs, 30 critères, questions suggérées, échelle) dans `core/model/cinq-s.ts`.
+- Cinq sections repliables (un seul « S » ouvert à la fois ; tous ouverts à l'impression), 6 critères chacun : note de 1 à 5 en gros boutons (toucher à nouveau efface), aide « Questions suggérées » dépliable, observations. Le panneau des résultats se calcule en direct : moyenne des critères notés par S, note globale = moyenne des S.
+- Plan d'action immédiat (lignes ajoutables : S concerné, problème, action, date limite, statut, résultat) et photos avant / après : plusieurs photos par emplacement, chacune avec une légende (composant `CinqSPhotosComponent`, sur le modèle de la galerie : miniatures protégées, agrandissement, suppression ; envoyées immédiatement, en JSON, voir « Envoi d'images »).
+- Lecture seule pour les managers, impression, évaluation (`<app-livrable-review toolCode="t5s" />`).
+
+## Outil Analyse financière (`T3hComponent`, identifiant technique `t3h`)
+
+- Étape 1 (entrée de menu `1M Analyse financière`, route `t3h` : l'identifiant technique n'a pas changé quand l'entrée a quitté l'étape 3).
+- Cinq rubriques en onglets (Chiffre d'affaires, Coûts directs, Frais d'exploitation, Coûts financiers, Compte de résultat) ; l'année et le taux d'imposition sont en haut de page. Les explications du guide Excel sont des bulles « i » (`InfoTipComponent`, `shared/components/info-tip`) posées sur la rubrique ou le poste concerné (texte dans `tip` de `SECTIONS`, `core/model/finance.ts`), pas une page de consignes.
+- Saisie : UN montant mensuel par ligne (les 12 mois reçoivent la même somme) ; le détail mois par mois s'ouvre avec l'icône calendrier, ou tout seul pour les lignes dont les montants varient et pour les ventes (`monthly: true`). Pas de défilement horizontal pour la saisie ; bouton « Ajouter une ligne » à la place des lignes libres ; bouton « Suivant » entre rubriques ; coche sur l'onglet rempli ; la barre du bas affiche le résultat net en direct.
+- Compte de résultat : tuiles, « Ce qu'il faut retenir » (phrases générées, avec rappels si les coûts directs ou le salaire administratif sont vides), graphique du résultat net par mois, puis le tableau complet (défilement horizontal visible). FCFA ou USD (interrupteur, taux `fx`), impression, évaluation (`<app-livrable-review toolCode="t3h" />`).
+- `computeFinance` (fonction pure, vérifiée contre les chiffres du fichier Excel) : marge brute = ventes − coûts directs ; résultat d'exploitation = marge brute − frais ; résultat avant impôts = exploitation − charges financières + autres revenus ; impôt appliqué aux mois bénéficiaires seulement. Données inchangées côté serveur (12 montants par ligne).
 
 ## Outil 1G — Cartographie des clients (`T1gComponent`)
 
@@ -540,4 +580,4 @@ Pour tout tableau large : `<div class="table-responsive scroll-visible" appScrol
 
 - Le menu « Tools » est construit à partir du **catalogue `src/app/shared/tools.catalog.ts`** (source unique, il remplace les deux listes qui étaient écrites à la main dans `header.component.ts` et `app.component.ts`). Chaque outil a un `status` : `'active'` (**pastille verte** à droite de la ligne) ou `'soon'` (**ligne grisée**, **toujours cliquable**). Pas de texte « Actif »/« Bientôt », ni compteur, ni légende.
 - **Pour activer un outil** : passer son `status` à `'active'` dans le catalogue ET vérifier que sa route (`consultant-routing.module.ts`) pointe vers le vrai composant (et non `OnconstructionComponent`).
-- Actifs à ce jour : prédiagnostic, 1D, 1G, 1H, 1L, 2D. 1B/2B (rien n'est enregistré), 1C (modification des tâches : `PUT /api/tools/activities/:id` absent) et 1E_a (page vide) restent « Bientôt » tant qu'ils ne sont pas complets.
+- Le programme compte 4 étapes (le menu a un groupe « Pré-diagnostic » puis les étapes 1 à 4). Actifs à ce jour : prédiagnostic, 1B/2B, 1D, 1E_a, 1G, 1H, 1J, 1K, 1L, 1M, 2D, 5S. 1B/2B (rien n'est enregistré), 1C (modification des tâches : `PUT /api/tools/activities/:id` absent) et 1E_a (page vide) restent « Bientôt » tant qu'ils ne sont pas complets.

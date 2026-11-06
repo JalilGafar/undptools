@@ -14,12 +14,52 @@ body,
   margin: 0;
   font-family: sans-serif;
 }
-// Impression du profil (outil 1L) : masque l'en-tête et le pied de page du site
+// ── Coque de l'application ───────────────────────────────────────────────────
+// Pensée pour le téléphone : en-tête de 52 px (56 px dès la tablette), pied de page dans le flux (il ne recouvre plus les barres
+// d'enregistrement collées en bas des outils). La page occupe tout l'espace entre l'en-tête et le pied de page.
+:root {
+  --app-header-h: 52px;
+  --app-footer-h: 40px;
+  --app-page-h: calc(100vh - var(--app-header-h) - var(--app-footer-h));       // hauteur d'une page « plein écran »
+}
+
+@supports (height: 100dvh) {                                                    // dvh : tient compte de la barre d'adresse mobile
+  :root { --app-page-h: calc(100dvh - var(--app-header-h) - var(--app-footer-h)); }
+}
+
+@media (min-width: 768px) {
+  :root { --app-header-h: 56px; }
+}
+
+.app-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--app-header-h));
+  min-height: calc(100dvh - var(--app-header-h));
+}
+
+// La page routée (juste après <router-outlet>) prend la place restante : le pied de page reste en bas, même sur une page courte
+.app-content > router-outlet + * {
+  flex: 1 0 auto;
+}
+
+// Un panneau de l'en-tête (navigation, outils) est ouvert : la page derrière ne défile plus
+body.hdr-lock,
+body.wave-lock {
+  overflow: hidden;
+}
+
+// Impression : ni en-tête ni pied de page (le profil de l'outil 1L, les autres outils)
 @media print {
-  body.print-profil app-header,
-  body.print-profil app-footer,
-  body.print-profil .update-banner {
+  app-header,
+  app-wave-bar,
+  app-footer,
+  .update-overlay {
     display: none !important;
+  }
+
+  #app {
+    padding-top: 0 !important;
   }
 }
 

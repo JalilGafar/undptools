@@ -1,0 +1,218 @@
+// Même charte que la page « Renseigner l'entreprise » (edit-company)
+$primary:  #1a56db;
+$border:   #e5e7eb;
+$muted:    #6b7280;
+$surface:  #f8fafc;
+$radius:   12px;
+
+.pf-wrapper {
+  max-width: 900px;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.pf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+.pf-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border-radius: $radius;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.75rem;
+  color: #fff;
+}
+
+.pf-header-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.pf-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: #fff;
+}
+
+.pf-subtitle {
+  font-size: 0.875rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pf-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $muted;
+
+  p { margin-top: 1rem; font-size: 0.9rem; }
+}
+
+// ── Titres de section ─────────────────────────────────────────────────────────
+.pf-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid $primary;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+}
+
+.pf-help {
+  font-size: 0.82rem;
+  color: $muted;
+  margin: .35rem 0 0;
+}
+
+// ── Champs ────────────────────────────────────────────────────────────────────
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.form-control,
+.form-select {
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    outline: none;
+  }
+
+  &.is-invalid {
+    border-color: #dc3545;
+  }
+
+  &:disabled {
+    background-color: $surface;
+    color: #1e293b;
+  }
+}
+
+// ── Tableaux (études, ventes) ─────────────────────────────────────────────────
+.pf-card {
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fff;
+
+  table { --bs-table-bg: transparent; min-width: 540px; }
+
+  th {
+    background: $surface;
+    color: #374151;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: .55rem .75rem;
+  }
+
+  td { padding: .4rem .75rem; font-size: 0.92rem; }
+
+  .pf-num { width: 110px; }
+  .pf-amount { width: 240px; }
+
+  .pf-total td {
+    background: #eef3ff;
+    color: #0e3fa3;
+    font-weight: 700;
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.pf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid $border;
+  margin-top: 0.5rem;
+}
+
+.pf-btn-save {
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+// Les signatures n'apparaissent qu'à l'impression
+.pf-signatures { display: none; }
+
+@media (max-width: 576px) {
+  .pf-header { padding: 1rem 1.1rem; }
+  .pf-card .pf-amount { width: 150px; }
+}
+
+// ── Impression : document sobre, sans éléments d'interface ───────────────────
+@media print {
+  .no-print { display: none !important; }
+
+  .pf-wrapper {
+    max-width: none;
+    padding: 0;
+  }
+
+  .pf-header {
+    background: none !important;
+    color: #000;
+    border-bottom: 2px solid #000;
+    border-radius: 0;
+    padding: 0 0 .5rem;
+    margin-bottom: 1rem;
+  }
+  .pf-title, .pf-subtitle { color: #000 !important; }
+  .pf-header-icon { display: none; }
+
+  .pf-section-title { break-after: avoid; border-bottom-color: #000; }
+  .pf-card, tr { break-inside: avoid; }
+
+  .pf-total td, .pf-card th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .form-control, .form-select, textarea {
+    border: 0;
+    border-bottom: 1px solid #94a3b8;
+    border-radius: 0;
+    background: transparent !important;
+    padding-left: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  textarea { resize: none; }
+
+  .pf-signatures {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    font-size: .9rem;
+  }
+  .pf-line {
+    display: inline-block;
+    width: 11rem;
+    border-bottom: 1px solid #000;
+  }
+}
+
+// Colonne « volume mensuel » du tableau des produits
+.pf-card .pf-vol { width: 200px; }

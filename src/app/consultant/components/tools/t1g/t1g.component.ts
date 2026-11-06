@@ -5,6 +5,9 @@ import { RouterLink } from '@angular/router';
 import { ConsultantService } from '../../../consultant.service';
 import { StorageService } from '../../../../_services/storage.service';
 import { ClientLigne } from '../../../../core/model/cartographie-clients';
+import { LivrableReviewComponent } from '../../../../shared/components/livrable-review/livrable-review.component';
+import { PreviewBannerComponent } from '../../../../shared/components/preview-banner/preview-banner.component';
+import { hasManagerRole } from '../../../../core/roles';
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 const PHONE_PATTERN = /^[0-9+().\s-]{6,50}$/;
@@ -21,7 +24,7 @@ function clientRequired(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-t1g',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [LivrableReviewComponent, PreviewBannerComponent, CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './t1g.component.html',
   styleUrl: './t1g.component.scss'
 })
@@ -42,6 +45,8 @@ export class T1gComponent implements OnInit, OnDestroy {
   isSaving = false;
   submitted = false;
   readOnly = true;
+  /** Aperçu manager : outil vierge, utilisable mais jamais enregistré */
+  preview = false;
   isManagerRole = false;
 
   alertMessage = '';
@@ -70,13 +75,16 @@ export class T1gComponent implements OnInit, OnDestroy {
 
     const user = this.storageService.getUser();
     this.userId = user.id;
-    this.isManagerRole = (user.roles ?? []).some((r: string) => r === 'ROLE_ADMIN' || r === 'ROLE_MODERATOR');
+    this.isManagerRole = hasManagerRole(user.roles);
     this.consultantId = this.storageService.ConsultantId === 0 ? this.userId : this.storageService.ConsultantId;
     this.companyId = this.storageService.CompanyId;
+    // Un manager qui ouvre l'outil depuis le menu (sans entreprise) le voit comme un consultant, sans pouvoir enregistrer
+    this.preview = this.isManagerRole && !this.companyId;
     // Seul le consultant concerné modifie ; un manager ou un autre utilisateur consulte en lecture seule
-    this.readOnly = this.isManagerRole || this.consultantId !== this.userId;
+    this.readOnly = !this.preview && (this.isManagerRole || this.consultantId !== this.userId || this.storageService.CompanyLocked);
 
     if (!this.companyId) {
+      if (this.preview) this.pushLine(this.newLine(), true);
       this.isLoading = false;
       return;
     }
@@ -254,7 +262,7 @@ export class T1gComponent implements OnInit, OnDestroy {
 
   save(): void {
     this.alertMessage = '';
-    if (this.readOnly) return;
+    if (this.readOnly || this.preview) return;
     this.submitted = true;
 
     if (this.form.invalid) {

@@ -1,0 +1,279 @@
+// Même charte que les autres outils (1L, 1G, 5S) — pensé d'abord pour le mobile : un montant par ligne, le détail mois par mois à la demande.
+$primary: #1a56db;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$surface: #f8fafc;
+$ok:      #0f9d58;
+$warn:    #d97706;
+$bad:     #dc3545;
+$radius:  12px;
+
+.ff-wrapper { max-width: 960px; padding-top: 1.25rem; padding-bottom: 2.5rem; }
+.ff-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+.ff-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border-radius: $radius;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+.ff-header-icon { font-size: 2rem; flex-shrink: 0; opacity: .9; }
+.ff-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+.ff-subtitle { font-size: .875rem; margin: 0; color: rgba(255, 255, 255, .85); }
+.ff-empty { text-align: center; padding: 3rem 1rem; color: $muted; }
+
+// ── Paramètres ────────────────────────────────────────────────────────────────
+.ff-params { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem 1rem; margin-bottom: .9rem; }
+.ff-param { flex: 0 1 160px; label { display: flex; align-items: center; font-size: .82rem; font-weight: 600; color: #374151; margin-bottom: 3px; white-space: nowrap; } }
+.ff-currency { margin: 0 0 .5rem auto; font-size: .85rem; color: $muted; }
+
+// ── Onglets ───────────────────────────────────────────────────────────────────
+.ff-tabs {
+  display: flex;
+  gap: .3rem;
+  padding: .3rem;
+  margin-bottom: .9rem;
+  overflow-x: auto;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+}
+
+.ff-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  flex: 1 0 auto;
+  justify-content: center;
+  min-height: 48px;
+  padding: .4rem .8rem;
+  font-weight: 600;
+  font-size: .9rem;
+  color: $muted;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+
+  &.active { color: $primary; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+}
+.ff-done { font-size: .8rem; color: $ok; }
+
+// ── Rubriques et lignes de saisie ─────────────────────────────────────────────
+.ff-section { margin-bottom: 1.25rem; padding: .85rem; background: #fff; border: 1.5px solid $border; border-radius: $radius; }
+
+.ff-section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .3rem 1rem; margin-bottom: .6rem; }
+
+.ff-section-title {
+  display: inline-flex;
+  align-items: center;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+.ff-section-total { font-weight: 800; color: #0e3fa3; font-variant-numeric: tabular-nums; small { font-weight: 500; color: $muted; } }
+
+.ff-lines { display: flex; flex-direction: column; gap: .35rem; }
+
+.fl { background: $surface; border: 1px solid $border; border-radius: 10px; }
+.fl.open { border-color: rgba($primary, .45); background: #f5f8ff; }
+
+.fl-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: .3rem .75rem;
+  padding: .45rem .6rem;
+}
+
+.fl-label { display: flex; align-items: center; min-width: 0; font-size: .92rem; font-weight: 600; color: #1e293b; span { overflow-wrap: anywhere; } }
+
+.fl-amount { display: flex; align-items: center; gap: .4rem; input { width: 130px; text-align: right; } }
+.fl-unit { font-size: .78rem; color: $muted; white-space: nowrap; }
+.fl-var { font-size: .8rem; font-weight: 600; color: $warn; white-space: nowrap; }
+
+.fl-end { display: flex; align-items: center; gap: .2rem; }
+.fl-total { min-width: 90px; text-align: right; font-weight: 700; color: #1e293b; font-variant-numeric: tabular-nums; }
+
+.fl-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; padding: 0;
+  color: $primary; background: transparent; border: 0; border-radius: 8px; font-size: 1.05rem;
+
+  &:hover { background: #e0e7ff; }
+  &.fl-del { color: $bad; &:hover { background: #fdecee; } }
+}
+
+// Détail mois par mois : 4 colonnes sur mobile, 6 sur grand écran, sans défilement horizontal
+.fl-months { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; padding: .1rem .6rem .7rem; }
+.fl-month { display: flex; flex-direction: column; gap: 2px; margin: 0; span { font-size: .72rem; font-weight: 600; color: $muted; } input { text-align: right; padding: .25rem .4rem; min-width: 0; } }
+
+.ff-add { margin-top: .6rem; min-height: 44px; }
+
+.form-control {
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 1rem;
+
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { background-color: $surface; color: #1e293b; }
+}
+
+.ff-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  font-weight: 700;
+  color: #fff;
+  background: $primary;
+  border: 0;
+  border-radius: $radius;
+  box-shadow: 0 3px 10px rgba($primary, .25);
+}
+
+// ── Compte de résultat ────────────────────────────────────────────────────────
+.ff-result-bar { display: flex; justify-content: flex-end; margin-bottom: .75rem; }
+
+.ff-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+.ff-kpi {
+  display: flex;
+  flex-direction: column;
+  padding: .7rem .9rem;
+  background: #fff;
+  border: 1.5px solid $border;
+  border-radius: $radius;
+
+  span { display: flex; align-items: center; font-size: .78rem; color: $muted; font-weight: 600; }
+  strong { font-size: 1.1rem; color: #1e293b; overflow-wrap: anywhere; }
+  &.neg strong { color: $bad; }
+  &.warn { background: #fdf1de; border-color: #f5d9a8; strong { color: $warn; } }
+}
+
+.ff-retenir {
+  padding: .9rem 1rem;
+  margin-bottom: 1rem;
+  background: #eef3ff;
+  border-radius: $radius;
+
+  .ff-section-title { margin-bottom: .5rem; }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+  li { display: flex; gap: .55rem; font-size: .92rem; color: #1e293b; i { color: $ok; margin-top: .2rem; flex-shrink: 0; } &.warn i { color: $warn; } }
+}
+
+// Graphique du résultat net par mois : une barre par mois autour de la ligne du zéro
+.ff-chart { padding: .9rem 1rem 1rem; margin-bottom: 1rem; background: #fff; border: 1.5px solid $border; border-radius: $radius; .ff-section-title { margin-bottom: .75rem; } }
+.ff-plot { position: relative; display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; height: 150px; }
+.ff-zero { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed #94a3b8; }
+.ff-bar-col { position: relative; height: 100%; }
+.ff-bar { position: absolute; left: 12%; right: 12%; min-height: 2px; background: $ok; border-radius: 3px; &.neg { background: $bad; } }
+.ff-plot-labels { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; margin-top: .3rem; span { text-align: center; font-size: .66rem; color: $muted; } }
+
+// Tableau détaillé
+.ff-grid {
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fff;
+
+  table { --bs-table-bg: transparent; min-width: 1100px; }
+  th { background: $surface; color: #374151; font-size: .78rem; font-weight: 700; white-space: nowrap; padding: .5rem .5rem; }
+  td { padding: .3rem .45rem; font-size: .88rem; white-space: nowrap; }
+}
+
+// Première colonne figée. Elle doit avoir un fond OPAQUE (celui de sa ligne) : sinon le texte des mois qui défilent derrière
+// se superpose au nom du poste. Chaque ligne du compte de résultat définit sa couleur de fond dans --row-bg,
+// reprise par toutes ses cellules, y compris la colonne figée.
+.ff-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 200px;
+  max-width: 200px;
+  background: var(--row-bg, #fff);
+  background-clip: padding-box;
+  box-shadow: 2px 0 4px -2px rgba(15, 23, 42, .28);   // ombre à droite : la colonne figée se distingue des mois qui passent dessous
+  white-space: normal;
+}
+.ff-grid th.ff-sticky { --row-bg: #{$surface}; z-index: 3; }
+
+// Le nom du poste passe à la ligne dans une largeur fixe (certaines lignes sont donc plus hautes que d'autres) au lieu de déborder sur les mois
+.ff-grid td.ff-sticky, .ff-grid th.ff-sticky { white-space: normal; }
+.ff-lbl { display: block; width: 200px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.25; }
+.ff-total-col { font-weight: 700; color: #1e293b; background: #f1f5f9; min-width: 100px; }
+
+.ff-result {
+  tr { --row-bg: #fff; }
+  td { background: var(--row-bg); }
+  .r-strong { --row-bg: #f1f5f9; }
+  .r-strong td { font-weight: 700; }
+  .r-sub td:first-child { padding-left: .8rem; }
+  .r-sub2 td:first-child { padding-left: 1.6rem; color: $muted; }
+  .r-key { --row-bg: #e0e7ff; }
+  .r-key td { font-weight: 700; color: #0e3fa3; }
+  .r-key.r-good { --row-bg: #e6f6ee; }
+  .r-key.r-good td { color: #0b6b3c; }
+  .r-net { --row-bg: #0e3fa3; }
+  .r-net td { font-weight: 800; font-size: 1rem; color: #fff; }
+  .r-pct { --row-bg: #f8fafc; }
+  .r-pct td { font-size: .82rem; color: #475569; }
+  td:last-child { font-weight: 700; }
+  .neg { color: $bad; }
+  .r-net .neg { color: #ffb4b4; }
+}
+.ff-note { margin: .9rem 0 0; font-size: .85rem; color: $muted; }
+
+// ── Barre du bas : résultat net en direct + enregistrement ───────────────────
+.ff-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .65rem 0;
+  margin-top: 1.25rem;
+  background: #fff;
+  border-top: 1px solid $border;
+  box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, .15);
+}
+.ff-live { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; span { font-size: .74rem; color: $muted; font-weight: 600; } strong { font-size: 1.05rem; color: #0e3fa3; overflow-wrap: anywhere; } &.neg strong { color: $bad; } }
+.ff-btn-save { flex-shrink: 0; font-weight: 600; padding: .5rem 1.5rem; min-height: 48px; display: inline-flex; align-items: center; }
+
+@media (min-width: 768px) {
+  .fl-months { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (max-width: 576px) {
+  .ff-header { padding: 1rem 1.1rem; }
+  // Sur téléphone : le nom en haut, le montant et les boutons dessous
+  .fl-main { grid-template-columns: minmax(0, 1fr) auto; }
+  .fl-label { grid-column: 1 / -1; }
+  .fl-amount input { width: 120px; }
+  .fl-total { min-width: 0; }
+  .ff-sticky { min-width: 150px; max-width: 150px; font-size: .82rem; }
+  .ff-lbl { width: 150px; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .ff-header { background: none !important; color: #000 !important; border: 1px solid #999; }
+  .ff-title, .ff-subtitle { color: #000 !important; }
+  .ff-grid table { min-width: 0; font-size: .7rem; }
+  .ff-sticky { position: static; box-shadow: none; min-width: 0; max-width: none; }
+  .ff-lbl { width: auto; }
+  .ff-grid { overflow: visible; }
+  .ff-result .r-net { --row-bg: #ddd; }
+  .ff-result .r-net td { color: #000 !important; }
+  .ff-result .r-key { --row-bg: #eee; }
+  .ff-result .r-key td { color: #000 !important; }
+  .ff-retenir { background: none; border: 1px solid #999; }
+}

@@ -1,161 +1,66 @@
-.update-banner {
+// Mise à jour disponible : fenêtre centrée, fond flouté, au-dessus de tout (en-tête, fenêtres de signature, agrandissements)
+.update-overlay {
   position: fixed;
-  bottom: 56px; // au-dessus du footer fixe
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1100;
-  background: #0468B1;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  inset: 0;
+  z-index: 3000;
   display: flex;
   align-items: center;
-  white-space: nowrap;
-  font-size: 0.9rem;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.7);          // repli si le flou n'est pas pris en charge
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
-// Compense header fixe (56px) + footer fixe (~44px)
-#app {
-  padding-top: 56px;
-  padding-bottom: 44px;
-  min-height: 100vh;
-}
-
-#wrapper {
-   padding-left: 0;
-   -webkit-transition: all 0.5s ease;
-   -moz-transition: all 0.5s ease;
-   -o-transition: all 0.5s ease;
-   transition: all 0.5s ease;
-   overflow: hidden;
-}
-
-#wrapper.toggled {
-   padding-left: 250px;
-   overflow: hidden;
-}
-
-.no-margin {
-  margin: 0;
-}
-
-.licon{
-   position: relative;
-   left: -20px;
-}
-
-#wrapper {
-  padding-left: 0;
-  transition: all 0.5s ease;
-  overflow: hidden;
-}
-
-#wrapper.toggled {
-  padding-left: 250px;
-}
-
-#sidebar-wrapper {
-  z-index: 1000;
-  position: absolute;
-  left: 250px;
-  width: 0;
-  height: 100%;
-  margin-left: -250px;
-  overflow-y: auto;
-  background: #000;
-  transition: all 0.5s ease;
-}
-
-#wrapper.toggled #sidebar-wrapper {
-  width: 350px;
-}
-
-#wrapper.toggled-2 #sidebar-wrapper {
-  width: 50px;
-}
-#wrapper.toggled-2 #sidebar-wrapper:hover {
-  width: 350px;
-}
-
-#page-content-wrapper {
-  position: absolute;
-  padding: 15px;
+.update-card {
   width: 100%;
-  overflow-x: hidden;
-  transition: all 0.5s ease;
+  max-width: 420px;
+  padding: 1.75rem 1.5rem 1.25rem;
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
-.xyz {
-  min-width: 360px;
-}
-
-.submenu {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease, opacity 0.3s ease;
-
-  &.open {
-    max-height: 500px; // assez grand pour contenir tes items
-    opacity: 1;
-  }
-}
-
-.sidebar-nav {
-  position: absolute;
-  top: 0;
-  width: 350px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  margin-top: 2px;
-}
-
-.sidebar-nav li {
-   padding-left: 25px;
-  text-indent: 0px;
-  line-height: normal;
-}
-.submenu li {
-   padding-left: 15px;
-  text-indent: 0px;
-  line-height: normal;
-//   line-height: 0px;
-}
-
-.dropstart .dropdown-menu{
-  top: 30px;
-}
-
-.user{
-  width: 2rem;
-}
-
-.badge{
-  padding: .3em !important;
-}
-
-.notif{
-  cursor: pointer;
-}
-
-.notif:hover{
-  color: blue;
-}
-
-.sidebar-nav li a {
-  display: block;
-  text-decoration: none;
-  color: #999;
-}
-
-.sidebar-nav li a:hover {
+.update-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0.75rem;
+  font-size: 2rem;
   color: #fff;
-  background: rgba(255, 255, 255, 0.2);
-  border-left: red 2px solid;
+  background: #0468B1;
+  border-radius: 50%;
+
+  .spin { animation: update-spin 1s linear infinite; }
 }
 
-.gogo{
-   margin-left: auto;
+@keyframes update-spin { to { transform: rotate(360deg); } }
+
+.update-title { margin: 0 0 0.5rem; font-size: 1.3rem; font-weight: 700; color: #1e293b; }
+.update-text { margin: 0 0 1.25rem; font-size: 0.95rem; color: #475569; }
+
+.update-btn {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.6rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  background: #0468B1;
+  border: 0;
+  border-radius: 10px;
+
+  &:hover:not(:disabled) { background: #035a99; }
+  &:disabled { opacity: 0.8; cursor: wait; }
+}
+
+.update-note { margin: 0.9rem 0 0; font-size: 0.78rem; color: #94a3b8; }
+
+// Le contenu passe sous l'en-tête fixe. Sa hauteur (--app-header-h) et la mise en page de la page + du pied de page sont
+// définies une fois pour toutes dans styles.scss (« coque de l'application »).
+#app {
+  padding-top: var(--app-header-h);
 }

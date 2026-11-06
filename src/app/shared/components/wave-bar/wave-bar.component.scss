@@ -1,0 +1,215 @@
+// Bande de vague + feuille de choix. Base = téléphone ; la feuille devient une fenêtre centrée à partir de 576 px.
+$primary: #1a56db;
+$navy:    #0e3fa3;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$ink:     #1e293b;
+$ok:      #0f9d58;
+
+:host { display: block; }
+
+// ── Bande ─────────────────────────────────────────────────────────────────────
+
+.wb { padding: .5rem 0; background: #f1f5fb; border-bottom: 1px solid #dde6f5; }
+
+.wb-inner { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem .75rem; }
+
+.wb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 44px;
+  max-width: 100%;
+  padding: .3rem .85rem;
+  font: inherit;
+  font-size: .92rem;
+  color: $navy;
+  background: #fff;
+  border: 1.5px solid #bcd0f5;
+  border-radius: 999px;
+  cursor: pointer;
+
+  > i:first-child { color: $primary; font-size: 1.05rem; }
+  &:hover { border-color: $primary; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+
+.wb-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wb-count { color: $muted; font-size: .82rem; white-space: nowrap; }
+.wb-caret { font-size: .8rem; color: $muted; }
+
+.wb-all {
+  min-height: 44px;
+  padding: 0 .25rem;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: $primary;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// ── Feuille ───────────────────────────────────────────────────────────────────
+
+.wbs-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1054;
+  background: rgba(15, 23, 42, .5);
+  animation: wbs-fade .18s ease-out;
+}
+
+.wbs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1055;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  max-height: 88dvh;
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 30px rgba(15, 23, 42, .25);
+  animation: wbs-up .22s ease-out;
+}
+
+@keyframes wbs-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes wbs-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.wbs-head { display: flex; align-items: center; justify-content: space-between; padding: .5rem .5rem .25rem 1.1rem; }
+.wbs-title { margin: 0; font-size: 1.1rem; font-weight: 700; color: $ink; }
+.wbs-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  font-size: 1.2rem;
+  color: $muted;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.wbs-body { flex: 1; padding: 0 1rem .5rem; overflow-y: auto; overscroll-behavior: contain; }
+.wbs-hint { margin: 0 0 .75rem; font-size: .85rem; color: $muted; }
+
+.wbs-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  min-height: 56px;
+  margin-bottom: .45rem;
+  padding: .5rem .75rem;
+  font: inherit;
+  text-align: left;
+  color: $ink;
+  background: #fff;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+  cursor: pointer;
+
+  &.on { background: #eef3ff; border-color: $primary; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+
+.wbs-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: transparent;
+  background: #fff;
+  border: 2px solid #94a3b8;
+  border-radius: 7px;
+  font-size: .95rem;
+}
+.wbs-row.on .wbs-check { color: #fff; background: $primary; border-color: $primary; }
+
+.wbs-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3;
+  strong { font-size: .98rem; }
+  small { font-size: .78rem; color: $muted; } }
+
+.wbs-state {
+  font-weight: 700;
+  &.en_cours { color: $ok; }
+  &.planifiee { color: #b45309; }
+  &.cloturee { color: #64748b; }
+}
+
+.wbs-n { flex-shrink: 0; min-width: 2rem; padding: .1rem .5rem; font-size: .85rem; font-weight: 700; text-align: center; color: $navy; background: #e0e7ff; border-radius: 999px; }
+
+.wbs-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 44px;
+  margin-top: .25rem;
+  padding: 0 .25rem;
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 600;
+  color: $primary;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.wbs-foot { padding: .6rem 1rem calc(.75rem + env(safe-area-inset-bottom)); border-top: 1px solid $border; }
+.wbs-manage {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 44px;
+  margin-bottom: .35rem;
+  font-size: .88rem;
+  font-weight: 600;
+  color: $primary;
+  text-decoration: none;
+}
+.wbs-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.wbs-btn {
+  min-height: 48px;
+  font: inherit;
+  font-weight: 700;
+  color: $ink;
+  background: #fff;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+  cursor: pointer;
+
+  &.primary { color: #fff; background: $primary; border-color: $primary; }
+}
+
+// ── Écrans plus larges : fenêtre centrée ──────────────────────────────────────
+
+@media (min-width: 576px) {
+  .wbs {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: 460px;
+    max-width: calc(100vw - 2rem);
+    border-radius: 18px;
+    transform: translate(-50%, -50%);
+    animation: wbs-pop .18s ease-out;
+  }
+
+  .wbs-foot { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-bottom: .75rem; }
+  .wbs-manage { margin-bottom: 0; }
+  .wbs-actions { margin-left: auto; grid-template-columns: auto auto; }
+  .wbs-btn { padding: 0 1.25rem; }
+}
+
+@keyframes wbs-pop { from { opacity: 0; transform: translate(-50%, -48%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .wbs, .wbs-backdrop { animation: none; }
+}

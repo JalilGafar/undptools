@@ -4,11 +4,15 @@ import { Observable, switchMap, tap } from 'rxjs';
 import { ManagerService } from '../../manager.service';
 import { Company } from '../../../core/model/company';
 import { CommonModule } from '@angular/common';
+import { LoadingComponent, LoadErrorComponent } from '../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../core/load-state';
 
 @Component({
   selector: 'app-one-consultant',
   standalone: true,
   imports: [
+    LoadingComponent,
+    LoadErrorComponent,
     CommonModule
   ],
   templateUrl: './one-consultant.component.html',
@@ -17,6 +21,7 @@ import { CommonModule } from '@angular/common';
 export class OneConsultantComponent implements OnInit {
 
   companies$!: Observable<Company[]>;
+  state$!: Observable<LoadState>;
 
   constructor(
     private router: Router,
@@ -30,6 +35,7 @@ export class OneConsultantComponent implements OnInit {
     ).subscribe();
 
     this.companies$ = this.ManagerServices.company$;
+    this.state$ = this.ManagerServices.companyState$;
   }
 
   goBack(): void {

@@ -16,7 +16,7 @@
     <div>
       <h2 class="ec-title">Renseigner l'entreprise</h2>
       @if (companyName) {
-        <p class="ec-subtitle">Mise à jour du profil de <strong>{{ companyName }}</strong></p>
+        <p class="ec-subtitle">Mise à jour du profil de <strong>{{ companyName }}</strong>@if (waveName) { · {{ waveName }}@if (locked) { (clôturée) } }</p>
       }
     </div>
   </div>
@@ -38,14 +38,16 @@
         <div>
           <input #logoInput type="file" class="d-none" accept="image/jpeg,image/png,image/webp"
                  (change)="onLogoSelected($event)">
+          @if (!locked) {
           <button type="button" class="btn btn-outline-primary btn-sm" (click)="logoInput.click()">
             <i class="bi bi-upload me-1"></i>{{ logoPreview ? 'Choisir une autre image' : 'Modifier le logo' }}
           </button>
+          }
           @if (logoPreview) {
             <button type="button" class="btn btn-link btn-sm text-danger" (click)="cancelLogo()">Annuler</button>
             <div class="form-text text-success">Le nouveau logo sera enregistré avec le formulaire.</div>
           }
-          <div class="form-text">JPG, PNG ou WEBP — 10 Mo maximum.</div>
+          <div class="form-text">JPG, PNG ou WEBP — 25 Mo maximum.</div>
         </div>
       </div>
     </div>
@@ -181,6 +183,7 @@
       <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
         <i class="bi bi-x-circle me-1"></i> Annuler
       </button>
+      @if (!locked) {
       <button type="submit" class="btn btn-success ec-btn-save" [disabled]="isSaving">
         @if (isSaving) {
           <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
@@ -188,6 +191,7 @@
           <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
         }
       </button>
+      }
     </div>
 
   </form>

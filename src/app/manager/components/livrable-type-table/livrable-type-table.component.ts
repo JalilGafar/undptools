@@ -1,11 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ManagerService } from '../../manager.service';
+import { livrableUrl } from '../../livrable-types';
 import { StorageService } from '../../../_services/storage.service';
 import { LivrableGlobal } from '../../../core/model/livrable-global';
-import { LIVRABLE_TYPES } from '../../livrable-types';
+import { LIVRABLE_TYPES, groupOf } from '../../livrable-types';
+import { LoadingComponent, LoadErrorComponent } from '../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../core/load-state';
+import { LivrableReviewService, ReviewSummary, reviewKey, lookupReview } from '../../../shared/livrable-review.service';
+import { ReviewBadgeComponent } from '../../../shared/components/review-badge/review-badge.component';
 
 type SortableColumn = 'company' | 'consultant' | 'ville' | 'secteur' | 'date' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
@@ -20,14 +25,25 @@ interface ColumnDef {
   selector: 'app-livrable-type-table',
   standalone: true,
   imports: [
+    ReviewBadgeComponent, LoadingComponent,
+    LoadErrorComponent,
     CommonModule,
   ],
   templateUrl: './livrable-type-table.component.html',
   styleUrl: './livrable-type-table.component.scss',
 })
 export class LivrableTypeTableComponent implements OnInit {
+  private reviewService = inject(LivrableReviewService);
+  /** Mention la plus récente de chaque livrable évalué ; chargée sans bloquer la page */
+  reviews = new Map<string, ReviewSummary>();
+
+  review(compId: number, consId: number, toolCode: string, itemId: number): ReviewSummary | undefined {
+    return lookupReview(this.reviews, compId, consId, toolCode, itemId);
+  }
+
 
   livrables$!: Observable<LivrableGlobal[]>;
+  state$!: Observable<LoadState>;
   typeLabel = '';
 
   readonly columns: ColumnDef[] = [
@@ -51,11 +67,13 @@ export class LivrableTypeTableComponent implements OnInit {
 
   ngOnInit() {
     const toolCode = this.route.snapshot.paramMap.get('type') ?? '';
+    this.reviewService.summary().subscribe(map => this.reviews = map);
     this.typeLabel = LIVRABLE_TYPES.find(t => t.tool_code === toolCode)?.label ?? toolCode;
 
     this.managerService.getAllLivrables();
+    this.state$ = this.managerService.allLivrablesState$;
     this.livrables$ = this.managerService.allLivrables$.pipe(
-      map(livrables => livrables.filter(l => l.tool_code === toolCode))
+      map(livrables => livrables.filter(l => groupOf(l) === toolCode))
     );
   }
 
@@ -92,7 +110,7 @@ export class LivrableTypeTableComponent implements OnInit {
   viewLivrable(item: LivrableGlobal) {
     this.storageService.setIdComp(item.comp_id);
     this.storageService.setIdConsultant(item.cons_id);
-    this.router.navigateByUrl('consultant/tool/' + item.tool_code);
+    this.router.navigateByUrl(livrableUrl(item.tool_code, item.id_livrable));
   }
 
   goBack(): void {

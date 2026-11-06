@@ -5,6 +5,12 @@
     <i class="bi bi-arrow-left me-1"></i> Retour
   </button>
 
+  @if ((state$ | async)?.loading) {
+    <app-loading message="Chargement du profil…" />
+  } @else if ((state$ | async)?.error) {
+    <app-load-error message="Impossible de charger le profil du consultant." />
+  } @else {
+
   @if (user$ | async; as user) {
 
   <!-- En-tête du profil -->
@@ -20,9 +26,16 @@
       @if (user.tel) {
         <p class="cp-tel"><i class="bi bi-telephone me-1"></i>{{ user.tel }}</p>
       }
-      <span class="badge cp-role-badge">
-        <i class="bi bi-person-badge me-1"></i>{{ user.name }}
-      </span>
+      <div class="cp-role-row">
+        <span class="badge cp-role-badge">
+          <i class="bi bi-person-badge me-1"></i>{{ user.name }}
+        </span>
+        @if (isAdmin) {
+          <a class="cp-role-edit" routerLink="/manager/utilisateurs" [queryParams]="{ q: user.username }">
+            <i class="bi bi-pencil-square"></i>Changer le rôle
+          </a>
+        }
+      </div>
     </div>
   </div>
 
@@ -50,7 +63,7 @@
   } @else {
     <div class="text-center py-5 text-muted">
       <i class="bi bi-person-x" style="font-size: 2.5rem;"></i>
-      <p class="mt-2">Chargement du profil…</p>
+      <p class="mt-2">Profil introuvable.</p>
     </div>
   }
 
@@ -120,6 +133,7 @@
                 <th>Livrable</th>
                 <th>Entreprise</th>
                 <th>Date</th>
+                <th>Évaluation</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -129,9 +143,10 @@
                   <td><span class="badge bg-primary-subtle text-primary">{{ l.livrable }}</span></td>
                   <td>{{ l.company }}</td>
                   <td class="text-muted">{{ l.date | date:'dd/MM/yyyy' }}</td>
+                  <td><app-review-badge [review]="review(l.comp_id, consultantId, l.tool_code, l.id_livrable)" /></td>
                   <td>
                     <button type="button" class="btn btn-sm btn-outline-success"
-                            (click)="viewLivrable(l.comp_id, l.tool_code)">
+                            (click)="viewLivrable(l.comp_id, l.tool_code, l.id_livrable)">
                       <i class="bi bi-eye me-1"></i>Voir
                     </button>
                   </td>
@@ -148,5 +163,7 @@
       }
     }
   </section>
+
+  }
 
 </div>

@@ -88,6 +88,14 @@
                     <input id="lieu" class="form-control" type="text" formControlName="lieu">
                 </div>
                 <div class="col-md-4">
+                    <label for="id_vague" class="form-label">Vague du programme</label>
+                    <select id="id_vague" class="form-select" formControlName="id_vague">
+                        @for (w of wave.openWaves(); track w.id) {
+                        <option [ngValue]="w.id">{{ w.nom }}{{ w.statut === 'en_cours' ? ' (en cours)' : ' (planifiée)' }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">Consultant responsable</label>
                     <div class="card flex justify-center">
                         @if (user$|async; as user) {

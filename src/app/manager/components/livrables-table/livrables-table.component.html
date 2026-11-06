@@ -1,0 +1,287 @@
+<section class="tf" aria-label="Tableau des livrables">
+
+  <div class="tf-top">
+  <!-- ── Recherche ──────────────────────────────────────────────────────── -->
+  <div class="tf-search">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <input type="search" [ngModel]="q()" (ngModelChange)="q.set($event)" [placeholder]="wide() ? 'Rechercher : livrable, entreprise, consultant, ville…' : 'Rechercher…'" aria-label="Rechercher un livrable, une entreprise, un consultant, une ville">
+    @if (q()) { <button type="button" class="tf-clear" (click)="q.set('')" aria-label="Effacer la recherche"><i class="bi bi-x-lg"></i></button> }
+  </div>
+
+  <!-- ── Statut d'évaluation (pastilles-filtres) ────────────────────────── -->
+  <div class="tf-chips" role="group" aria-label="Statut d'évaluation">
+    <button type="button" class="tf-chip" [class.on]="status() === 'all'" [attr.aria-pressed]="status() === 'all'" (click)="status.set('all')">
+      Tous <b>{{ counts().all }}</b>
+    </button>
+    <button type="button" class="tf-chip non" [class.on]="status() === 'non'" [attr.aria-pressed]="status() === 'non'" (click)="status.set('non')" [disabled]="!reviewsReady()">
+      <i class="bi bi-hourglass-split"></i>Non évalués <b>{{ reviewsReady() ? counts().non : '…' }}</b>
+    </button>
+    <button type="button" class="tf-chip warn" [class.on]="status() === 'ameliorer'" [attr.aria-pressed]="status() === 'ameliorer'" (click)="status.set('ameliorer')" [disabled]="!reviewsReady()"
+            title="Au moins une instance (Bureau Pays ou RBLAC) demande des améliorations">
+      <i class="bi bi-exclamation-circle"></i>À améliorer <b>{{ reviewsReady() ? counts().ameliorer : '…' }}</b>
+    </button>
+    <button type="button" class="tf-chip wait" [class.on]="status() === 'partiel'" [attr.aria-pressed]="status() === 'partiel'" (click)="status.set('partiel')" [disabled]="!reviewsReady()"
+            title="Validé par une instance, pas encore évalué par l'autre">
+      <i class="bi bi-hourglass-bottom"></i>En attente <b>{{ reviewsReady() ? counts().partiel : '…' }}</b>
+    </button>
+    <button type="button" class="tf-chip ok" [class.on]="status() === 'valide'" [attr.aria-pressed]="status() === 'valide'" (click)="status.set('valide')" [disabled]="!reviewsReady()"
+            title="Validé à la fois par le Bureau Pays et par le RBLAC">
+      <i class="bi bi-check-circle"></i>Validés <b>{{ reviewsReady() ? counts().valide : '…' }}</b>
+    </button>
+  </div>
+  </div>
+
+  <!-- ── Outils : filtres, regroupement, tri, export ────────────────────── -->
+  <div class="tf-tools">
+    <button type="button" class="tf-btn" [class.on]="filtersOpen()" [attr.aria-expanded]="filtersOpen()" (click)="filtersOpen.set(!filtersOpen())">
+      <i class="bi bi-funnel"></i>{{ wide() ? 'Filtres' : 'Filtres et tri' }} @if (panelBadge()) { <span class="tf-n">{{ panelBadge() }}</span> }
+    </button>
+
+    @if (wide()) {
+      <ng-container *ngTemplateOutlet="groupField"></ng-container>
+    }
+
+    <button type="button" class="tf-btn tf-export" (click)="exportCsv()" [disabled]="!sorted().length" title="Télécharger la liste affichée (Excel)">
+      <i class="bi bi-download"></i>Exporter
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  @if (filtersOpen()) {
+    <div class="tf-filters">
+      @if (!wide()) {
+        <ng-container *ngTemplateOutlet="groupField"></ng-container>
+        <label class="tf-field">
+          <span>Trier par</span>
+          <span class="tf-sort">
+            <select id="tf-sort" [ngModel]="sortKey()" (ngModelChange)="chooseSort($event)">
+              <option value="updated_at">Dernière modification</option>
+              <option value="evaluation">Statut d'évaluation</option>
+              <option value="livrable">Type de livrable</option>
+              <option value="company">Entreprise</option>
+              <option value="consultant">Consultant</option>
+              <option value="ville">Ville</option>
+              <option value="secteur">Secteur d'activité</option>
+              <option value="etape">Étape</option>
+              @if (multiWave()) { <option value="vague">Vague</option> }
+            </select>
+            <button type="button" class="tf-dir" (click)="toggleDir()" [attr.aria-label]="sortDir() === 'asc' ? 'Ordre croissant' : 'Ordre décroissant'">
+              <i class="bi" [class.bi-sort-down-alt]="sortDir() === 'asc'" [class.bi-sort-down]="sortDir() === 'desc'"></i>
+            </button>
+          </span>
+        </label>
+      }
+      <label class="tf-field"><span>Type de livrable</span>
+        <select [ngModel]="fType()" (ngModelChange)="fType.set($event)">
+          <option value="">Tous</option>
+          @for (o of typeOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+        </select></label>
+      <label class="tf-field"><span>Étape</span>
+        <select [ngModel]="fEtape()" (ngModelChange)="fEtape.set($event)">
+          <option value="">Toutes</option>
+          @for (o of etapeOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+        </select></label>
+      <label class="tf-field"><span>Consultant</span>
+        <select [ngModel]="fConsultant()" (ngModelChange)="fConsultant.set($event)">
+          <option value="">Tous</option>
+          @for (o of consultantOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+        </select></label>
+      <label class="tf-field"><span>Ville</span>
+        <select [ngModel]="fVille()" (ngModelChange)="fVille.set($event)">
+          <option value="">Toutes</option>
+          @for (o of villeOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+        </select></label>
+      <label class="tf-field"><span>Secteur d'activité</span>
+        <select [ngModel]="fSecteur()" (ngModelChange)="fSecteur.set($event)">
+          <option value="">Tous</option>
+          @for (o of secteurOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+        </select></label>
+      <label class="tf-field"><span>Bureau Pays</span>
+        <select [ngModel]="fBp()" (ngModelChange)="fBp.set($event)">
+          <option value="">Toutes les mentions</option>
+          <option value="valide">Validé</option>
+          <option value="a_ameliorer">À améliorer</option>
+          <option value="none">Pas encore évalué</option>
+        </select></label>
+      <label class="tf-field"><span>RBLAC</span>
+        <select [ngModel]="fRb()" (ngModelChange)="fRb.set($event)">
+          <option value="">Toutes les mentions</option>
+          <option value="valide">Validé</option>
+          <option value="a_ameliorer">À améliorer</option>
+          <option value="none">Pas encore évalué</option>
+        </select></label>
+      @if (multiWave()) {
+        <label class="tf-field"><span>Vague</span>
+          <select [ngModel]="fVague()" (ngModelChange)="fVague.set($event)">
+            <option value="">Toutes</option>
+            @for (o of vagueOptions(); track o.value) { <option [value]="o.value">{{ o.label }} ({{ o.count }})</option> }
+          </select></label>
+      }
+    </div>
+  }
+
+  <p class="tf-summary" aria-live="polite">
+    <strong>{{ sorted().length }}</strong> livrable{{ sorted().length > 1 ? 's' : '' }}
+    @if (sorted().length !== rows().length) { sur {{ rows().length }} }
+    @if (groupBy()) { · regroupés par {{ groupLabel() }} }
+    @if (hasCriteria()) { <button type="button" class="tf-reset" (click)="resetAll()">Réinitialiser</button> }
+  </p>
+
+  <!-- ── Résultats ──────────────────────────────────────────────────────── -->
+  @if (!sorted().length) {
+    <div class="tf-empty">
+      <i class="bi bi-inbox"></i>
+      <p>{{ hasCriteria() ? 'Aucun livrable ne correspond à ces critères.' : 'Aucun livrable pour le moment.' }}</p>
+      @if (hasCriteria()) { <button type="button" class="tf-btn on" (click)="resetAll()">Réinitialiser les critères</button> }
+    </div>
+  } @else if (wide()) {
+
+    <!-- Tableau (écran large) -->
+    <div class="tf-table-wrap">
+      <table class="tf-table">
+        <thead>
+          <tr>
+            <th scope="col" [attr.aria-sort]="ariaSort('livrable')"><button type="button" (click)="sortBy('livrable')">Livrable<i class="bi {{ sortIcon('livrable') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('company')"><button type="button" (click)="sortBy('company')">Entreprise<i class="bi {{ sortIcon('company') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('bp')"><button type="button" (click)="sortBy('bp')">Bureau Pays<i class="bi {{ sortIcon('bp') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('rblac')"><button type="button" (click)="sortBy('rblac')">RBLAC<i class="bi {{ sortIcon('rblac') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('consultant')"><button type="button" (click)="sortBy('consultant')">Consultant<i class="bi {{ sortIcon('consultant') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('ville')"><button type="button" (click)="sortBy('ville')">Ville<i class="bi {{ sortIcon('ville') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('secteur')"><button type="button" (click)="sortBy('secteur')">Secteur<i class="bi {{ sortIcon('secteur') }}"></i></button></th>
+            <th scope="col" [attr.aria-sort]="ariaSort('etape')"><button type="button" (click)="sortBy('etape')">Étape<i class="bi {{ sortIcon('etape') }}"></i></button></th>
+            @if (multiWave()) {
+              <th scope="col" [attr.aria-sort]="ariaSort('vague')"><button type="button" (click)="sortBy('vague')">Vague<i class="bi {{ sortIcon('vague') }}"></i></button></th>
+            }
+            <th scope="col" [attr.aria-sort]="ariaSort('updated_at')"><button type="button" (click)="sortBy('updated_at')">Modifié le<i class="bi {{ sortIcon('updated_at') }}"></i></button></th>
+
+          </tr>
+        </thead>
+
+        @if (groups(); as gs) {
+          @for (g of gs; track g.key) {
+            <tbody>
+              <tr class="tf-group-row">
+                <td [attr.colspan]="colCount()">
+                  <button type="button" class="tf-group" [attr.aria-expanded]="!isCollapsed(g.key)" (click)="toggleGroup(g.key)">
+                    <i class="bi" [class.bi-chevron-down]="!isCollapsed(g.key)" [class.bi-chevron-right]="isCollapsed(g.key)"></i>
+                    <strong>{{ g.label }}</strong>
+                    <span class="tf-group-count">{{ g.rows.length }} livrable{{ g.rows.length > 1 ? 's' : '' }}</span>
+                    @if (reviewsReady()) { <span class="tf-group-progress">{{ g.evaluated }}/{{ g.rows.length }} évalué{{ g.evaluated > 1 ? 's' : '' }}</span> }
+                  </button>
+                </td>
+              </tr>
+              @if (!isCollapsed(g.key)) {
+                @for (r of g.rows; track r.key) { <ng-container *ngTemplateOutlet="tableRow; context: { $implicit: r }"></ng-container> }
+              }
+            </tbody>
+          }
+        } @else {
+          <tbody>
+            @for (r of visible(); track r.key) { <ng-container *ngTemplateOutlet="tableRow; context: { $implicit: r }"></ng-container> }
+          </tbody>
+        }
+      </table>
+    </div>
+
+  } @else {
+
+    <!-- Cartes (téléphone) -->
+    <div class="tf-cards">
+      @if (groups(); as gs) {
+        @for (g of gs; track g.key) {
+          <button type="button" class="tf-group tf-group-card" [attr.aria-expanded]="!isCollapsed(g.key)" (click)="toggleGroup(g.key)">
+            <i class="bi" [class.bi-chevron-down]="!isCollapsed(g.key)" [class.bi-chevron-right]="isCollapsed(g.key)"></i>
+            <strong>{{ g.label }}</strong>
+            <span class="tf-group-count">{{ g.rows.length }}</span>
+            @if (reviewsReady()) { <span class="tf-group-progress">{{ g.evaluated }}/{{ g.rows.length }} évalué{{ g.evaluated > 1 ? 's' : '' }}</span> }
+          </button>
+          @if (!isCollapsed(g.key)) {
+            @for (r of g.rows; track r.key) { <ng-container *ngTemplateOutlet="card; context: { $implicit: r }"></ng-container> }
+          }
+        }
+      } @else {
+        @for (r of visible(); track r.key) { <ng-container *ngTemplateOutlet="card; context: { $implicit: r }"></ng-container> }
+      }
+    </div>
+  }
+
+  @if (!groups() && visible().length < sorted().length) {
+    <button type="button" class="tf-more" (click)="showMore()">Afficher plus ({{ sorted().length - visible().length }} restant{{ sorted().length - visible().length > 1 ? 's' : '' }})</button>
+  }
+</section>
+
+<!-- Choix du regroupement (barre d'outils sur grand écran, panneau sur téléphone) -->
+<ng-template #groupField>
+  <label class="tf-field">
+    <span>Regrouper par</span>
+    <select id="tf-group" [ngModel]="groupBy()" (ngModelChange)="groupBy.set($event)">
+      <option value="">Aucun regroupement</option>
+      <option value="consultant">Consultant</option>
+      <option value="ville">Ville</option>
+      <option value="secteur">Secteur d'activité</option>
+      <option value="statut">Statut d'évaluation</option>
+      <option value="type">Type de livrable</option>
+      <option value="etape">Étape</option>
+      <option value="entreprise">Entreprise</option>
+      @if (multiWave()) { <option value="vague">Vague</option> }
+    </select>
+  </label>
+</ng-template>
+
+<!-- Mention d'une instance dans le tableau -->
+<ng-template #mark let-m>
+  @if (!reviewsReady()) { <span class="tf-muted">…</span> }
+  @else if (m === 'valide') { <span class="tf-mark ok"><i class="bi bi-check-circle-fill"></i>Validé</span> }
+  @else if (m === 'a_ameliorer') { <span class="tf-mark warn"><i class="bi bi-exclamation-circle-fill"></i>À améliorer</span> }
+  @else { <span class="tf-muted" title="Pas encore évalué par cette instance">—</span> }
+</ng-template>
+
+<!-- Ligne du tableau -->
+<ng-template #tableRow let-r>
+  <tr class="tf-row" tabindex="0" (click)="open(r)" (keydown.enter)="open(r)">
+    <td>
+      <span class="tf-livrable"><i class="bi {{ r.typeIcon }}" aria-hidden="true"></i><span>{{ r.item.livrable }}</span></span>
+      @if (r.comments) { <span class="tf-cmt" [title]="r.comments + ' avis écrit(s)'"><i class="bi bi-chat-left-text"></i>{{ r.comments }}</span> }
+      @if (r.unseen) { <span class="tf-new">Nouveau</span> }
+    </td>
+    <td class="tf-strong">{{ r.item.company }}</td>
+    <td><ng-container *ngTemplateOutlet="mark; context: { $implicit: r.bp }"></ng-container></td>
+    <td><ng-container *ngTemplateOutlet="mark; context: { $implicit: r.rb }"></ng-container></td>
+    <td><span class="tf-person"><span class="tf-avatar" aria-hidden="true">{{ initial(r.item.consultant) }}</span>{{ r.item.consultant }}</span></td>
+    <td>
+      @if (r.item.ville) { {{ r.item.ville }} } @else { <span class="tf-muted">—</span> }
+      @if (r.item.region) { <small class="tf-sub">{{ r.item.region }}</small> }
+    </td>
+    <td>@if (r.item.secteur) { <span class="tf-tag">{{ r.item.secteur }}</span> } @else { <span class="tf-muted">—</span> }</td>
+    <td class="tf-nowrap">{{ r.etape }}</td>
+    @if (multiWave()) { <td>@if (r.vague) { <span class="tf-tag wave">{{ r.vague }}</span> } @else { <span class="tf-muted">—</span> }</td> }
+    <td class="tf-nowrap tf-muted">{{ r.item.updated_at | date:'dd/MM/yyyy' }}</td>
+  </tr>
+</ng-template>
+
+<!-- Carte (téléphone) -->
+<ng-template #card let-r>
+  <article class="tf-card" tabindex="0" (click)="open(r)" (keydown.enter)="open(r)">
+    <header class="tf-card-head">
+      <span class="tf-livrable"><i class="bi {{ r.typeIcon }}" aria-hidden="true"></i><span>{{ r.item.livrable }}</span></span>
+      <span class="tf-card-status">
+        @if (!reviewsReady()) { <span class="tf-muted">…</span> }
+        @else {
+          <!-- « Non évalué » tant qu'aucune instance n'a posé de mention (même s'il y a déjà des commentaires) -->
+          @if (r.state === 'none') { <span class="tf-none">Non évalué</span> }
+          @if (r.review) { <app-review-badge [review]="r.review" [pending]="true" /> }
+        }
+      </span>
+    </header>
+    <p class="tf-card-line tf-strong"><i class="bi bi-building" aria-hidden="true"></i>{{ r.item.company }}</p>
+    <p class="tf-card-line"><i class="bi bi-person-badge" aria-hidden="true"></i>{{ r.item.consultant }}</p>
+    <p class="tf-card-line tf-muted">
+      <i class="bi bi-geo-alt" aria-hidden="true"></i>{{ r.item.ville || '—' }}@if (r.item.secteur) { · {{ r.item.secteur }} }
+    </p>
+    <footer class="tf-card-foot">
+      <span class="tf-tag">{{ r.etape }}</span>
+      @if (multiWave() && r.vague) { <span class="tf-tag wave">{{ r.vague }}</span> }
+      <span class="tf-muted tf-card-date">Modifié le {{ r.item.updated_at | date:'dd/MM/yyyy' }}</span>
+    </footer>
+  </article>
+</ng-template>

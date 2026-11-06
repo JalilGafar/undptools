@@ -1,0 +1,203 @@
+<div class="container tse-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="tse-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()">
+      <i class="bi bi-printer me-1"></i>Imprimer / PDF
+    </button>
+  </div>
+
+  <!-- En-tête -->
+  <div class="tse-header">
+    <div class="tse-header-icon"><i class="bi bi-graph-up-arrow"></i></div>
+    <div>
+      <h2 class="tse-title">Suivi et évaluation</h2>
+      <p class="tse-subtitle">
+        Chaînes de valeur inclusives · <strong>{{ phase === 'final' ? 'Saisie finale (clôture)' : 'Saisie initiale (démarrage)' }}</strong>
+        @if (company?.name) { · <strong>{{ company?.name }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement du questionnaire…" />
+  } @else if (!companyId && !preview) {
+    <div class="tse-empty">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError || !qn) {
+    <app-load-error message="Impossible de charger le questionnaire de suivi et d'évaluation." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  }
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  }
+  @if (alertMessage) {
+    <div class="alert no-print" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">{{ alertMessage }}</div>
+  }
+
+  <p class="tse-intro no-print">
+    @if (phase === 'final') {
+      <strong>Saisie finale.</strong> À renseigner à la fin de la mise en œuvre, pour comparer avec le début : sous chaque question, la réponse du démarrage est rappelée.
+    } @else {
+      <strong>Saisie initiale.</strong> Choisissez la réponse la plus appropriée, ou celle qui correspond le mieux à la situation de l'entreprise aujourd'hui.
+      Vous pouvez enregistrer à tout moment et reprendre plus tard.
+    }
+    Il est essentiel de partager les informations recueillies avec l'entreprise.
+  </p>
+
+  <!-- Avancement global -->
+  <div class="tse-progress no-print" role="progressbar" [attr.aria-valuenow]="progress" aria-valuemin="0" aria-valuemax="100"
+       [attr.aria-label]="progress + ' % des questions renseignées'">
+    <span class="tse-progress-fill" [style.width.%]="progress"></span>
+  </div>
+  <p class="tse-progress-text no-print">{{ answeredCount }} question{{ answeredCount > 1 ? 's' : '' }} sur {{ totalCount }} renseignée{{ answeredCount > 1 ? 's' : '' }} ({{ progress }} %)</p>
+
+  <!-- Rubriques -->
+  @for (s of sections; track s.id; let i = $index) {
+    <section class="tse-section" [id]="'tse-s-' + s.id" [class.complete]="isComplete(s)">
+      <button type="button" class="tse-section-head" (click)="toggleSection(s)" [attr.aria-expanded]="openSection === s.id || openSection === '*'">
+        <span class="tse-section-badge"><i class="bi {{ s.icon }}"></i></span>
+        <span class="tse-section-title">
+          <small>{{ s.id === '0' ? 'Rubrique' : 'Rubrique ' + s.id }}</small>
+          {{ s.title }}
+        </span>
+        @if (total(s)) {
+          <span class="tse-section-count" [class.ok]="isComplete(s)">
+            @if (isComplete(s)) { <i class="bi bi-check-lg"></i> }
+            {{ done(s) }}/{{ total(s) }}
+          </span>
+        }
+        <i class="bi no-print" [class.bi-chevron-up]="openSection === s.id" [class.bi-chevron-down]="openSection !== s.id"></i>
+      </button>
+
+      @if (openSection === s.id || openSection === '*') {
+        <div class="tse-section-body">
+          @if (s.note) { <p class="tse-section-note">{{ s.note }}</p> }
+          @if (s.id === '0') {
+            <div class="tse-fixed"><i class="bi bi-geo-alt me-2"></i>Pays : <strong>Cameroun</strong></div>
+          }
+
+          @for (q of questionsOf(s); track q.key) {
+            <article class="tse-q" [class.done]="isAnswered(q)">
+              <div class="tse-q-head">
+                @if (numberOf(q)) { <span class="tse-q-num">{{ numberOf(q) }}</span> } @else { <span class="tse-q-num dot"><i class="bi bi-dot"></i></span> }
+                <p class="tse-q-label">{{ q.label }}@if (q.optional) { <span class="tse-optional"> (facultatif)</span> }</p>
+                @if (q.note) { <app-info-tip class="no-print" [text]="q.note" label="Explication de la question" /> }
+              </div>
+
+              @if (phase === 'final' && initialText(q); as was) {
+                <div class="tse-was"><i class="bi bi-clock-history me-1"></i>Au démarrage : <strong>{{ was }}</strong>
+                  @if (delta(q); as d) { <span class="tse-delta" [ngClass]="d.sign">{{ d.text }}</span> }
+                </div>
+              }
+              @if (prefilled.has(q.key)) {
+                <div class="tse-prefill no-print"><i class="bi bi-magic me-1"></i>Repris de la fiche entreprise : vérifiez et corrigez si besoin.</div>
+              }
+
+              @switch (q.type) {
+                @case ('choice') {
+                  <div [class.tse-yn]="q.compact" [class.tse-opts]="!q.compact" role="group" [attr.aria-label]="q.label">
+                    @for (o of q.options; track $index) {
+                      <button type="button" class="tse-opt" [class.on]="isOn(q, $index + 1)" [class.compact]="q.compact"
+                              [disabled]="readOnly" [attr.aria-pressed]="isOn(q, $index + 1)" (click)="pick(q, $index + 1)">
+                        @if (!q.compact) { <span class="tse-radio"></span> }
+                        <span>{{ o }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+                @case ('multi') {
+                  <div class="tse-opts" role="group" [attr.aria-label]="q.label">
+                    @for (o of q.options; track $index) {
+                      <button type="button" class="tse-opt multi" [class.on]="isOn(q, $index + 1)"
+                              [disabled]="readOnly" [attr.aria-pressed]="isOn(q, $index + 1)" (click)="pick(q, $index + 1)">
+                        <span class="tse-check"><i class="bi bi-check-lg"></i></span>
+                        <span>{{ o }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+                @case ('number') {
+                  <div class="tse-input-row">
+                    <input class="form-control tse-num" type="number" inputmode="numeric" [min]="q.min ?? 0" [max]="q.max ?? null" step="1"
+                           [(ngModel)]="answers[q.key]" [disabled]="readOnly" [attr.aria-label]="q.label">
+                    @if (q.unit) { <span class="tse-unit">{{ q.unit }}</span> }
+                  </div>
+                }
+                @case ('money') {
+                  <div class="tse-input-row">
+                    <input class="form-control tse-num" type="number" inputmode="numeric" [min]="q.min ?? 0" step="1"
+                           [(ngModel)]="answers[q.key]" [disabled]="readOnly" [attr.aria-label]="q.label">
+                    <span class="tse-unit">FCFA</span>
+                    @if (usd(answers[q.key]); as u) { <span class="tse-usd">{{ u }}</span> }
+                  </div>
+                }
+                @case ('percent') {
+                  <div class="tse-input-row">
+                    <input class="form-control tse-num" type="number" inputmode="decimal" min="0" max="100" step="0.1"
+                           [(ngModel)]="answers[q.key]" [disabled]="readOnly" [attr.aria-label]="q.label">
+                    <span class="tse-unit">%</span>
+                  </div>
+                }
+                @case ('list') {
+                  <app-search-select [options]="qn.lists[q.list!]" [value]="answers[q.key] ?? null" (valueChange)="setList(q, $event)"
+                                     [disabled]="readOnly" [placeholder]="q.list === 'regions' ? 'Choisir la région' : 'Rechercher un secteur (code ou mot)'" />
+                }
+                @case ('longtext') {
+                  <textarea class="form-control" rows="3" maxlength="2000" [(ngModel)]="answers[q.key]" [disabled]="readOnly" [attr.aria-label]="q.label"></textarea>
+                }
+                @default {
+                  <input class="form-control" type="text" maxlength="255" [(ngModel)]="answers[q.key]" [disabled]="readOnly" [attr.aria-label]="q.label">
+                }
+              }
+            </article>
+          }
+
+          @if (s.id === 'III') {
+            @for (w of jobsWarnings; track w) {
+              <div class="alert alert-warning py-2 mb-2 no-print"><i class="bi bi-exclamation-triangle me-1"></i>{{ w }}</div>
+            }
+          }
+
+          @if (sections.indexOf(s) < sections.length - 1) {
+            <button type="button" class="btn btn-outline-primary tse-next no-print" (click)="nextSection(s)">
+              Rubrique suivante <i class="bi bi-arrow-down ms-1"></i>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Barre du bas : l'avancement suit la saisie -->
+  @if (!readOnly || preview) {
+    <div class="tse-actions no-print">
+      <div class="tse-live" aria-live="polite">
+        <span>Avancement</span>
+        <strong>{{ answeredCount }} / {{ totalCount }}</strong>
+      </div>
+      @if (preview) {
+        <span class="small text-muted">Aperçu : rien n'est enregistré</span>
+      } @else {
+        <button type="button" class="btn btn-success tse-btn-save" [disabled]="isSaving" (click)="save()">
+          @if (isSaving) { <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement… }
+          @else { <i class="bi bi-check-circle me-2"></i>Enregistrer }
+        </button>
+      }
+    </div>
+  }
+  }
+
+  @if (!preview) { <app-livrable-review [toolCode]="phase === 'final' ? 'tsef' : 'tse'" /> }
+</div>

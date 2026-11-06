@@ -5,9 +5,12 @@ import { RouterLink } from '@angular/router';
 import { ConsultantService } from '../../../consultant.service';
 import { StorageService } from '../../../../_services/storage.service';
 import { ScrollHintDirective } from '../../../../shared/scroll-hint.directive';
+import { LivrableReviewComponent } from '../../../../shared/components/livrable-review/livrable-review.component';
+import { PreviewBannerComponent } from '../../../../shared/components/preview-banner/preview-banner.component';
 import {
   CANAUX_VENTE, ProfilResponse, ProfilVente
 } from '../../../../core/model/entreprise-profil';
+import { hasManagerRole } from '../../../../core/roles';
 
 type Niveau = 'secondaire' | 'universite' | 'autre';
 
@@ -23,7 +26,7 @@ const CHOICE_FIELDS = ['type_entreprise', 'type_facturation', 'type_clientele'];
 @Component({
   selector: 'app-t1l',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ScrollHintDirective],
+  imports: [LivrableReviewComponent, PreviewBannerComponent, CommonModule, ReactiveFormsModule, RouterLink, ScrollHintDirective],
   templateUrl: './t1l.component.html',
   styleUrl: './t1l.component.scss'
 })
@@ -46,6 +49,8 @@ export class T1lComponent implements OnInit, OnDestroy {
   loadError = false;
   isSaving = false;
   readOnly = true;
+  /** Aperçu manager : outil vierge, utilisable mais jamais enregistré */
+  preview = false;
   isManagerRole = false;
 
   alertMessage = '';
@@ -71,13 +76,16 @@ export class T1lComponent implements OnInit, OnDestroy {
 
     const user = this.storageService.getUser();
     this.userId = user.id;
-    this.isManagerRole = (user.roles ?? []).some((r: string) => r === 'ROLE_ADMIN' || r === 'ROLE_MODERATOR');
+    this.isManagerRole = hasManagerRole(user.roles);
     this.consultantId = this.storageService.ConsultantId === 0 ? this.userId : this.storageService.ConsultantId;
     this.companyId = this.storageService.CompanyId;
+    // Un manager qui ouvre l'outil depuis le menu (sans entreprise) le voit comme un consultant, sans pouvoir enregistrer
+    this.preview = this.isManagerRole && !this.companyId;
     // Seul le consultant concerné modifie ; un manager ou un autre utilisateur consulte en lecture seule
-    this.readOnly = this.isManagerRole || this.consultantId !== this.userId;
+    this.readOnly = !this.preview && (this.isManagerRole || this.consultantId !== this.userId || this.storageService.CompanyLocked);
 
     if (!this.companyId) {
+      if (this.preview) this.fill({ profil: null, ventes: [] } as unknown as ProfilResponse);
       this.isLoading = false;
       return;
     }
@@ -208,7 +216,7 @@ export class T1lComponent implements OnInit, OnDestroy {
 
   save(): void {
     this.alertMessage = '';
-    if (this.readOnly) return;
+    if (this.readOnly || this.preview) return;
     if (this.form.invalid || this.femmesSuperieuresAuTotal) {
       this.form.markAllAsTouched();
       this.showAlert('Vérifiez les champs signalés avant d\'enregistrer.', 'danger');

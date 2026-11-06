@@ -1,0 +1,63 @@
+@if (visible()) {
+  <div class="wb" role="region" aria-label="Vagues affichées">
+    <div class="container wb-inner">
+      <button type="button" class="wb-chip" (click)="open()" [attr.aria-expanded]="sheetOpen()" aria-haspopup="dialog">
+        <i class="bi bi-layers"></i>
+        <span class="wb-name">{{ wave.label() }}</span>
+        <span class="wb-count">{{ plural(wave.companiesCount()) }}</span>
+        <i class="bi bi-chevron-down wb-caret"></i>
+      </button>
+      @if (!wave.isAll() && wave.waves().length > 1) {
+        <button type="button" class="wb-all" (click)="showAll()">Voir toutes les vagues</button>
+      }
+    </div>
+  </div>
+}
+
+@if (sheetOpen()) {
+  <div class="wbs-backdrop" (click)="close()"></div>
+  <section class="wbs" role="dialog" aria-modal="true" aria-labelledby="wbs-title">
+    <header class="wbs-head">
+      <h2 id="wbs-title" class="wbs-title">Vagues affichées</h2>
+      <button type="button" class="wbs-close" (click)="close()" aria-label="Fermer"><i class="bi bi-x-lg"></i></button>
+    </header>
+
+    <div class="wbs-body">
+      <p class="wbs-hint">Choisissez une ou plusieurs vagues : les listes, les livrables et les tableaux de bord ne portent que sur elles.</p>
+
+      <button type="button" class="wbs-row" role="checkbox" [class.on]="draft().length === 0" [attr.aria-checked]="draft().length === 0" (click)="draft.set([])">
+        <span class="wbs-check"><i class="bi bi-check-lg"></i></span>
+        <span class="wbs-text"><strong>Toutes les vagues</strong><small>Vue d'ensemble, vagues confondues</small></span>
+        <span class="wbs-n">{{ totalCompanies() }}</span>
+      </button>
+
+      @for (w of wave.waves(); track w.id) {
+        <button type="button" class="wbs-row" role="checkbox" [class.on]="draft().includes(w.id)" [attr.aria-checked]="draft().includes(w.id)" (click)="toggle(w.id)">
+          <span class="wbs-check"><i class="bi bi-check-lg"></i></span>
+          <span class="wbs-text">
+            <strong>{{ w.nom }}</strong>
+            <small>
+              <span [class]="'wbs-state ' + w.statut">{{ statusLabel(w.statut) }}</span>
+              @if (periodOf(w)) { · {{ periodOf(w) }} }
+            </small>
+          </span>
+          <span class="wbs-n">{{ w.nb_entreprises }}</span>
+        </button>
+      }
+
+      @if (wave.defaultSelection.length) {
+        <button type="button" class="wbs-link" (click)="currentOnly()"><i class="bi bi-lightning-charge"></i>Seulement les vagues en cours</button>
+      }
+    </div>
+
+    <footer class="wbs-foot">
+      @if (isAdmin()) {
+        <a class="wbs-manage" routerLink="/manager/vagues" (click)="close()"><i class="bi bi-gear"></i>Gérer les vagues</a>
+      }
+      <div class="wbs-actions">
+        <button type="button" class="wbs-btn" (click)="close()">Annuler</button>
+        <button type="button" class="wbs-btn primary" (click)="apply()">Afficher</button>
+      </div>
+    </footer>
+  </section>
+}

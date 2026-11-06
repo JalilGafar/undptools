@@ -1,217 +1,188 @@
-<div class="containers">
-    <!-- Retour -->
-    <button class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
-        ← Retour
-    </button>
-    <div class="row">
-        <div class="col-md-9">
-            <div class="row pt-3">
-                <div class="col">
-                    <h2 class="card-title"> {{company.name}} </h2>
-                    <p class="card-text">
-                        {{company.description}}
-                    </p>
-                    <a [routerLink]="['/consultant/edit-company', company.id]"
-                       class="btn btn-primary btn-sm mt-1">
-                        <i class="bi bi-pencil-square me-1"></i>Renseigner l'entreprise
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <img src="../../../../assets/images/relation7.jpeg" class="rounded float-end"
-                        style="width: -webkit-fill-available;" alt="">
-                </div>
-            </div>
-            <hr class="text-muted">
-            <hr class="text-muted">
-            <!-- <div class="container">
-                <div class="row justify-content-between">
-                    <div class="col-6">
-                        <div class="card">
-                            <div class="contente">
-                                <div style="display: block;" class="chart" chartType="bar">
-                                    <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType"
-                                        (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
-                                    </canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card">
-                            <div class="contente">
-                                <div style="display: block;" class="chart" chartType="radar">
-                                    <canvas baseChart [data]="radarChartData" [options]="radarChartOptions"
-                                        [type]="radarChartType">
-                                    </canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="row">
-                <div class="col-md-4">
-                    <a  routerLink="consultant/tool/attribut" >
-                        <div class="card m-2">
-                            <div class="illust">
-                                <i class="bi bi-spellcheck"></i>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">Prédiagnostique</h5>
-                                <div class="progress" style="height: 40px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"
-                                        aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <div class="card m-2">
-                        <div class="illust">
-                            <i class="bi bi-signpost-split-fill"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Offre & Demande</h5>
-                            <div class="progress" style="height: 40px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 15%;"
-                                    aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">15%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card m-2">
-                        <div class="illust">
-                            <i class="bi bi-grid-1x2-fill"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Modèle d'Affaires</h5>
-                            <div class="progress" style="height: 40px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 10%;"
-                                    aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">5%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card m-2">
-                        <div class="illust">
-                            <i class="bi bi-easel-fill"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Renforcement des capacités</h5>
-                            <div class="progress" style="height: 40px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 10%;"
-                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card m-2">
-                        <div class="illust">
-                            <i class="bi bi-rocket-takeoff-fill"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Renforcement des activités</h5>
-                            <div class="progress" style="height: 40px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 10%;"
-                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card m-2">
-                        <div class="illust">
-                            <i class="bi bi-repeat"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Promotion des relations d'affaires</h5>
-                            <div class="progress" style="height: 40px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 10%;"
-                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="container db-wrapper">
 
-            </div>
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  @if (isLoading) {
+    <app-loading message="Chargement de l'entreprise…" />
+  } @else if (loadError || !company) {
+    <app-load-error message="Impossible de charger cette entreprise." />
+  } @else {
+
+    <!-- ── En-tête de l'entreprise ───────────────────────────────────────── -->
+    <header class="db-header">
+      <img class="db-logo" [src]="company.logo | companyLogo" (error)="onLogoError($event)" [alt]="company.name">
+      <div class="db-identity">
+        <h1 class="db-name">{{ company.name }}</h1>
+        <p class="db-meta">
+          <i class="bi bi-geo-alt me-1"></i>{{ company.ville || '—' }}@if (company.region) {, {{ company.region }}}
+          @if (company.secteur) { · {{ company.secteur }} }
+        </p>
+        @if (company.vague_nom) {
+          <p class="db-wave" [class.closed]="company.vague_statut === 'cloturee'">
+            <i class="bi" [class.bi-layers]="company.vague_statut !== 'cloturee'" [class.bi-lock-fill]="company.vague_statut === 'cloturee'"></i>
+            {{ company.vague_nom }}@if (company.vague_statut === 'cloturee') { · clôturée, lecture seule }
+          </p>
+        }
+        <div class="db-header-actions">
+          @if (!locked) {
+            <a class="btn btn-light btn-sm" [routerLink]="['/consultant/edit-company', company.id]">
+              <i class="bi bi-pencil-square me-1"></i>Renseigner l'entreprise
+            </a>
+          }
+          <button type="button" class="btn btn-outline-light btn-sm" (click)="open('t1h')">
+            <i class="bi bi-images me-1"></i>Photos
+          </button>
         </div>
-        <div class="col-md-3">
-            <div class="container">
-                <div class="row pt-3">
-                    <div class="col">
-                        <div class="card" style="width: 20rem;">
-                            <h5 class="card-header">Annonces</h5>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    Réunion ZOOM dans 3 jours
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      </div>
+    </header>
 
-                <div class="row pt-3">
-                    <div class="col">
-                        <div class="card" style="width: 20rem;">
-                            <h5 class="card-header">To-do List</h5>
-                            <div class="card-body">
-                                <div class="list-group pb-2">
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="">
-                                        First checkbox
-                                    </label>
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="">
-                                        Second checkbox
-                                    </label>
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="">
-                                        Third checkbox
-                                    </label>
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="">
-                                        Fourth checkbox
-                                    </label>
-                                    <label class="list-group-item">
-                                        <input class="form-check-input me-1" type="checkbox" value="">
-                                        Fifth checkbox
-                                    </label>
-                                </div>
-                                <button type="button" class="btn btn-primary pt-2">Ajouter une tache</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row pt-3">
-                    <div class="col">
-                        <div class="card" style="width: 20rem;">
-                            <h5 class="card-header">Réalisations Globale</h5>
-                            <div class="card-body roo">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-3 col-sm-6">
-                                            <div class="progress blue">
-                                                <span class="progress-left">
-                                                    <span class="progress-bar"></span>
-                                                </span>
-                                                <span class="progress-right">
-                                                    <span class="progress-bar"></span>
-                                                </span>
-                                                <div class="progress-value">30%</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- ── Trois tuiles ──────────────────────────────────────────────────── -->
+    <div class="db-tiles">
+      <div class="db-tile">
+        <strong>{{ totalLivrables }}</strong>
+        <span>Livrable{{ totalLivrables > 1 ? 's' : '' }} rempli{{ totalLivrables > 1 ? 's' : '' }}</span>
+      </div>
+      <button type="button" class="db-tile warn" [class.active]="filter === 'amelio'" [disabled]="!nbAmeliorer" (click)="setFilter('amelio')">
+        <strong>{{ nbAmeliorer }}</strong>
+        <span>À améliorer</span>
+      </button>
+      <button type="button" class="db-tile alert-tile" [class.active]="filter === 'nouveau'" [disabled]="!nbNouveau" (click)="setFilter('nouveau')">
+        <strong>{{ nbNouveau }}</strong>
+        <span>Nouvelle{{ nbNouveau > 1 ? 's' : '' }} évaluation{{ nbNouveau > 1 ? 's' : '' }}</span>
+      </button>
     </div>
+    @if (filter) {
+      <p class="db-filter-note">
+        Affichage filtré : {{ filter === 'amelio' ? 'livrables à améliorer' : 'nouvelles évaluations' }}
+        <button type="button" class="btn btn-link btn-sm p-0 ms-1" (click)="setFilter(filter)">Tout afficher</button>
+      </p>
+    }
+
+    <!-- ── Prochaine action ──────────────────────────────────────────────── -->
+    @if (!filter && !locked) {
+      @if (next) {
+        <button type="button" class="db-next" (click)="openNext()">
+          <span class="db-next-icon"><i class="bi bi-play-fill"></i></span>
+          <span class="db-next-text">
+            <small>Prochaine action</small>
+            <strong>{{ next.code }} {{ next.name }}</strong>
+          </span>
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      } @else {
+        <div class="db-next done">
+          <span class="db-next-icon"><i class="bi bi-check-lg"></i></span>
+          <span class="db-next-text"><strong>Tous les outils actifs sont remplis.</strong></span>
+        </div>
+      }
+    }
+
+    <div class="row g-3">
+
+      <!-- ── Colonne de droite sur ordinateur : retours + à propos (en premier sur mobile) ── -->
+      <div class="col-lg-4 order-1 order-lg-2">
+
+        @if (feedback.length) {
+          <section class="db-card">
+            <h2 class="db-card-title"><i class="bi bi-chat-square-text me-2"></i>Retours d'évaluation</h2>
+            <ul class="db-feedback">
+              @for (f of feedback; track f.label) {
+                @if (feedbackVisible(f)) {
+                  <li>
+                    <button type="button" class="db-fb-item" (click)="openFeedback(f)">
+                      <span class="db-fb-label">{{ f.label }}</span>
+                      <app-review-badge [review]="f.review" [pending]="true" />
+                    </button>
+                  </li>
+                }
+              }
+            </ul>
+          </section>
+        }
+
+        @if (!filter) {
+          <section class="db-card db-about">
+            <h2 class="db-card-title"><i class="bi bi-building me-2"></i>À propos</h2>
+            @if (company.description) { <p>{{ company.description }}</p> }
+            <dl>
+              @if (company.gerant) { <dt>Gérant</dt><dd>{{ company.gerant }}</dd> }
+              @if (company.nbr_employer) { <dt>Employés</dt><dd>{{ company.nbr_employer }}@if (company.nbr_femme) { dont {{ company.nbr_femme }} femme{{ company.nbr_femme > 1 ? 's' : '' }} }</dd> }
+              @if (company.date_creation) { <dt>Création</dt><dd>{{ company.date_creation }}</dd> }
+            </dl>
+          </section>
+        }
+      </div>
+
+      <!-- ── Outils par étape ──────────────────────────────────────────────── -->
+      <div class="col-lg-8 order-2 order-lg-1">
+        @for (g of groups; track g.label; let i = $index) {
+          @if (groupVisible(g)) {
+            <section class="db-group" [class.db-group-soon]="g.progress === null">
+              <button type="button" class="db-group-head" (click)="toggle(g)" [attr.aria-expanded]="g.open">
+                <i class="bi {{ g.icon }} db-group-icon"></i>
+                <span class="db-group-title">
+                  @if (i > 0) { <small class="db-group-eyebrow">Étape {{ i }}</small> }
+                  {{ g.label }}
+                </span>
+                @if (g.progress !== null) {
+                  <span class="db-bar" role="progressbar" [attr.aria-valuenow]="g.progress" aria-valuemin="0" aria-valuemax="100">
+                    <span class="db-bar-fill" [style.width.%]="g.progress"></span>
+                  </span>
+                }
+                <i class="bi" [class.bi-chevron-up]="g.open" [class.bi-chevron-down]="!g.open"></i>
+              </button>
+
+              @if (g.open) {
+                <div class="db-tools">
+                  @for (r of g.rows; track r.route + r.name) {
+                    @if (rowVisible(r)) {
+                      <div class="db-tool-wrap" [class.soon]="r.status === 'soon'" [class.has-done]="r.filled">
+                        <button type="button" class="db-tool" (click)="r.minutes ? open('t1b') : open(r.route)">
+                          @if (r.code) { <span class="db-code">{{ r.code }}</span> }
+                          <span class="db-tool-name">{{ r.name }}</span>
+                          @if (r.status === 'active') {
+                            @if (r.minutes) {
+                              @if (r.minutes.length) { <span class="db-chip ok">{{ r.minutes.length }} minute{{ r.minutes.length > 1 ? 's' : '' }}</span> }
+                              @else { <span class="db-chip todo">À faire</span> }
+                            } @else if (r.filled) {
+                              <span class="db-chip ok"><i class="bi bi-check-lg me-1"></i>Rempli</span>
+                              <app-review-badge [review]="r.review" />
+                            } @else {
+                              <span class="db-chip todo">À faire</span>
+                            }
+                          }
+                        </button>
+
+                        @if (r.minutes && r.status === 'active') {
+                          <ul class="db-minutes">
+                            @for (m of r.minutes; track m.id) {
+                              @if (minuteVisible(m)) {
+                                <li>
+                                  <button type="button" class="db-minute" (click)="openMinute(m.id)">
+                                    <span><i class="bi bi-calendar-event me-1"></i>{{ fmtDate(m.date) }}</span>
+                                    <app-review-badge [review]="m.review" />
+                                  </button>
+                                </li>
+                              }
+                            }
+                          </ul>
+                          @if (!filter && !locked) {
+                            <button type="button" class="db-new" (click)="newMinute(r.etape ?? 1)">
+                              <i class="bi bi-plus-circle me-1"></i>Nouvelle minute de réunion
+                            </button>
+                          }
+                        }
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </section>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

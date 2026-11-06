@@ -18,7 +18,7 @@
     <!-- En-tête -->
     @if (isAdmin) {
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 class="mb-0 fw-bold">{{ company.name }}</h4>
+      <h4 class="mb-0 fw-bold">{{ company.name }}@if (company.vague_nom) { <span class="badge rounded-pill ms-2 fs-6 align-middle" [class.text-bg-primary]="company.vague_statut !== 'cloturee'" [class.text-bg-warning]="company.vague_statut === 'cloturee'">{{ company.vague_nom }}{{ company.vague_statut === 'cloturee' ? ' · clôturée' : '' }}</span> }</h4>
       <div class="d-flex gap-2">
         <button class="btn btn-outline-primary btn-sm" (click)="toggleEdit()">
           {{ editMode ? 'Annuler' : '✏️ Modifier' }}
@@ -35,7 +35,7 @@
     </div>
     } @else {
     <div class="mb-4">
-      <h4 class="mb-0 fw-bold">{{ company.name }}</h4>
+      <h4 class="mb-0 fw-bold">{{ company.name }}@if (company.vague_nom) { <span class="badge rounded-pill ms-2 fs-6 align-middle" [class.text-bg-primary]="company.vague_statut !== 'cloturee'" [class.text-bg-warning]="company.vague_statut === 'cloturee'">{{ company.vague_nom }}{{ company.vague_statut === 'cloturee' ? ' · clôturée' : '' }}</span> }</h4>
     </div>
     }
 
@@ -71,6 +71,16 @@
               <dl class="row mb-0">
                 <dt class="col-sm-5">Nom</dt>
                 <dd class="col-sm-7">{{ company.name }}</dd>
+
+                <dt class="col-sm-5">Consultant en charge</dt>
+                <dd class="col-sm-7">
+                  @if (company.idUser && company.consultant) {
+                    <a [routerLink]="['/manager/consultant-profile', company.idUser]" class="cd-consultant">{{ company.consultant }}</a>
+                  } @else { <span class="text-muted">Non attribuée</span> }
+                </dd>
+
+                <dt class="col-sm-5">Secteur d'activité</dt>
+                <dd class="col-sm-7">{{ company.secteur }}</dd>
 
                 <dt class="col-sm-5">Gérant</dt>
                 <dd class="col-sm-7">{{ company.gerant }}</dd>
@@ -159,6 +169,27 @@
                   <input id="cd_name" class="form-control" formControlName="name"
                     [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched">
                   <div class="invalid-feedback">Le nom est obligatoire.</div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label" for="cd_id_consl">Consultant en charge</label>
+                  <select id="cd_id_consl" class="form-select" formControlName="id_consl">
+                    @if (!consultants.length) { <option [ngValue]="company.idUser">{{ company.consultant || 'Chargement…' }}</option> }
+                    @for (c of consultants; track c.id) { <option [ngValue]="c.id">{{ c.label }}</option> }
+                  </select>
+                  @if (consultantChanged) {
+                    <div class="alert alert-warning mt-2 mb-0 py-2 small" role="alert">
+                      <i class="bi bi-arrow-left-right me-1"></i>
+                      <strong>{{ consultantName(form.value.id_consl) }}</strong> prendra l'entreprise en charge à l'enregistrement.
+                      Les livrables déjà saisis (et leurs évaluations) la suivent : {{ company.consultant || 'le consultant actuel' }} n'y aura plus accès,
+                      et {{ consultantName(form.value.id_consl) }} verra les évaluations comme nouvelles.
+                    </div>
+                  }
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label" for="cd_secteur">Secteur d'activité</label>
+                  <input id="cd_secteur" class="form-control" formControlName="secteur">
                 </div>
 
                 <div class="col-12">
@@ -271,7 +302,7 @@
         <div class="d-flex gap-2 mt-4">
           <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving">
             @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
-            Enregistrer les modifications
+            {{ consultantChanged ? 'Enregistrer et transférer à ' + consultantName(form.value.id_consl) : 'Enregistrer les modifications' }}
           </button>
           <button type="button" class="btn btn-outline-secondary" (click)="toggleEdit()">
             Annuler
@@ -291,9 +322,11 @@
       <app-company-gallery [companyId]="company.id" />
     }
 
+  } @else if ((companyState$ | async)?.error) {
+    <div class="alert alert-danger">Impossible de charger l'entreprise. Vérifiez votre connexion puis réessayez.</div>
   } @else {
     <div class="d-flex justify-content-center py-5">
-      <div class="spinner-border text-primary"></div>
+      <div class="spinner-border text-primary" role="status"></div>
     </div>
   }
 

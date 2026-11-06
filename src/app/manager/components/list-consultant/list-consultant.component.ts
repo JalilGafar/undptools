@@ -7,11 +7,15 @@ import { UserService } from '../../../_services/user.service';
 import { ManagerService } from '../../manager.service';
 import { StorageService } from '../../../_services/storage.service';
 import { AvatarPipe } from '../../../core/company-logo.pipe';
+import { LoadingComponent, LoadErrorComponent } from '../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../core/load-state';
 
 @Component({
   selector: 'app-list-consultant',
   standalone: true,
   imports: [
+    LoadingComponent,
+    LoadErrorComponent,
         CommonModule,
         RouterLink,
         AvatarPipe
@@ -22,6 +26,7 @@ import { AvatarPipe } from '../../../core/company-logo.pipe';
 export class ListConsultantComponent implements OnInit {
 
   user$!: Observable<User[]>;
+  userState$!: Observable<LoadState>;
   isAdmin = false;
 
   constructor(
@@ -37,6 +42,7 @@ export class ListConsultantComponent implements OnInit {
 
     this.managerService.getUserFromServer();
     this.user$ = this.managerService.persona$;
+    this.userState$ = this.managerService.personaState$;
   }
 
   consultantSelect(id: number) {

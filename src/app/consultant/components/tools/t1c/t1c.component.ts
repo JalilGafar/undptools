@@ -8,18 +8,21 @@ import { GanttTask } from '../../../../core/model/gantt-task.model';
 import { ConsultantService } from '../../../consultant.service';
 import { StorageService } from '../../../../_services/storage.service';
 import { filter, Observable, tap } from 'rxjs';
+import { LoadingComponent, LoadErrorComponent } from '../../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../../core/load-state';
 
 @Component({
   selector: 'app-t1c',
   standalone: true,
   imports: [
-    CommonModule,
+    LoadingComponent, LoadErrorComponent, CommonModule,
     ReactiveFormsModule,
   ],
   templateUrl: './t1c.component.html',
   styleUrl: './t1c.component.scss'
 })
 export class T1cComponent implements OnInit, AfterViewInit, OnDestroy {
+  toolState$!: Observable<LoadState>;
 
   activityForm!: FormGroup;
   activities: Activity[] = [];
@@ -73,6 +76,7 @@ export class T1cComponent implements OnInit, AfterViewInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.toolState$ = this.toolService.toolState$;
     this.activityForm = this.fb.group({
       etape: [''],
       name: ['', Validators.required],

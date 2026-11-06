@@ -1,0 +1,141 @@
+<div class="container ic-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="ic-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()">
+      <i class="bi bi-printer me-1"></i>Imprimer / PDF
+    </button>
+  </div>
+
+  <!-- En-tête -->
+  <div class="ic-header">
+    <div class="ic-header-icon"><i class="bi bi-brush"></i></div>
+    <div>
+      <h2 class="ic-title">Diagnostic d'image commerciale</h2>
+      <p class="ic-subtitle">
+        Programme GYB
+        @if (companyName) { · <strong>{{ companyName }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement du diagnostic…" />
+  } @else if (!companyId && !preview) {
+    <div class="ic-empty">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <app-load-error message="Impossible de charger le diagnostic d'image commerciale." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  }
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  } @else {
+    <p class="ic-intro no-print">Pour chaque élément, évaluez la situation actuelle de l'entreprise et indiquez si elle a besoin d'un accompagnement dans le cadre du programme.</p>
+  }
+
+  <!-- Résumé : se met à jour au fil des réponses -->
+  <section class="ic-summary" aria-label="Résumé">
+    <div class="ic-sum ok"><strong>{{ existant }}</strong><span>Existant</span></div>
+    <div class="ic-sum help"><strong>{{ besoinAide }}</strong><span>Besoin d'aide</span></div>
+    <div class="ic-sum none"><strong>{{ inexistant }}</strong><span>Inexistant</span></div>
+  </section>
+  <p class="ic-note">Les éléments « Partiellement » ne sont comptés ni comme existants ni comme inexistants.</p>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    @for (section of sections; track section.title) {
+      <h5 class="ic-section-title"><i class="bi {{ section.icon }} me-2"></i>{{ section.title }}</h5>
+
+      @for (e of section.elements; track e.id) {
+        <article class="ic-item" [formGroup]="item(e.id)">
+          <header class="ic-item-head">
+            <span class="ic-badge">{{ e.id }}</span>
+            <h3 class="ic-item-title">{{ e.label }}</h3>
+          </header>
+
+          <div class="ic-field">
+            <span class="ic-label">Existe-t-il ?</span>
+            <div class="ic-choices" role="group" aria-label="Existe-t-il ?">
+              @for (c of existeChoices; track c.value) {
+                <button type="button" class="ic-choice" [class.selected]="isChosen(e.id, 'existe', c.value)"
+                        [class.c-oui]="c.value === 'oui'" [class.c-non]="c.value === 'non'" [class.c-part]="c.value === 'partiellement'"
+                        [disabled]="readOnly" [attr.aria-pressed]="isChosen(e.id, 'existe', c.value)"
+                        (click)="pick(e.id, 'existe', c.value)">{{ c.label }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="ic-field">
+            <span class="ic-label">Situation actuelle</span>
+            <div class="ic-choices ic-choices-4" role="group" aria-label="Situation actuelle">
+              @for (c of situationChoices; track c.value) {
+                <button type="button" class="ic-choice" [class.selected]="isChosen(e.id, 'situation', c.value)"
+                        [class.c-oui]="c.value === 'bonne'" [class.c-part]="c.value === 'moyenne'" [class.c-non]="c.value === 'mediocre'" [class.c-off]="c.value === 'non_applicable'"
+                        [disabled]="readOnly" [attr.aria-pressed]="isChosen(e.id, 'situation', c.value)"
+                        (click)="pick(e.id, 'situation', c.value)">{{ c.label }}</button>
+              }
+            </div>
+          </div>
+
+          <div class="ic-field">
+            <span class="ic-label">Besoin d'un accompagnement ?</span>
+            <div class="ic-choices" role="group" aria-label="Besoin d'un accompagnement ?">
+              <button type="button" class="ic-choice c-help" [class.selected]="isChosen(e.id, 'besoin', true)"
+                      [disabled]="readOnly" [attr.aria-pressed]="isChosen(e.id, 'besoin', true)"
+                      (click)="pick(e.id, 'besoin', true)">Oui</button>
+              <button type="button" class="ic-choice c-neutral" [class.selected]="isChosen(e.id, 'besoin', false)"
+                      [disabled]="readOnly" [attr.aria-pressed]="isChosen(e.id, 'besoin', false)"
+                      (click)="pick(e.id, 'besoin', false)">Non</button>
+            </div>
+          </div>
+
+          <div class="ic-field">
+            <label class="ic-label" [for]="'obs-' + e.id">Observations</label>
+            <textarea [id]="'obs-' + e.id" class="form-control" rows="2" formControlName="observations" maxlength="1000"></textarea>
+          </div>
+        </article>
+      }
+    }
+
+    <h5 class="ic-section-title"><i class="bi bi-chat-left-text me-2"></i>Remarques générales</h5>
+    <textarea class="form-control" rows="4" formControlName="remarques_generales" maxlength="3000"
+              aria-label="Remarques générales"></textarea>
+
+    @if (alertMessage) {
+      <div class="alert mt-3 mb-0 no-print" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">
+        {{ alertMessage }}
+      </div>
+    }
+    @if (preview) {
+      <app-preview-banner [end]="true" />
+    } @else if (!readOnly) {
+      <div class="ic-actions no-print">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+          <i class="bi bi-x-circle me-1"></i> Annuler
+        </button>
+        <button type="submit" class="btn btn-success ic-btn-save" [disabled]="isSaving">
+          @if (isSaving) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+          } @else {
+            <i class="bi bi-check-circle me-2"></i>Enregistrer le diagnostic
+          }
+        </button>
+      </div>
+    }
+  </form>
+  }
+
+  @if (!preview) { <app-livrable-review toolCode="t1k" /> }
+</div>

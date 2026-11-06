@@ -1,10 +1,12 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { hasManagerRole } from '../core/roles';
 
 const USER_KEY = 'auth-user';
 const COMPANY_KEY = 'auth-company-id';
 const CONSULTANT_KEY = 'auth-consultant-id';
+const LOCKED_KEY = 'auth-company-locked';      // nom de la vague clôturée de l'entreprise courante
 
 @Injectable({
   providedIn: 'root'
@@ -15,11 +17,25 @@ export class StorageService {
     this._currentUser$ = new BehaviorSubject<any>(this.readUserFromStorage());
     this._companyId = this.readNumber(COMPANY_KEY) as number;
     this._consultantId = this.readNumber(CONSULTANT_KEY) ?? 0;
+    this._lockedWave.set(isPlatformBrowser(platformId) ? window.sessionStorage.getItem(LOCKED_KEY) : null);
   }
 
   // Entreprise / consultant courants : conservés dans sessionStorage pour survivre à l'actualisation de la page
   private _companyId!: number;
   private _consultantId = 0;
+
+  // Vague clôturée de l'entreprise courante : le consultant la consulte en lecture seule (le serveur refuse de toute façon ses saisies)
+  private _lockedWave = signal<string | null>(null);
+  get CompanyLocked(): boolean { return this._lockedWave() !== null; }
+  get LockedWaveName(): string | null { return this._lockedWave(); }
+
+  public setCompanyLocked(waveName: string | null): void {
+    this._lockedWave.set(waveName);
+    if (isPlatformBrowser(this.platformId)) {
+      if (waveName === null) window.sessionStorage.removeItem(LOCKED_KEY);
+      else window.sessionStorage.setItem(LOCKED_KEY, waveName);
+    }
+  }
 
   get CompanyId(): number { return this._companyId; }
   get ConsultantId(): number { return this._consultantId; }
@@ -48,22 +64,6 @@ export class StorageService {
     if (!isPlatformBrowser(this.platformId)) return null;
     const raw = window.sessionStorage.getItem(USER_KEY);
     return raw ? JSON.parse(raw) : null;
-  }
-
-  // ── Visibilité outils (flux réactif) ───────────────────────────────────────
-
-  private _visibleTools$ = new BehaviorSubject<boolean>(false);
-
-  get visibleTools$(): Observable<boolean> {
-    return this._visibleTools$.asObservable();
-  }
-
-  public setVisibleToolsTrue() {
-    this._visibleTools$.next(true);
-  }
-
-  public setVisibleToolsFalse() {
-    this._visibleTools$.next(false);
   }
 
   // ── Session ────────────────────────────────────────────────────────────────
@@ -97,11 +97,23 @@ export class StorageService {
   public setIdComp(id: number) {
     this._companyId = Number(id);
     this.writeNumber(COMPANY_KEY, this._companyId);
+    this.setCompanyLocked(null);          // l'appelant précise ensuite si la vague de cette entreprise est clôturée
   }
 
   public setIdConsultant(id: number) {
     this._consultantId = Number(id);
     this.writeNumber(CONSULTANT_KEY, this._consultantId);
+  }
+
+  /** Oublie l'entreprise et le consultant courants (un manager qui ouvre un outil depuis le menu le voit alors vierge) */
+  public clearContext(): void {
+    this.setIdComp(0);
+    this.setIdConsultant(0);
+  }
+
+  public isManager(): boolean {
+    const roles: string[] = this.getUser()?.roles ?? [];
+    return hasManagerRole(roles);
   }
 
   // conservées pour compatibilité

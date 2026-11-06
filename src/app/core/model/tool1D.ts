@@ -140,4 +140,6 @@ export class ToolMatDiagInteg {
     besoin_1!: string;
     besoin_2!: string;
     besoin_3!: string;
+    /** Champ des recommandations (JSON : conclusions, recommandations, problèmes identifiés) ; null tant qu'il n'a pas été rempli */
+    recommandations?: string | null;
 }

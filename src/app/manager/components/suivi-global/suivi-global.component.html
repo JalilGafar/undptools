@@ -1,0 +1,140 @@
+<div class="container sg-wrapper">
+
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <header class="sg-header">
+    <div class="sg-header-icon"><i class="bi bi-graph-up-arrow"></i></div>
+    <div>
+      <h1 class="sg-title">Suivi et évaluation du portefeuille</h1>
+      <p class="sg-sub">Chaînes de valeur inclusives : les réponses de toutes les entreprises, début de l'accompagnement contre clôture.</p>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <app-loading message="Calcul des indicateurs…" />
+  } @else if (loadError || !data || !qn) {
+    <app-load-error message="Impossible de charger le tableau de bord du suivi et de l'évaluation." />
+  } @else {
+
+    <!-- Filtres -->
+    <section class="sg-filters">
+      <div>
+        <label class="form-label" for="sg-region">Région</label>
+        <select id="sg-region" class="form-select" [(ngModel)]="region" (ngModelChange)="load()">
+          <option value="">Toutes les régions</option>
+          @for (r of data.filtres.regions; track r) { <option [value]="r">{{ r }}</option> }
+        </select>
+      </div>
+      <div>
+        <label class="form-label" for="sg-cons">Consultant</label>
+        <select id="sg-cons" class="form-select" [(ngModel)]="consultant" (ngModelChange)="load()">
+          <option [ngValue]="0">Tous les consultants</option>
+          @for (c of data.filtres.consultants; track c.id) { <option [ngValue]="c.id">{{ c.username }}</option> }
+        </select>
+      </div>
+      <div class="sg-filter-actions">
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="sg-usd" [(ngModel)]="showUsd">
+          <label class="form-check-label small" for="sg-usd">Afficher en USD <span class="text-muted">(1 USD = {{ data.fx.xafPerUsd }} FCFA)</span></label>
+        </div>
+        @if (filtered) { <button type="button" class="btn btn-link btn-sm p-0" (click)="resetFilters()">Réinitialiser les filtres</button> }
+      </div>
+    </section>
+
+    <!-- Couverture -->
+    <section class="sg-tiles" aria-label="Couverture">
+      <div class="sg-tile"><strong>{{ data.phases.initial.indicateurs.entreprises }}</strong><span>Saisies initiales</span></div>
+      <div class="sg-tile"><strong>{{ data.phases.final.indicateurs.entreprises }}</strong><span>Saisies finales</span></div>
+      <div class="sg-tile accent"><strong>{{ data.paired.entreprises }}</strong><span>Entreprises avec les deux</span></div>
+    </section>
+
+    @if (!data.phases.initial.indicateurs.entreprises && !data.phases.final.indicateurs.entreprises) {
+      <div class="sg-empty">
+        <i class="bi bi-inbox"></i>
+        <p>Aucune saisie{{ filtered ? ' pour ces filtres' : '' }} pour le moment.</p>
+      </div>
+    } @else {
+
+    <!-- Indicateurs clés -->
+    <div class="sg-mode" role="group" aria-label="Base de comparaison">
+      <button type="button" [class.on]="mode === 'all'" (click)="mode = 'all'">Toutes les entreprises</button>
+      <button type="button" [class.on]="mode === 'paired'" (click)="mode = 'paired'">À entreprises constantes ({{ data.paired.entreprises }})</button>
+    </div>
+    <p class="sg-mode-hint">
+      @if (mode === 'all') { Chaque colonne porte sur toutes les entreprises qui ont fait la saisie correspondante : le groupe peut différer entre début et fin. }
+      @else { Seules les entreprises qui ont les deux saisies : la comparaison début / clôture est à périmètre identique. }
+    </p>
+
+    <section class="sg-kpis" aria-label="Indicateurs clés">
+      @for (k of kpis; track k.label) {
+        <article class="sg-kpi">
+          <div class="sg-kpi-label"><i class="bi {{ k.icon }}"></i>{{ k.label }}</div>
+          <div class="sg-kpi-values">
+            <span class="sg-from"><small>Début</small>{{ value(k.initial, k.format) }}</span>
+            <i class="bi bi-arrow-right"></i>
+            <span class="sg-to"><small>Clôture</small>{{ value(k.final, k.format) }}</span>
+          </div>
+          @if (delta(k); as d) { <span class="sg-delta" [ngClass]="d.sign">{{ d.text }}</span> }
+          @if (k.hint) { <small class="sg-kpi-hint">{{ k.hint }}</small> }
+        </article>
+      }
+    </section>
+
+    <!-- Détail par rubrique -->
+    <h2 class="sg-h2">Détail par question</h2>
+    <div class="sg-legend"><span class="ini"></span>Début <span class="fin"></span>Clôture</div>
+
+    @for (s of sections; track s.id) {
+      @if (questionsOf(s).length) {
+        <section class="sg-section">
+          <button type="button" class="sg-section-head" (click)="toggleSection(s)" [attr.aria-expanded]="openSection === s.id">
+            <span class="sg-section-icon"><i class="bi {{ s.icon }}"></i></span>
+            <span class="sg-section-title"><small>{{ s.id === '0' ? 'Rubrique' : 'Rubrique ' + s.id }}</small>{{ s.title }}</span>
+            <i class="bi" [class.bi-chevron-up]="openSection === s.id" [class.bi-chevron-down]="openSection !== s.id"></i>
+          </button>
+
+          @if (openSection === s.id) {
+            <div class="sg-section-body">
+              @for (q of questionsOf(s); track q.key) {
+                <article class="sg-q">
+                  <p class="sg-q-label">
+                    @if (numberOf(q)) { <span class="sg-q-num">{{ numberOf(q) }}</span> }{{ q.label }}
+                  </p>
+
+                  @if (isNumeric(q)) {
+                    <div class="sg-stat">
+                      <div><small>Moyenne</small>
+                        <span class="sg-from">{{ stat('initial', q, 'moyenne') }}</span><i class="bi bi-arrow-right"></i><span class="sg-to">{{ stat('final', q, 'moyenne') }}</span></div>
+                      <div><small>Médiane</small>
+                        <span class="sg-from">{{ stat('initial', q, 'mediane') }}</span><i class="bi bi-arrow-right"></i><span class="sg-to">{{ stat('final', q, 'mediane') }}</span></div>
+                      <small class="sg-n">{{ dist('initial', q).n }} réponse(s) au début · {{ dist('final', q).n }} à la clôture</small>
+                    </div>
+                  } @else {
+                    @for (r of rows(q); track r.label) {
+                      <div class="sg-row">
+                        <p class="sg-row-label">{{ r.label }}</p>
+                        <div class="sg-bars">
+                          <div class="sg-bar"><span class="ini" [style.width.%]="r.pctInitial"></span></div>
+                          <span class="sg-pct">{{ r.pctInitial | number:'1.0-0' }} % <small>({{ r.initial }})</small></span>
+                          <div class="sg-bar"><span class="fin" [style.width.%]="r.pctFinal"></span></div>
+                          <span class="sg-pct">{{ r.pctFinal | number:'1.0-0' }} % <small>({{ r.final }})</small></span>
+                        </div>
+                      </div>
+                    }
+                    <small class="sg-n">{{ dist('initial', q).n }} réponse(s) au début · {{ dist('final', q).n }} à la clôture
+                      @if (q.type === 'multi') { · plusieurs réponses possibles : le total peut dépasser 100 % }
+                      @if (q.type === 'list') { · {{ TOP_LABEL }} }
+                    </small>
+                  }
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
+    }
+  }
+</div>

@@ -1,0 +1,115 @@
+@if (loaded && !loadError && (canReview || reviews.length)) {
+  <section class="lr-card">
+    <h3 class="lr-title"><i class="bi bi-patch-check me-2"></i>Évaluation du livrable</h3>
+
+    <!-- Mention de chaque instance : visible de tous (consultant compris) -->
+    <div class="lr-seals" aria-label="Mention de chaque instance">
+      @for (s of seals; track s.instance) {
+        <div class="lr-seal" [class.ok]="s.review?.status === 'valide'" [class.warn]="s.review?.status === 'a_ameliorer'">
+          <span class="lr-seal-name">{{ instanceLabel(s.instance) }}</span>
+          @if (s.review; as r) {
+            <span class="lr-seal-status">
+              <i class="bi" [class.bi-check-circle-fill]="r.status === 'valide'" [class.bi-exclamation-circle-fill]="r.status === 'a_ameliorer'"></i>
+              {{ r.status === 'valide' ? 'Validé par ' + instanceArticle(s.instance) : 'À améliorer (' + instanceLabel(s.instance) + ')' }}
+            </span>
+            <small class="lr-seal-meta">{{ r.updated_at | date:'dd/MM/yyyy' }}@if (r.reviewer) { · {{ r.reviewer }} }</small>
+          } @else {
+            <span class="lr-seal-status none">Pas encore évalué</span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (formError && !editing) {
+      <div class="alert alert-danger py-2">{{ formError }}</div>
+    }
+
+    <!-- Avis de l'utilisateur connecté (équipe de supervision) -->
+    @if (canReview) {
+      @if (editing) {
+        <div class="lr-form">
+          @if (canEvaluate && myInstance) {
+            <p class="lr-as"><i class="bi bi-person-badge me-1"></i>Vous évaluez au nom du <strong>{{ instanceLabel(myInstance) }}</strong>.</p>
+            <div class="lr-choices" role="group" aria-label="Mention">
+              <button type="button" class="lr-choice ok" [class.selected]="status === 'valide'"
+                      (click)="pick('valide')" [attr.aria-pressed]="status === 'valide'">
+                <i class="bi bi-check-circle-fill"></i> Validé par {{ instanceArticle(myInstance) }}
+              </button>
+              <button type="button" class="lr-choice warn" [class.selected]="status === 'a_ameliorer'"
+                      (click)="pick('a_ameliorer')" [attr.aria-pressed]="status === 'a_ameliorer'">
+                <i class="bi bi-exclamation-circle-fill"></i> À améliorer
+              </button>
+            </div>
+            <p class="lr-hint">La mention est facultative : sans mention, votre avis reste un simple commentaire. Touchez la mention choisie pour la retirer.</p>
+          } @else {
+            <p class="lr-as"><i class="bi bi-chat-left-text me-1"></i>Vous pouvez <strong>commenter</strong> ce livrable. Seuls le Bureau Pays et le RBLAC posent une mention.</p>
+          }
+
+          <label class="form-label mt-2" for="lr-comment">Commentaire (lisible par l'équipe de supervision et par le consultant)</label>
+          <textarea id="lr-comment" class="form-control" rows="4" [maxlength]="maxComment"
+                    [(ngModel)]="comment" placeholder="Vos remarques sur ce livrable…"></textarea>
+          <div class="lr-count">{{ comment.length }} / {{ maxComment }}</div>
+
+          @if (formError) { <div class="alert alert-danger py-2 mt-2">{{ formError }}</div> }
+
+          <div class="lr-actions">
+            <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
+              @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              Enregistrer
+            </button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="saving" (click)="cancelEdit()">Annuler</button>
+          </div>
+        </div>
+      } @else if (mine; as m) {
+        <!-- Mon avis existant -->
+        <article class="lr-item" [class.ok]="m.status === 'valide'" [class.warn]="m.status === 'a_ameliorer'">
+          <header class="lr-item-head">
+            <span class="lr-auth">{{ authorityOf(m) }}</span>
+            @if (m.status) {
+              <span class="lr-chip" [class.ok]="m.status === 'valide'" [class.warn]="m.status === 'a_ameliorer'">{{ statusLabel(m.status) }}</span>
+            } @else {
+              <span class="lr-chip note">Commentaire</span>
+            }
+            <span class="lr-who">Votre avis · {{ m.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+          </header>
+          @if (m.comment) { <p class="lr-comment">{{ m.comment }}</p> }
+          @if (confirmDeleteId === m.id) {
+            <div class="lr-confirm">
+              Supprimer votre avis ?
+              <button type="button" class="btn btn-sm btn-danger ms-2" (click)="confirmDelete()">Supprimer</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary ms-1" (click)="cancelDelete()">Annuler</button>
+            </div>
+          } @else {
+            <div class="lr-actions">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="startEdit()"><i class="bi bi-pencil me-1"></i>Modifier</button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="askDelete(m.id)"><i class="bi bi-trash me-1"></i>Supprimer</button>
+            </div>
+          }
+        </article>
+      } @else {
+        <button type="button" class="btn btn-primary" (click)="startEdit()">
+          <i class="bi bi-chat-square-text me-2"></i>{{ canEvaluate ? 'Évaluer ce livrable' : 'Commenter ce livrable' }}
+        </button>
+      }
+    }
+
+    <!-- Avis des autres membres de l'équipe (et, pour le consultant, tous les avis) -->
+    @if (others.length) {
+      <h4 class="lr-sub">{{ canReview ? 'Autres avis' : 'Avis reçus' }}</h4>
+      @for (r of others; track r.id) {
+        <article class="lr-item" [class.ok]="r.status === 'valide'" [class.warn]="r.status === 'a_ameliorer'">
+          <header class="lr-item-head">
+            <span class="lr-auth">{{ authorityOf(r) }}</span>
+            @if (r.status) {
+              <span class="lr-chip" [class.ok]="r.status === 'valide'" [class.warn]="r.status === 'a_ameliorer'">{{ statusLabel(r.status) }}</span>
+            } @else {
+              <span class="lr-chip note">Commentaire</span>
+            }
+            <span class="lr-who">{{ r.reviewer || 'Équipe de supervision' }} · {{ r.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+          </header>
+          @if (r.comment) { <p class="lr-comment">{{ r.comment }}</p> }
+        </article>
+      }
+    }
+  </section>
+}

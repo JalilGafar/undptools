@@ -1,6 +1,331 @@
-<div class="container pt-3">
-  <!-- Retour -->
-  <button class="btn btn-outline-secondary btn-sm mb-4" (click)="goBack()">
-    ← Retour
-  </button>
+<div class="container bp-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="bp-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()" [disabled]="printing">
+      <i class="bi bi-printer me-1"></i>Imprimer / PDF
+    </button>
+  </div>
+
+  <!-- En-tête -->
+  <div class="bp-header">
+    <div class="bp-header-icon"><i class="bi bi-clipboard2-check"></i></div>
+    <div>
+      <h2 class="bp-title">Diagnostic BPF</h2>
+      <p class="bp-subtitle">
+        Bonnes pratiques de fabrication : sécurité alimentaire et hygiène
+        @if (companyName) { · <strong>{{ companyName }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement du diagnostic BPF…" />
+  } @else if (!companyId && !preview) {
+    <div class="bp-empty">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <app-load-error message="Impossible de charger le diagnostic BPF." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  }
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  }
+  @if (alertMessage) {
+    <div class="alert no-print" role="status" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">{{ alertMessage }}</div>
+  }
+
+  <!-- Onglets : Inspection (pendant la visite) puis Rapport (résultats et rédaction) -->
+  <div class="bp-tabs no-print" role="tablist" aria-label="Parties du diagnostic">
+    <button type="button" role="tab" class="bp-tab" [class.active]="tab === 'inspection'" [attr.aria-selected]="tab === 'inspection'" (click)="goTab('inspection')">
+      <i class="bi bi-list-check me-1"></i>Inspection <span class="bp-tab-count">{{ treated }}/{{ itemCount }}</span>
+    </button>
+    <button type="button" role="tab" class="bp-tab" [class.active]="tab === 'rapport'" [attr.aria-selected]="tab === 'rapport'" (click)="goTab('rapport')">
+      <i class="bi bi-file-earmark-bar-graph me-1"></i>Rapport
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+  <div class="bp-body">
+
+    <!-- ══ Rapport : résultats, conclusions, recommandations, actions ══ -->
+    @if (tab === 'rapport' || printing) {
+    <div class="bp-pane bp-pane-rapport">
+
+      <h5 class="bp-section-title"><i class="bi bi-building me-2"></i>Identification</h5>
+      <div class="row g-3 mb-2">
+        <div class="col-6 col-md-4">
+          <span class="bp-label">Entreprise</span>
+          <p class="bp-static">{{ companyName || '—' }}</p>
+        </div>
+        <div class="col-6 col-md-4">
+          <span class="bp-label">Consultant</span>
+          <p class="bp-static">{{ consultantName || '—' }}</p>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="bp-label" for="date_evaluation">Date de la visite</label>
+          <input id="date_evaluation" class="form-control no-print" type="date" formControlName="date_evaluation">
+          <p class="bp-static print-only">{{ dateEvaluation || '—' }}</p>
+        </div>
+      </div>
+
+      <h5 class="bp-section-title"><i class="bi bi-bar-chart-line me-2"></i>Résultats par catégorie</h5>
+      @if (provisional) {
+        <p class="bp-provisional">
+          <i class="bi bi-hourglass-split me-1"></i>Résultats provisoires : {{ total.total - treated }} exigence{{ total.total - treated > 1 ? 's' : '' }} sur {{ total.total }} pas encore évaluée{{ total.total - treated > 1 ? 's' : '' }}.
+          Elles ne comptent ni dans les points ni dans le maximum.
+        </p>
+      }
+      <p class="bp-legend"><span class="bp-dot got"></span>Points obtenus <span class="bp-dot gap"></span>Écart par rapport au maximum</p>
+
+      <!-- Résultat global d'abord : c'est ce qu'on cherche en ouvrant le rapport, les catégories suivent -->
+      <article class="bp-res bp-res-total">
+        <header class="bp-res-head">
+          <span class="bp-res-name">TOTAL – résultat global</span>
+          <span class="bp-pill lv-{{ status(total).cls }}">{{ status(total).label }}</span>
+        </header>
+        <span class="bp-bar lv-{{ status(total).cls }}" role="img" [attr.aria-label]="'Taux de conformité global : ' + fmtPct(total.taux)">
+          <span class="bp-bar-fill" [style.width.%]="pct(total.taux)"></span>
+        </span>
+        <dl class="bp-stats">
+          <div><dt>Points obtenus</dt><dd>{{ total.obtenu }}</dd></div>
+          <div><dt>Maximum</dt><dd>{{ total.max }}</dd></div>
+          <div><dt>Écart</dt><dd>{{ total.ecart }}</dd></div>
+          <div><dt>Taux de conformité</dt><dd>{{ fmtPct(total.taux) }}</dd></div>
+        </dl>
+        <p class="bp-global"><strong>Appréciation globale :</strong> {{ status(total).label }}</p>
+      </article>
+
+      @for (cat of categories; track cat.id) {
+        <article class="bp-res">
+          <header class="bp-res-head">
+            <span class="bp-res-name">{{ cat.id }}. {{ cat.name }}</span>
+            <span class="bp-pill lv-{{ status(scores[cat.id - 1]).cls }}">{{ status(scores[cat.id - 1]).label }}</span>
+          </header>
+          <span class="bp-bar lv-{{ status(scores[cat.id - 1]).cls }}" role="img" [attr.aria-label]="'Taux de conformité : ' + fmtPct(scores[cat.id - 1].taux)">
+            <span class="bp-bar-fill" [style.width.%]="pct(scores[cat.id - 1].taux)"></span>
+          </span>
+          <dl class="bp-stats">
+            <div><dt>Points obtenus</dt><dd>{{ scores[cat.id - 1].obtenu }}</dd></div>
+            <div><dt>Maximum</dt><dd>{{ scores[cat.id - 1].max }}</dd></div>
+            <div><dt>Écart</dt><dd>{{ scores[cat.id - 1].ecart }}</dd></div>
+            <div><dt>Taux</dt><dd>{{ fmtPct(scores[cat.id - 1].taux) }}</dd></div>
+          </dl>
+          @if (scores[cat.id - 1].nonApplicables) {
+            <p class="bp-na-note">{{ scores[cat.id - 1].nonApplicables }} exigence{{ scores[cat.id - 1].nonApplicables > 1 ? 's' : '' }} non applicable{{ scores[cat.id - 1].nonApplicables > 1 ? 's' : '' }}, retirée{{ scores[cat.id - 1].nonApplicables > 1 ? 's' : '' }} du calcul.</p>
+          }
+        </article>
+      }
+
+      <div class="bp-scale">
+        <h6>Référence de l'échelle d'évaluation</h6>
+        <ul>
+          @for (a of appreciations; track a.value) {
+            <li><span class="bp-pill lv-{{ a.value }}">{{ a.label }}</span> <strong>{{ a.seuil }}</strong> : {{ a.description }}</li>
+          }
+        </ul>
+      </div>
+
+      <h5 class="bp-section-title"><i class="bi bi-chat-left-text me-2"></i>Conclusions et recommandations par catégorie</h5>
+      @for (cat of categories; track cat.id) {
+        <section class="bp-reco" [class.bp-reco-empty]="!hasReco(cat.id)" [formGroup]="catText(cat.id)">
+          <button type="button" class="bp-reco-head" (click)="toggleReco(cat.id)" [attr.aria-expanded]="isRecoOpen(cat.id)">
+            <span class="bp-reco-title">{{ cat.id }}. {{ cat.name }}</span>
+            @if (hasReco(cat.id)) { <span class="bp-reco-done no-print"><i class="bi bi-check-circle-fill me-1"></i>Rédigé</span> }
+            <i class="bi no-print" [class.bi-chevron-up]="openReco === cat.id" [class.bi-chevron-down]="openReco !== cat.id"></i>
+          </button>
+          @if (isRecoOpen(cat.id)) {
+            <div class="bp-reco-body">
+              <label class="bp-label" [class.bp-hide-print]="!recoText(cat.id, 'conclusions')" [for]="'concl-' + cat.id">Principales conclusions</label>
+              <textarea [id]="'concl-' + cat.id" class="form-control no-print" rows="4" formControlName="conclusions" maxlength="3000"></textarea>
+              @if (recoText(cat.id, 'conclusions')) { <p class="bp-print-text print-only">{{ recoText(cat.id, 'conclusions') }}</p> }
+              <label class="bp-label" [class.bp-hide-print]="!recoText(cat.id, 'recommandations')" [for]="'reco-' + cat.id">Recommandations</label>
+              <textarea [id]="'reco-' + cat.id" class="form-control no-print" rows="4" formControlName="recommandations" maxlength="3000"></textarea>
+              @if (recoText(cat.id, 'recommandations')) { <p class="bp-print-text print-only">{{ recoText(cat.id, 'recommandations') }}</p> }
+            </div>
+          }
+        </section>
+      }
+
+      <h5 class="bp-section-title"><i class="bi bi-journal-text me-2"></i>Remarques générales</h5>
+      <textarea class="form-control no-print" rows="4" formControlName="remarques_generales" maxlength="3000" aria-label="Remarques générales"></textarea>
+      @if (remarques) { <p class="bp-print-text print-only">{{ remarques }}</p> }
+
+      <h5 class="bp-section-title"><i class="bi bi-list-check me-2"></i>Actions prioritaires</h5>
+      <div class="no-print" formArrayName="actions">
+        @for (a of actions.controls; track a; let i = $index) {
+          <div class="bp-action">
+            <span class="bp-action-num">{{ i + 1 }}</span>
+            <textarea class="form-control" rows="2" [formControlName]="i" maxlength="1000" [attr.aria-label]="'Action prioritaire ' + (i + 1)"></textarea>
+            @if (!readOnly) {
+              <button type="button" class="bp-action-del" (click)="removeAction(i)" [attr.aria-label]="'Supprimer l\'action ' + (i + 1)"><i class="bi bi-trash"></i></button>
+            }
+          </div>
+        }
+        @if (!readOnly) {
+          <button type="button" class="btn btn-outline-primary bp-add" (click)="addAction()" [disabled]="actions.length >= maxActions">
+            <i class="bi bi-plus-lg me-1"></i>Ajouter une action
+            <small>({{ actions.length }}/{{ maxActions }})</small>
+          </button>
+        }
+      </div>
+      @if (printing && filledActions.length) {
+        <ol class="bp-print-actions print-only">
+          @for (a of filledActions; track $index) { <li>{{ a }}</li> }
+        </ol>
+      }
+    </div>
+    }
+
+    <!-- ══ Inspection : la liste de contrôle, 9 catégories ══ -->
+    @if (tab === 'inspection' || printing) {
+    <div class="bp-pane bp-pane-inspection">
+
+      <h5 class="bp-print-heading print-only">Détail de l'inspection</h5>
+
+      <div class="bp-fold no-print">
+        <button type="button" class="bp-fold-btn" (click)="showGuide = !showGuide" [attr.aria-expanded]="showGuide">
+          <i class="bi bi-info-circle me-2"></i>Mode d'emploi <i class="bi ms-auto" [class.bi-chevron-up]="showGuide" [class.bi-chevron-down]="!showGuide"></i>
+        </button>
+        @if (showGuide) {
+          <ul class="bp-guide-list">
+            @for (line of modeEmploi; track line) { <li>{{ line }}</li> }
+          </ul>
+        }
+      </div>
+
+      <!-- Résultats en direct : se mettent à jour à chaque réponse -->
+      <section class="bp-live no-print" aria-label="Résultats en direct">
+        <div class="bp-live-total">
+          <div class="bp-live-main">
+            <span class="bp-live-label">Taux de conformité global</span>
+            <small class="bp-live-progress">{{ treated }} / {{ itemCount }} évaluées @if (provisional) { · provisoire }</small>
+          </div>
+          <strong>{{ fmtPct(total.taux) }}</strong>
+          <span class="bp-pill lv-{{ status(total).cls }}">{{ status(total).label }}</span>
+        </div>
+        <button type="button" class="bp-live-toggle" (click)="showLive = !showLive" [attr.aria-expanded]="showLive">
+          Détail par catégorie <i class="bi ms-auto" [class.bi-chevron-up]="showLive" [class.bi-chevron-down]="!showLive"></i>
+        </button>
+        @if (showLive) {
+          @for (cat of categories; track cat.id) {
+            <div class="bp-live-row">
+              <span class="bp-live-name">{{ cat.name }}</span>
+              <strong class="bp-live-value">{{ fmtPct(scores[cat.id - 1].taux) }}</strong>
+              <span class="bp-bar lv-{{ status(scores[cat.id - 1]).cls }}"><span class="bp-bar-fill" [style.width.%]="pct(scores[cat.id - 1].taux)"></span></span>
+            </div>
+          }
+        }
+      </section>
+
+      @for (cat of categories; track cat.id) {
+        <section class="bp-cat" [id]="'bp-cat-' + cat.id">
+          <button type="button" class="bp-cat-head" (click)="toggleCat(cat.id)" [attr.aria-expanded]="isCatOpen(cat.id)">
+            <span class="bp-cat-badge"><i class="bi {{ cat.icon }}"></i></span>
+            <span class="bp-cat-title">{{ cat.id }}. {{ cat.name }}
+              <small>{{ done(cat.id) }} / {{ cat.items.length }} évaluées</small>
+            </span>
+            @if (scores[cat.id - 1].taux !== null) { <span class="bp-cat-rate">{{ fmtPct(scores[cat.id - 1].taux) }}</span> }
+            <i class="bi no-print" [class.bi-chevron-up]="openCat === cat.id" [class.bi-chevron-down]="openCat !== cat.id"></i>
+          </button>
+
+          @if (isCatOpen(cat.id)) {
+            <div class="bp-cat-body">
+              @for (it of cat.items; track it.id) {
+                <article class="bp-item st-{{ state(it.id) }}" [formGroup]="item(it.id)">
+                  <header class="bp-item-head">
+                    <span class="bp-num">{{ it.num }}</span>
+                    <p class="bp-text">{{ it.text }}</p>
+                    <span class="bp-max">{{ it.max }}&nbsp;pts</span>
+                  </header>
+
+                  <div class="bp-choices no-print" role="group" [attr.aria-label]="'Conformité de l\'exigence ' + it.num">
+                    @for (c of choices; track c.value) {
+                      <button type="button" class="bp-choice c-{{ c.value }}" [class.selected]="state(it.id) === c.value"
+                              [disabled]="readOnly" [attr.aria-pressed]="state(it.id) === c.value"
+                              (click)="pick(it.id, c.value)">{{ c.label }}</button>
+                    }
+                  </div>
+
+                  @if (points(it.id) !== null && state(it.id) !== 'na') {
+                    <div class="bp-points no-print">
+                      <span class="bp-points-label" [id]="'pts-' + it.id">Points attribués</span>
+                      <button type="button" class="bp-step" [disabled]="readOnly || points(it.id) === 0" (click)="step(it.id, -1)" aria-label="Retirer un point">−</button>
+                      <input class="bp-points-input" type="number" inputmode="numeric" min="0" [max]="it.max" step="1"
+                             [value]="points(it.id)" [disabled]="readOnly" [attr.aria-labelledby]="'pts-' + it.id"
+                             (change)="typePoints(it.id, $any($event.target))">
+                      <span class="bp-points-max">/ {{ it.max }}</span>
+                      <button type="button" class="bp-step" [disabled]="readOnly || points(it.id) === it.max" (click)="step(it.id, 1)" aria-label="Ajouter un point">+</button>
+                    </div>
+                  }
+                  <p class="bp-print-answer print-only">{{ answerText(it.id) }}</p>
+
+                  <div class="bp-tools no-print">
+                    @if (it.guide) {
+                      <button type="button" class="bp-link" (click)="toggleGuide(it.id)" [attr.aria-expanded]="guideOpen.has(it.id)">
+                        <i class="bi bi-info-circle me-1"></i>Comment vérifier
+                      </button>
+                    }
+                    <button type="button" class="bp-link" (click)="toggleNote(it.id)" [attr.aria-expanded]="noteVisible(it.id)">
+                      <i class="bi bi-pencil me-1"></i>Remarque @if (obsText(it.id)) { <span class="bp-dot-note" aria-label="remarque saisie"></span> }
+                    </button>
+                  </div>
+                  @if (it.guide && guideOpen.has(it.id)) {
+                    <p class="bp-guide no-print">{{ it.guide }}</p>
+                  }
+                  @if (noteVisible(it.id)) {
+                    <textarea class="form-control no-print" rows="2" formControlName="observations" maxlength="1000"
+                              [attr.aria-label]="'Remarque sur l\'exigence ' + it.num" placeholder="Observation, preuve, photo prise…"
+                              (input)="noteOpen.add(it.id)"></textarea>
+                  }
+                  @if (obsText(it.id)) {
+                    <p class="bp-print-obs print-only"><strong>Remarque :</strong> {{ obsText(it.id) }}</p>
+                  }
+                </article>
+              }
+
+              <button type="button" class="btn btn-outline-primary bp-next no-print" (click)="nextCat(cat.id)">
+                @if (cat.id < categories.length) {
+                  Catégorie suivante<i class="bi bi-arrow-right ms-2"></i>
+                } @else {
+                  Voir le rapport<i class="bi bi-arrow-right ms-2"></i>
+                }
+              </button>
+            </div>
+          }
+        </section>
+      }
+    </div>
+    }
+  </div>
+
+  @if (preview) {
+    <app-preview-banner [end]="true" />
+  } @else if (!readOnly) {
+    <div class="bp-actions no-print">
+      <span class="bp-actions-progress">{{ treated }} / {{ itemCount }} évaluées</span>
+      <button type="submit" class="btn btn-success bp-btn-save" [disabled]="isSaving">
+        @if (isSaving) {
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+        } @else {
+          <i class="bi bi-check-circle me-2"></i>Enregistrer
+        }
+      </button>
+    </div>
+  }
+  </form>
+  }
+
+  @if (!preview) { <app-livrable-review toolCode="t1ea" /> }
 </div>

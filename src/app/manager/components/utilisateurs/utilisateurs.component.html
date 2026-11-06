@@ -1,0 +1,88 @@
+<div class="container ut-wrapper">
+
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <header class="ut-header">
+    <div class="ut-header-icon"><i class="bi bi-people"></i></div>
+    <div>
+      <h1 class="ut-title">Utilisateurs et rôles</h1>
+      <p class="ut-sub">Chaque utilisateur a un seul rôle. L'administrateur évalue au nom du Bureau Pays, l'évaluateur au nom du RBLAC.</p>
+    </div>
+  </header>
+
+  @if (message(); as m) {
+    <div class="alert ut-alert" [class.alert-success]="m.type === 'success'" [class.alert-danger]="m.type === 'danger'" role="status">
+      <span>{{ m.text }}</span>
+      <button type="button" class="btn-close" aria-label="Fermer" (click)="dismiss()"></button>
+    </div>
+  }
+
+  <!-- Qui peut faire quoi -->
+  <section class="ut-legend" aria-label="Rôles">
+    @for (r of roles; track r.value) {
+      <div class="ut-legend-item"><i class="bi {{ r.icon }}"></i><div><strong>{{ r.label }}</strong><small>{{ r.hint }}</small></div></div>
+    }
+  </section>
+
+  @if (loading()) {
+    <app-loading message="Chargement des utilisateurs…" />
+  } @else if (loadError()) {
+    <app-load-error message="Impossible de charger les utilisateurs." />
+  } @else {
+
+    <div class="ut-search">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input type="search" [ngModel]="q()" (ngModelChange)="q.set($event)" placeholder="Rechercher un nom ou un e-mail…" aria-label="Rechercher un utilisateur">
+    </div>
+
+    <div class="ut-chips" role="group" aria-label="Filtrer par rôle">
+      <button type="button" class="ut-chip" [class.on]="roleFilter() === ''" (click)="roleFilter.set('')">Tous <b>{{ users().length }}</b></button>
+      @for (r of roles; track r.value) {
+        <button type="button" class="ut-chip" [class.on]="roleFilter() === r.value" (click)="roleFilter.set(r.value)">{{ r.label }} <b>{{ counts()[r.value] || 0 }}</b></button>
+      }
+    </div>
+
+    <p class="ut-count"><strong>{{ shown().length }}</strong> utilisateur{{ shown().length > 1 ? 's' : '' }}</p>
+
+    <ul class="ut-list">
+      @for (u of shown(); track u.id) {
+        <li class="ut-card">
+          <div class="ut-card-main">
+            <img class="ut-avatar" [src]="u.photo | avatar" (error)="onAvatarError($event)" alt="">
+            <div class="ut-id">
+              <strong>{{ u.username }}@if (u.id === myId) { <span class="ut-me">vous</span> }</strong>
+              <small>{{ u.email }}</small>
+            </div>
+            <span class="ut-role" [class]="'ut-role r-' + (u.role ?? 'none')"><i class="bi {{ roleOf(u.role)?.icon ?? 'bi-question-circle' }}"></i>{{ roleLabel(u.role) }}</span>
+          </div>
+          @if (u.nb_entreprises) { <p class="ut-meta"><i class="bi bi-building"></i>{{ u.nb_entreprises }} entreprise{{ u.nb_entreprises > 1 ? 's' : '' }} attribuée{{ u.nb_entreprises > 1 ? 's' : '' }}</p> }
+
+          @if (editingId() === u.id) {
+            <div class="ut-edit">
+              <label class="form-label" [for]="'role-' + u.id">Nouveau rôle de {{ u.username }}</label>
+              <select class="form-select" [id]="'role-' + u.id" [(ngModel)]="newRole" [name]="'role-' + u.id">
+                @for (r of roles; track r.value) { <option [value]="r.value">{{ r.label }}</option> }
+              </select>
+              <p class="ut-hint">{{ roleOf(newRole)?.hint }}</p>
+              @if (warn(u)) {
+                <p class="ut-warn"><i class="bi bi-exclamation-triangle me-1"></i>{{ u.nb_entreprises }} entreprise{{ u.nb_entreprises > 1 ? 's restent attribuées' : ' reste attribuée' }} à ce compte : pensez à {{ u.nb_entreprises > 1 ? 'les' : 'la' }} réaffecter (fiche de l'entreprise, « Modifier », « Consultant en charge »).</p>
+              }
+              <div class="ut-edit-actions">
+                <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Annuler</button>
+                <button type="button" class="btn btn-primary" [disabled]="busy() || newRole === u.role" (click)="save(u)">
+                  @if (busy()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> }Confirmer
+                </button>
+              </div>
+            </div>
+          } @else if (u.id !== myId) {
+            <button type="button" class="btn btn-outline-primary ut-change" (click)="edit(u)"><i class="bi bi-arrow-repeat me-1"></i>Changer le rôle</button>
+          }
+        </li>
+      } @empty {
+        <li class="ut-empty">Aucun utilisateur ne correspond.</li>
+      }
+    </ul>
+  }
+</div>

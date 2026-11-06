@@ -1,8 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { User } from '../core/model/user';
+import { compressImage } from '../shared/image-compress';
 
 
 const AUTH_API = `${environment.apiUrl}/api/auth/`;
@@ -45,9 +46,11 @@ export class AuthService {
   }
 
   uploadPhoto(file: File): Observable<{ photo: string }> {
-    const formData = new FormData();
-    formData.append('photo', file);
-    return this.http.post<{ photo: string }>(AUTH_API + 'photo', formData, { withCredentials: true });
+    // Image réduite dans le navigateur puis envoyée en JSON (la couche d'entrée de l'hébergeur refuse le multipart)
+    return from(compressImage(file, { maxSide: 800, maxBytes: 500_000 })).pipe(
+      switchMap(image => this.http.post<{ photo: string }>(AUTH_API + 'photo-json', { image }, { withCredentials: true })),
+      catchError(err => throwError(() => err?.error ? err : { error: { message: err?.message ?? 'Une erreur est survenue. Veuillez réessayer.' } }))
+    );
   }
 
   logout(): Observable<any> {

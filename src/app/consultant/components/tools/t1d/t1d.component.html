@@ -1,31 +1,57 @@
+<!-- Chargement des données de l'outil : le formulaire reste en place mais est recouvert tant que tout n'est pas arrivé -->
+@if ((toolState$ | async)?.loading) {
+  <app-loading [overlay]="true" message="Chargement de l'outil…" />
+}
+@if ((toolState$ | async)?.error) {
+  <div class="container mt-2"><app-load-error message="Impossible de charger les données de l'outil." /></div>
+}
 <div class="container td-wrapper">
 
-  <!-- Retour -->
-  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
-    <i class="bi bi-arrow-left me-1"></i> Retour
-  </button>
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="td-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    @if (canPrint) {
+      <button type="button" class="btn btn-outline-primary ms-auto" (click)="printReport()" [disabled]="printing">
+        <i class="bi bi-printer me-1"></i>Imprimer / PDF
+      </button>
+    }
+  </div>
 
   <!-- En-tête -->
   <div class="td-header">
     <div class="td-header-icon"><i class="bi bi-clipboard2-data"></i></div>
     <div>
-      <h2 class="td-title">1D Diagnostic intégral de l'entreprise</h2>
+      <h2 class="td-title">1D Diagnostic Général de l'entreprise</h2>
       <p class="td-subtitle">{{ totalQuestions }} questions réparties en 8 domaines, plus difficultés, forces, faiblesses et besoins</p>
     </div>
   </div>
 
+  <!-- En-tête du rapport imprimé : entreprise, consultant, dates -->
+  @if (printing) {
+    <p class="td-print-only td-print-meta">
+      @if (companyName) { Entreprise : <strong>{{ companyName }}</strong> · }
+      @if (consultantLabel) { Consultant : <strong>{{ consultantLabel }}</strong> · }
+      @if (diagnosticDate) { Diagnostic enregistré le {{ diagnosticDate }} · }
+      Imprimé le {{ printDate }}
+    </p>
+  }
+
+  @if (preview) { <app-preview-banner class="no-print" /> }
+
   <!-- Alerte (enregistrement) -->
   @if (showAlert) {
-    <div class="alert alert-{{ alertType }} alert-dismissible fade show" role="alert">
+    <div class="alert alert-{{ alertType }} alert-dismissible fade show no-print" role="alert">
       {{ alertMessage }}
       <button type="button" class="btn-close" aria-label="Fermer" (click)="showAlert = false"></button>
     </div>
   }
 
   <!-- Bascule Résumé / Questionnaire -->
-  <div class="td-tabs" role="tablist">
+  <div class="td-tabs no-print" role="tablist">
     <button type="button" role="tab" [class.active]="mode === 'resume'" [attr.aria-selected]="mode === 'resume'"
-            (click)="mode = 'resume'">
+            (click)="openResume()">
       <i class="bi bi-journal-text me-1"></i>Résumé
     </button>
     <button type="button" role="tab" [class.active]="mode === 'form'" [attr.aria-selected]="mode === 'form'"
@@ -56,24 +82,18 @@
                   </p>
                 }
 
-                @for (d of domaines; track d.label; let i = $index) {
-                  <div class="td-score">
-                    <div class="td-score-label">{{ d.label }}</div>
-                    <div class="td-score-line">
-                      <div class="progress td-progress">
-                        <div class="progress-bar" [ngClass]="'lvl-' + levelOfPct(score(i))"
-                             role="progressbar" [style.width.%]="score(i)"
-                             [attr.aria-valuenow]="score(i)" aria-valuemin="0" aria-valuemax="100"></div>
-                      </div>
-                      <span class="td-score-value">{{ score(i).toFixed(1) }} %</span>
-                    </div>
-                  </div>
-                }
+                <ng-container *ngTemplateOutlet="scoreBars; context: { scores: scores }" />
 
-                <button type="button" class="btn btn-primary w-100 mt-3" (click)="showDetail = !showDetail">
-                  <i class="bi" [class.bi-chevron-up]="showDetail" [class.bi-list-ul]="!showDetail"></i>
-                  {{ showDetail ? 'Masquer le détail' : 'Consulter en détail' }}
-                </button>
+                <div class="td-actions no-print">
+                  <button type="button" class="btn btn-primary" [attr.aria-expanded]="showDetail" (click)="showDetail = !showDetail">
+                    <i class="bi" [class.bi-chevron-up]="showDetail" [class.bi-list-ul]="!showDetail"></i>
+                    {{ showDetail ? 'Masquer le détail' : 'Consulter en détail' }}
+                  </button>
+                  <button type="button" class="btn btn-outline-primary" [attr.aria-expanded]="showReco" aria-controls="td-reco" (click)="toggleReco()">
+                    <i class="bi" [class.bi-chevron-up]="showReco" [class.bi-lightbulb]="!showReco"></i>
+                    {{ showReco ? 'Masquer les recommandations' : 'Voir les recommandations' }}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -81,34 +101,14 @@
             <div class="col-12 col-lg-5">
               <div class="td-card">
                 <h6 class="td-card-title">Score par domaine</h6>
-                <div class="td-chart">
-                  <ngx-charts-polar-chart
-                    [results]="single"
-                    [tooltipDisabled]="false"
-                    [legend]="false"
-                    [scheme]="colorScheme"
-                    [xAxis]="xAxis"
-                    [yAxis]="yAxis"
-                    [curve]="curveLinearClosed"
-                    [labelTrim]="true"
-                    [labelTrimSize]="14"
-                    [rangeFillOpacity]="0.3"
-                    [yAxisMinScale]="100"
-                    [yAxisTickFormatting]="pctTick">
-                  </ngx-charts-polar-chart>
-                </div>
-                <p class="td-radar-key">
-                  Chaque anneau est un niveau de réponse :
-                  <span>20&nbsp;% Insuffisant</span> · <span>40&nbsp;% À améliorer</span> · <span>60&nbsp;% Suffisant</span> ·
-                  <span>80&nbsp;% Bon</span> · <span>100&nbsp;% Excellent</span>
-                </p>
+                <ng-container *ngTemplateOutlet="radarChart; context: { results: single }" />
               </div>
             </div>
 
           </div>
 
           <!-- Détail : évaluation, domaine par domaine -->
-          @if (showDetail && matIntegLabel) {
+          @if ((showDetail || printing) && matIntegLabel) {
             <h6 class="td-section-title mt-4"><i class="bi bi-list-check me-2"></i>Évaluation détaillée</h6>
 
             @for (d of domaines; track d.label) {
@@ -150,6 +150,65 @@
             </div>
           }
 
+          <!-- Version imprimée des recommandations : du texte lisible (des zones de saisie couperaient les textes longs) -->
+          @if (printReco; as pr) {
+            <section class="td-print-only td-print-reco">
+              <h6 class="td-section-title"><i class="bi bi-lightbulb me-2"></i>Conclusions et recommandations</h6>
+              @if (pr.empty) {
+                <p class="td-print-none">Aucune conclusion ni recommandation n'a été saisie pour ce diagnostic.</p>
+              }
+              @if (pr.conclusions.length) {
+                <h6>Principales conclusions et lacunes</h6>
+                <ol>@for (c of pr.conclusions; track $index) { <li>{{ c }}</li> }</ol>
+              }
+              @if (pr.recommandations.length) {
+                <h6>Recommandations</h6>
+                <ol>@for (r of pr.recommandations; track $index) { <li>{{ r }}</li> }</ol>
+              }
+              @if (pr.problemes.length) {
+                <h6>Problèmes identifiés</h6>
+                <table class="td-print-table">
+                  <thead>
+                    <tr><th>Problème identifié</th><th>Référence</th><th>Indicateur</th><th>Valeur initiale</th><th>Prévision</th></tr>
+                  </thead>
+                  @for (p of pr.problemes; track $index; let pi = $index) {
+                    <tbody>
+                      @for (l of p.lignes; track $index; let li = $index) {
+                        <tr>
+                          @if (li === 0) { <td [attr.rowspan]="p.lignes.length"><strong>{{ pi + 1 }}.</strong> {{ p.probleme }}</td> }
+                          <td>{{ l.reference }}</td><td>{{ l.indicateur }}</td><td>{{ l.valeur_initiale }}</td><td>{{ l.prevision }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  }
+                </table>
+              }
+            </section>
+          }
+
+          <!-- Champ des recommandations : modifiable par le consultant en charge, en lecture seule pour les autres -->
+          @if (showReco) {
+            <div id="td-reco" class="td-reco-section no-print">
+              <h6 class="td-section-title"><i class="bi bi-lightbulb me-2"></i>Conclusions et recommandations</h6>
+              <ng-container *ngTemplateOutlet="recoFields" />
+
+              @if (canSave && recoShown) {
+                <div class="td-reco-save">
+                  <button type="button" class="btn btn-success" (click)="saveReco()" [disabled]="isSavingReco">
+                    @if (isSavingReco) { <span class="spinner-border spinner-border-sm me-2"></span>Enregistrement… }
+                    @else { <i class="bi bi-check-circle me-1"></i>Enregistrer les recommandations }
+                  </button>
+                  @if (recoNotice) {
+                    <p class="td-reco-notice" [class.ok]="recoNotice.type === 'success'" [class.ko]="recoNotice.type === 'danger'" role="status">
+                      <i class="bi" [class.bi-check-circle]="recoNotice.type === 'success'" [class.bi-exclamation-triangle]="recoNotice.type === 'danger'"></i>
+                      {{ recoNotice.text }}
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+
         }
       } @else {
         <div class="td-empty">
@@ -173,8 +232,15 @@
 
     @if (readOnly) {
       <div class="alert alert-info py-2">
-        <i class="bi bi-eye me-1"></i>Consultation en lecture seule : seul le consultant concerné peut modifier cette matrice.
+        <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
       </div>
+    }
+
+    <!-- Raccourci en tête de l'onglet : atteindre les résultats, les conclusions et les recommandations sans parcourir les 64 éléments -->
+    @if (!finalStep) {
+      <button type="button" class="btn btn-outline-primary td-shortcut td-shortcut-top" (click)="goToResults(); qTop.scrollIntoView({ behavior: 'smooth' })">
+        <i class="bi bi-lightbulb me-1"></i>Conclusions et recommandations
+      </button>
     }
 
     <!-- Personnel de l'entreprise : une fiche par personne -->
@@ -229,18 +295,26 @@
       </div>
     </form>
 
-    <!-- Questionnaire : une question à la fois -->
+    <!-- Questionnaire : une question à la fois, puis une dernière étape (résultats, recommandations, enregistrement) -->
     <form [formGroup]="matIntegForm" (ngSubmit)="saveTool()" novalidate>
+      <div #qTop class="td-qtop"></div>
+
+      @if (!finalStep) {
       <div class="td-card td-quiz">
 
         <!-- Progression -->
-        <div #qTop class="td-progress-head">
+        <div class="td-progress-head">
           <span class="td-count">Élément {{ currentIndex + 1 }} / {{ matIntegLength }}</span>
           <span class="td-percent">{{ answeredCount }} / {{ totalQuestions }} questions répondues</span>
         </div>
         <div class="progress td-progress-global">
           <div class="progress-bar" role="progressbar" [style.width.%]="progress"></div>
         </div>
+
+        <!-- Raccourci : atteindre les résultats, les conclusions et les recommandations sans parcourir les 64 éléments -->
+        <button type="button" class="btn btn-outline-primary td-shortcut" (click)="goToResults(); qTop.scrollIntoView({ behavior: 'smooth' })">
+          <i class="bi bi-lightbulb me-1"></i>Conclusions et recommandations
+        </button>
 
         @if (answeredCount < totalQuestions && answeredCount > 0) {
           <button type="button" class="btn btn-link btn-sm p-0 mb-2" (click)="goToFirstUnanswered(); qTop.scrollIntoView({ behavior: 'smooth' })">
@@ -307,6 +381,56 @@
           }
         }
       </div>
+      } @else {
+
+      <!-- Dernière étape : atteinte après le dernier élément (le 64e). Résultats, champ des recommandations, puis enregistrement. -->
+      <div class="td-final">
+        <div class="td-card">
+          <span class="td-domain-chip">Dernière étape</span>
+          <h5 class="td-q mb-2">Résultats et recommandations</h5>
+          @if (resultsNotice) {
+            <p class="td-results-notice" [ngClass]="resultsNotice.type" role="status">
+              @if (resultsNotice.type === 'info') { <span class="spinner-border spinner-border-sm me-2"></span> }
+              @else { <i class="bi me-1" [class.bi-check-circle]="resultsNotice.type === 'success'" [class.bi-exclamation-triangle]="resultsNotice.type === 'danger'"></i> }
+              {{ resultsNotice.text }}
+            </p>
+          }
+          <p class="td-final-text">
+            @if (readOnly) {
+              Voici les résultats de l'analyse et le champ des recommandations.
+            } @else {
+              Voici les résultats de l'analyse. Complétez si vous le souhaitez les conclusions et les recommandations (facultatif),
+              puis enregistrez l'outil.
+            }
+          </p>
+          @if (answeredCount < totalQuestions) {
+            <p class="td-incomplete mb-0">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              {{ answeredCount }} / {{ totalQuestions }} questions répondues : les scores ne tiennent compte que des réponses données.
+            </p>
+          }
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-7">
+            <div class="td-card">
+              <h6 class="td-card-title">Résumé du diagnostic d'entreprise</h6>
+              <ng-container *ngTemplateOutlet="scoreBars; context: { scores: liveScores }" />
+            </div>
+          </div>
+          <div class="col-12 col-lg-5">
+            <div class="td-card">
+              <h6 class="td-card-title">Score par domaine</h6>
+              <ng-container *ngTemplateOutlet="radarChart; context: { results: liveSingle }" />
+            </div>
+          </div>
+        </div>
+
+        <h6 class="td-section-title"><i class="bi bi-lightbulb me-2"></i>Conclusions et recommandations</h6>
+        <ng-container *ngTemplateOutlet="recoFields" />
+      </div>
+
+      }
 
       <!-- Navigation collée en bas de l'écran -->
       <div class="td-nav">
@@ -315,10 +439,12 @@
           <i class="bi bi-chevron-left"></i> Précédent
         </button>
 
-        @if (currentIndex + 1 < matIntegLength) {
+        @if (!finalStep) {
           <button type="button" class="btn btn-primary" (click)="nextItem(); qTop.scrollIntoView({ behavior: 'smooth' })">
-            Suivant <i class="bi bi-chevron-right"></i>
+            {{ currentIndex + 1 === matIntegLength ? 'Voir les résultats' : 'Suivant' }} <i class="bi bi-chevron-right"></i>
           </button>
+        } @else if (preview) {
+          <span class="small text-muted align-self-center">Aperçu : rien n'est enregistré</span>
         } @else if (!readOnly) {
           <button type="submit" class="btn btn-success" [disabled]="isSaving">
             @if (isSaving) { <span class="spinner-border spinner-border-sm me-2"></span>Enregistrement… }
@@ -330,4 +456,158 @@
 
   }
 
+
+  @if (!preview) { <app-livrable-review class="no-print" toolCode="t1d" /> }
 </div>
+
+<!-- ═══════════════ Éléments communs au Résumé et à la dernière étape du questionnaire ═══════════════ -->
+
+<!-- Score de chaque domaine, en % -->
+<ng-template #scoreBars let-scores="scores">
+  @for (d of domaines; track d.label; let i = $index) {
+    <div class="td-score">
+      <div class="td-score-label">{{ d.label }}</div>
+      <div class="td-score-line">
+        <div class="progress td-progress">
+          <div class="progress-bar" [ngClass]="'lvl-' + levelOfPct(scores[i])"
+               role="progressbar" [style.width.%]="scores[i]"
+               [attr.aria-valuenow]="scores[i]" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <span class="td-score-value">{{ scores[i].toFixed(1) }} %</span>
+      </div>
+    </div>
+  }
+</ng-template>
+
+<!-- Graphique radar : s'adapte à la largeur de l'écran -->
+<ng-template #radarChart let-results="results">
+  <div class="td-chart">
+    <ngx-charts-polar-chart
+      [results]="results"
+      [tooltipDisabled]="false"
+      [legend]="false"
+      [scheme]="colorScheme"
+      [xAxis]="xAxis"
+      [yAxis]="yAxis"
+      [curve]="curveLinearClosed"
+      [labelTrim]="true"
+      [labelTrimSize]="14"
+      [rangeFillOpacity]="0.3"
+      [yAxisMinScale]="100"
+      [yAxisTickFormatting]="pctTick">
+    </ngx-charts-polar-chart>
+  </div>
+  <p class="td-radar-key">
+    Chaque anneau est un niveau de réponse :
+    <span>20&nbsp;% Insuffisant</span> · <span>40&nbsp;% À améliorer</span> · <span>60&nbsp;% Suffisant</span> ·
+    <span>80&nbsp;% Bon</span> · <span>100&nbsp;% Excellent</span>
+  </p>
+</ng-template>
+
+<!-- Liste d'éléments du champ des recommandations (conclusions, recommandations) : un champ au départ, le consultant en ajoute jusqu'à 15 -->
+<ng-template #recoList let-kind="kind" let-items="items" let-noun="noun" let-addLabel="addLabel">
+  <div class="td-lines">
+    @for (c of items; track c; let i = $index) {
+      <div class="td-line">
+        <span class="td-badge">{{ i + 1 }}</span>
+        <textarea class="form-control" rows="2" [id]="'reco-' + kind + '-' + i" [formControl]="c" [attr.aria-label]="noun + ' n°' + (i + 1)"></textarea>
+        @if (canFill && items.length > 1) {
+          <button type="button" class="td-line-del" (click)="removeReco(kind, i)" [attr.aria-label]="'Retirer ' + noun.toLowerCase() + ' n°' + (i + 1)">
+            <i class="bi bi-trash"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  @if (canFill) {
+    <button type="button" class="btn btn-outline-primary td-add" (click)="addReco(kind)" [disabled]="items.length >= recoMax">
+      <i class="bi bi-plus-circle me-1"></i>{{ items.length >= recoMax ? 'Maximum atteint' : addLabel }} ({{ items.length }} / {{ recoMax }})
+    </button>
+  }
+</ng-template>
+
+<!-- Champ des recommandations : principales conclusions et lacunes, recommandations, problèmes identifiés -->
+<ng-template #recoFields>
+  <div class="td-reco" [formGroup]="recoForm" (keydown.enter)="blockEnter($event)">
+
+    @if (!recoShown) {
+      <!-- Rien d'enregistré : le message, et à côté le bouton pour celui qui peut remplir ; les autres voient pourquoi ils ne le peuvent pas -->
+      <div class="td-card td-reco-empty">
+        <div class="td-reco-empty-msg">
+          <i class="bi bi-lightbulb"></i>
+          <p>Aucune conclusion ni recommandation n'a été saisie pour ce diagnostic.</p>
+        </div>
+        @if (canFill) {
+          <button type="button" class="btn btn-primary" (click)="recoEditing = true">
+            <i class="bi bi-pencil me-1"></i>Remplir cette partie
+          </button>
+        } @else {
+          <p class="td-reco-why"><i class="bi bi-lock me-1"></i>{{ readOnlyReason }}</p>
+        }
+      </div>
+    } @else {
+
+      <div class="td-card">
+        <h6 class="td-card-title">Principales conclusions et lacunes</h6>
+        <p class="td-hint">Résumez les principales conclusions et lacunes de l'analyse, une par champ.</p>
+        <ng-container *ngTemplateOutlet="recoList; context: { kind: 'conclusions', items: conclusionsCtrls, noun: 'Conclusion ou lacune', addLabel: 'Ajouter une conclusion ou une lacune' }" />
+      </div>
+
+      <div class="td-card">
+        <h6 class="td-card-title">Recommandations</h6>
+        <p class="td-hint">Actions ou mesures à prendre, d'après les résultats de l'analyse, une par champ.</p>
+        <ng-container *ngTemplateOutlet="recoList; context: { kind: 'recommandations', items: recommandationsCtrls, noun: 'Recommandation', addLabel: 'Ajouter une recommandation' }" />
+      </div>
+
+      <div class="td-card">
+        <h6 class="td-card-title">Problèmes identifiés</h6>
+        <p class="td-hint">Sur la base des problèmes identifiés, établissez la situation de référence de l'entreprise et sa valeur prévisionnelle.</p>
+        <div class="td-problems">
+          @for (p of problemesCtrls; track p; let pi = $index) {
+            <div class="td-problem" [formGroup]="p">
+              <div class="td-problem-head">
+                <span class="td-badge">{{ pi + 1 }}</span>
+                <label class="form-label mb-0" [for]="'reco-pb-' + pi">Problème identifié</label>
+                @if (canFill && problemesCtrls.length > 1) {
+                  <button type="button" class="td-line-del ms-auto" (click)="removeReco('problemes', pi)" [attr.aria-label]="'Retirer le problème n°' + (pi + 1)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+              <textarea class="form-control" rows="2" [id]="'reco-pb-' + pi" formControlName="probleme"></textarea>
+
+              @for (l of lignesCtrls(p); track l; let li = $index) {
+                <div class="td-ligne" [formGroup]="l">
+                  <div class="row g-2">
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label" [for]="'reco-ref-' + pi + '-' + li">Référence</label>
+                      <input class="form-control" type="text" [id]="'reco-ref-' + pi + '-' + li" formControlName="reference" autocomplete="off">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label class="form-label" [for]="'reco-ind-' + pi + '-' + li">Indicateur</label>
+                      <input class="form-control" type="text" [id]="'reco-ind-' + pi + '-' + li" formControlName="indicateur" autocomplete="off">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" [for]="'reco-val-' + pi + '-' + li">Valeur initiale</label>
+                      <input class="form-control" type="text" [id]="'reco-val-' + pi + '-' + li" formControlName="valeur_initiale" autocomplete="off">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label" [for]="'reco-prev-' + pi + '-' + li">Prévision</label>
+                      <input class="form-control" type="text" [id]="'reco-prev-' + pi + '-' + li" formControlName="prevision" autocomplete="off">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (canFill) {
+          <button type="button" class="btn btn-outline-primary td-add" (click)="addReco('problemes')" [disabled]="problemesCtrls.length >= recoMax">
+            <i class="bi bi-plus-circle me-1"></i>{{ problemesCtrls.length >= recoMax ? 'Maximum atteint' : 'Ajouter un problème identifié' }} ({{ problemesCtrls.length }} / {{ recoMax }})
+          </button>
+        }
+      </div>
+
+    }
+  </div>
+</ng-template>

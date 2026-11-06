@@ -1,0 +1,78 @@
+$ok:   #0f9d58;
+$warn: #d97706;
+$border: #e5e7eb;
+
+.lr-card {
+  max-width: 1000px;
+  margin: 1.5rem auto 2rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+}
+
+.lr-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0 0 1rem; }
+.lr-sub { font-size: .9rem; font-weight: 700; color: #475569; margin: 1.25rem 0 .5rem; }
+
+.lr-choices { display: grid; grid-template-columns: 1fr; gap: .5rem; }
+@media (min-width: 576px) { .lr-choices { grid-template-columns: 1fr 1fr; } }
+
+.lr-choice {
+  min-height: 48px;
+  border: 1.5px solid $border;
+  color: #64748b;
+  border-radius: 10px;
+  background: #fff;
+  font-weight: 600;
+  &.ok.selected   { border-color: $ok;   background: color-mix(in srgb, $ok 12%, #fff);   color: $ok; }
+  &.warn.selected { border-color: $warn; background: color-mix(in srgb, $warn 12%, #fff); color: $warn; }
+}
+
+.lr-count { text-align: right; font-size: .75rem; color: #94a3b8; }
+.lr-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.lr-confirm { margin-top: .75rem; font-size: .9rem; }
+
+.lr-item {
+  padding: .75rem .9rem;
+  margin-bottom: .6rem;
+  border: 1px solid $border;
+  border-left: 4px solid #94a3b8;
+  border-radius: 8px;
+  background: #f8fafc;
+  &.ok   { border-left-color: $ok; }
+  &.warn { border-left-color: $warn; }
+}
+
+.lr-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+.lr-who { font-size: .8rem; color: #64748b; }
+.lr-comment { margin: .5rem 0 0; white-space: pre-line; word-break: break-word; font-size: .92rem; color: #334155; }
+
+.lr-chip {
+  padding: .15rem .65rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+  &.ok   { color: $ok;   background: color-mix(in srgb, $ok 14%, #fff); }
+  &.warn { color: $warn; background: color-mix(in srgb, $warn 14%, #fff); }
+}
+
+// ── Mention de chaque instance (Bureau Pays / RBLAC) ──────────────────────────
+.lr-seals { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-bottom: 1rem; }
+@media (min-width: 576px) { .lr-seals { grid-template-columns: 1fr 1fr; } }
+
+.lr-seal {
+  display: flex; flex-direction: column; gap: .15rem; padding: .7rem .9rem;
+  border: 1.5px solid $border; border-radius: 10px; background: #f8fafc;
+  &.ok   { border-color: $ok;   background: color-mix(in srgb, $ok 8%, #fff); }
+  &.warn { border-color: $warn; background: color-mix(in srgb, $warn 8%, #fff); }
+}
+.lr-seal-name { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #64748b; }
+.lr-seal-status { font-weight: 700; color: #1e293b; &.none { font-weight: 500; color: #94a3b8; } }
+.lr-seal.ok .lr-seal-status { color: $ok; }
+.lr-seal.warn .lr-seal-status { color: $warn; }
+.lr-seal-meta { color: #64748b; font-size: .78rem; }
+
+.lr-as { margin: 0 0 .75rem; padding: .55rem .75rem; font-size: .9rem; color: #1e3a8a; background: #eef3ff; border-radius: 8px; }
+.lr-hint { margin: .5rem 0 0; font-size: .8rem; color: #64748b; }
+.lr-auth { padding: .15rem .6rem; border-radius: 6px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #334155; background: #e2e8f0; }
+.lr-chip.note { color: #475569; background: #eef2f7; }

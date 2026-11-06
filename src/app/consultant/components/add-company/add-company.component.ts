@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ConsultantService } from '../../consultant.service';
 import { StorageService } from '../../../_services/storage.service';
 import { Router } from '@angular/router';
+import { WaveService } from '../../../shared/wave.service';
 
 @Component({
   selector: 'app-add-company',
@@ -19,6 +20,8 @@ export class AddCompanyComponent implements OnInit {
 
   companyForm!: FormGroup;
   idUser!: number;
+  isSaving = false;
+  error = '';
 
  
 
@@ -28,7 +31,8 @@ export class AddCompanyComponent implements OnInit {
     private formBuilder: FormBuilder,
     private storageService: StorageService,
     private consultantService: ConsultantService,
-    private appRout: Router
+    private appRout: Router,
+    readonly wave: WaveService
   ) { }
 
   ngOnInit(): void {
@@ -50,11 +54,16 @@ export class AddCompanyComponent implements OnInit {
       lieu: [''],
       x: [''],
       y: [''],
-      idUser: [null]
+      idUser: [null],
+      id_vague: [null]
 
     });
 
     this.idUser = this.storageService.getUser().id;
+
+    // La vague proposée est la vague en cours ; la liste est relue pour tenir compte d'une vague créée entre-temps
+    this.chooseDefaultWave();
+    void this.wave.refresh(true).then(() => this.chooseDefaultWave());
 
 
   }
@@ -70,11 +79,23 @@ export class AddCompanyComponent implements OnInit {
       idUser: this.storageService.getUser().id
     });
 
-    this.consultantService.addCompany(this.companyForm.value).subscribe()
-    this.appRout.navigateByUrl('consultant/companies');
+    this.isSaving = true;
+    this.error = '';
+    this.consultantService.addCompany(this.companyForm.value).subscribe({
+      next: () => this.appRout.navigateByUrl('consultant/companies'),
+      error: err => { this.isSaving = false; this.error = err.error?.message ?? "L'enregistrement a échoué. Veuillez réessayer."; }
+    });
     // this.adminService.addNewFormation(this.newFormation.value).pipe(take(1)).subscribe();
     // window.location.reload();
 
+  }
+
+  /** Vague en cours, ou à défaut la première vague ouverte ; ne touche pas à un choix déjà fait */
+  private chooseDefaultWave(): void {
+    if (this.companyForm.value.id_vague) return;
+    const open = this.wave.openWaves();
+    const current = open.find(w => w.statut === 'en_cours') ?? open[0];
+    if (current) this.companyForm.patchValue({ id_vague: current.id });
   }
 
   onGoBack() {

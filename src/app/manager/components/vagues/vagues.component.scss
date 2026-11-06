@@ -1,0 +1,91 @@
+// Administration des vagues : base = téléphone (une colonne, boutons de 44 px), la grille s'élargit à partir de 768 px.
+$primary: #1a56db;
+$navy:    #0e3fa3;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$ink:     #1e293b;
+$ok:      #0f9d58;
+
+.vg-wrapper { max-width: 900px; padding-top: 1.25rem; padding-bottom: 2.5rem; }
+
+.vg-header {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding: 1.1rem 1.25rem; color: #fff;
+  background: linear-gradient(135deg, $primary 0%, $navy 100%); border-radius: 12px;
+}
+.vg-header-icon { font-size: 2rem; opacity: .9; flex-shrink: 0; }
+.vg-title { margin: 0 0 2px; font-size: 1.3rem; font-weight: 700; color: #fff; }
+.vg-sub { margin: 0; font-size: .85rem; line-height: 1.4; color: rgba(255, 255, 255, .88); }
+
+.vg-alert { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+
+.vg-bar { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
+.vg-h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: $ink; }
+.vg-h2-spaced { margin: 1.75rem 0 .35rem; }
+.vg-new { min-height: 44px; font-weight: 600; }
+.vg-note { margin: 0 0 .75rem; font-size: .85rem; color: $muted; }
+
+.vg-card { margin-bottom: .75rem; padding: 1rem; background: #fff; border: 1.5px solid $border; border-radius: 12px; }
+.vg-card.closed { background: #f8fafc; }
+.vg-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.vg-card-main { min-width: 0; }
+.vg-card-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: $ink; overflow-wrap: anywhere; }
+.vg-card-meta { margin: .15rem 0 0; font-size: .85rem; color: $muted; }
+.vg-count { margin: .6rem 0 .25rem; font-size: .88rem; color: #475569; }
+
+.vg-state {
+  flex-shrink: 0; padding: .2rem .7rem; font-size: .78rem; font-weight: 700; border-radius: 999px; background: #eef2f7; color: $muted;
+  &.en_cours { color: $ok; background: #e6f6ee; }
+  &.planifiee { color: #b45309; background: #fef3c7; }
+  &.cloturee { color: #475569; background: #e2e8f0; }
+}
+
+.vg-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem;
+  .btn { min-height: 44px; font-weight: 600; } }
+
+.vg-confirm {
+  margin-top: .75rem; padding: .85rem; background: #fff7e6; border: 1px solid #f3dc9b; border-radius: 10px;
+  p { margin: 0 0 .75rem; font-size: .9rem; line-height: 1.4; }
+}
+.vg-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; .btn { min-height: 46px; font-weight: 600; } }
+
+.vg-form { display: grid; gap: .75rem; margin-top: .75rem; }
+.vg-form-dates { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.vg-form-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; .btn { min-height: 46px; font-weight: 600; } }
+.form-label { display: block; margin: 0 0 4px; font-size: .82rem; font-weight: 600; color: #374151; }
+.form-control, .form-select { min-height: 44px; border: 1.5px solid $border; border-radius: 8px; }
+
+// ── Répartition ──
+.vg-filters { display: grid; gap: .75rem; margin-bottom: .75rem; }
+
+.vg-all {
+  display: flex; align-items: center; gap: .65rem; width: 100%; min-height: 44px; padding: .25rem .5rem; margin-bottom: .35rem;
+  font: inherit; font-size: .9rem; font-weight: 600; color: $primary; background: none; border: 0; text-align: left; cursor: pointer;
+}
+
+.vg-list { margin: 0; padding: 0; list-style: none; max-height: 52vh; overflow-y: auto; }
+
+.vg-company {
+  display: flex; align-items: center; gap: .7rem; width: 100%; min-height: 56px; margin-bottom: .4rem; padding: .45rem .65rem;
+  font: inherit; text-align: left; color: $ink; background: #fff; border: 1.5px solid $border; border-radius: 10px; cursor: pointer;
+  &.on { background: #eef3ff; border-color: $primary; }
+}
+.vg-company-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3;
+  strong { font-size: .95rem; overflow-wrap: anywhere; } small { font-size: .78rem; color: $muted; } }
+.vg-chip { flex-shrink: 0; max-width: 40%; padding: .15rem .6rem; font-size: .75rem; font-weight: 700; color: $navy; background: #e0e7ff; border-radius: 999px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.vg-check {
+  display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; color: transparent; background: #fff;
+  border: 2px solid #94a3b8; border-radius: 7px; font-size: .95rem;
+  &.on { color: #fff; background: $primary; border-color: $primary; }
+}
+
+.vg-empty { padding: 1rem 0; text-align: center; color: $muted; }
+
+.vg-move { display: grid; gap: .75rem; margin-top: .85rem; padding-top: .85rem; border-top: 1px solid $border;
+  .btn { min-height: 46px; font-weight: 700; } }
+
+@media (min-width: 768px) {
+  .vg-filters { grid-template-columns: 1fr 1fr; }
+  .vg-move { grid-template-columns: 1fr auto; align-items: end; }
+  .vg-confirm-actions, .vg-form-actions { display: flex; justify-content: flex-end; }
+}

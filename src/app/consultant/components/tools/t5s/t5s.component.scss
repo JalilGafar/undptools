@@ -1,0 +1,189 @@
+// Même charte que les autres outils (1L, 1G, 1D) — pensé d'abord pour le mobile.
+$primary: #1a56db;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$surface: #f8fafc;
+$radius:  12px;
+
+.fs-wrapper { max-width: 900px; padding-top: 1.25rem; padding-bottom: 2.5rem; }
+.fs-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+.fs-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border-radius: $radius;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+}
+.fs-header-icon { font-size: 2rem; flex-shrink: 0; opacity: .9; }
+.fs-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+.fs-subtitle { font-size: .875rem; margin: 0; color: rgba(255, 255, 255, .85); }
+.fs-empty { text-align: center; padding: 3rem 1rem; color: $muted; }
+
+// ── Niveaux de couleur (1 à 5) ────────────────────────────────────────────────
+.lvl-0 { --lvl: #94a3b8; }
+.lvl-1 { --lvl: #dc3545; }
+.lvl-2 { --lvl: #f97316; }
+.lvl-3 { --lvl: #f59e0b; }
+.lvl-4 { --lvl: #65a30d; }
+.lvl-5 { --lvl: #0f9d58; }
+
+.fs-lvl {
+  display: inline-block;
+  padding: .15rem .6rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--lvl);
+  background: color-mix(in srgb, var(--lvl) 14%, #fff);
+  white-space: nowrap;
+}
+
+// ── Mode d'emploi / échelle (repliables) ─────────────────────────────────────
+.fs-fold { margin-bottom: .6rem; border: 1.5px solid $border; border-radius: 10px; background: #fff; }
+.fs-fold-btn { display: flex; align-items: center; width: 100%; min-height: 46px; padding: .5rem .9rem; font-weight: 600; color: #1e293b; background: transparent; border: 0; text-align: left; }
+.fs-guide, .fs-scale { margin: 0; padding: 0 1rem 1rem 2rem; font-size: .88rem; color: #475569; li { margin-bottom: .4rem; } }
+.fs-scale { list-style: none; padding-left: 1rem; }
+
+.fs-section-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: .5rem;
+  margin: 1.25rem 0 .85rem;
+  border-bottom: 2px solid $primary;
+  display: inline-block;
+}
+.fs-hint { font-size: .85rem; color: $muted; }
+
+.form-label, .fs-label { display: block; font-size: .82rem; font-weight: 600; color: #374151; margin: .6rem 0 4px; }
+.form-label { margin-top: 0; }
+
+.form-control, .form-select {
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 1rem;
+
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { background-color: $surface; color: #1e293b; }
+}
+textarea.form-control { min-height: 0; resize: vertical; line-height: 1.45; }
+
+// ── Panneau des résultats ─────────────────────────────────────────────────────
+.fs-results { padding: 1rem; margin: 1rem 0 1.25rem; background: #fff; border: 1.5px solid $border; border-radius: $radius; }
+.fs-results-title { font-size: .95rem; font-weight: 700; margin: 0 0 .75rem; color: #1e293b; }
+
+.fs-result-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+.fs-result-name { flex: 0 0 150px; font-size: .85rem; font-weight: 600; color: #334155; }
+.fs-bar { flex: 1; height: 10px; border-radius: 6px; background: #e8edf3; overflow: hidden; }
+.fs-bar-fill { display: block; height: 100%; border-radius: 6px; background: var(--lvl); transition: width .25s ease; }
+.fs-result-value { flex: 0 0 38px; text-align: right; font-size: .95rem; }
+
+.fs-global {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .75rem;
+  margin-top: .85rem;
+  padding: .6rem .9rem;
+  background: #eef3ff;
+  border-radius: 10px;
+  color: #0e3fa3;
+  font-weight: 700;
+
+  strong { font-size: 1.6rem; margin-left: auto; }
+}
+
+// Progression par rapport à l'évaluation initiale (évaluation finale)
+.fs-compare { display: inline-flex; align-items: center; gap: .35rem; small { color: $muted; font-weight: 500; } }
+.fs-delta { font-size: .8rem; font-weight: 700; &.up { color: #0f9d58; } &.down { color: #dc3545; } &.same { color: $muted; } }
+.fs-global .fs-compare small { color: #4b6cb7; }
+
+// ── Les cinq « S » ────────────────────────────────────────────────────────────
+.fs-s { margin-bottom: .85rem; border-radius: $radius; overflow: hidden; background: #eef2f7; box-shadow: 0 2px 8px rgba(15, 23, 42, .08); }
+
+.fs-s-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  min-height: 58px;
+  padding: .6rem 1rem;
+  text-align: left;
+  color: #fff;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border: 0;
+}
+.fs-s-badge { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #fff; color: $primary; font-weight: 800; }
+.fs-s-title { flex: 1; font-weight: 700; font-size: 1rem; small { font-weight: 500; opacity: .85; } }
+.fs-s-head .fs-lvl { background: #fff; }
+
+.fs-s-body { padding: .85rem; }
+.fs-objective { font-size: .88rem; color: #475569; margin: 0 0 .85rem; font-style: italic; }
+
+.fs-item { padding: .85rem; margin-bottom: .6rem; background: #fff; border: 1px solid $border; border-left: 4px solid #94a3b8; border-radius: 10px; }
+.fs-item-head { display: flex; align-items: flex-start; gap: .6rem; }
+.fs-item-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #e0e7ff; color: $primary; font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.fs-item-text { margin: 0; font-size: .95rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
+
+.fs-help-btn { margin: .5rem 0 0; padding: .2rem 0; font-size: .82rem; font-weight: 600; color: $primary; background: transparent; border: 0; }
+.fs-help { margin: .35rem 0 0; padding: .6rem .8rem; font-size: .85rem; color: #475569; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; }
+
+// Notes : 5 gros boutons, un par niveau
+.fs-notes { display: grid; grid-template-columns: repeat(5, 1fr); gap: .4rem; margin: .75rem 0 .3rem; }
+.fs-note {
+  min-height: 48px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--lvl);
+  background: #fff;
+  border: 1.5px solid color-mix(in srgb, var(--lvl) 55%, #fff);
+  border-radius: 10px;
+
+  &:disabled { opacity: 1; cursor: default; }
+  &.selected { color: #fff; background: var(--lvl); border-color: var(--lvl); }
+}
+.fs-level { margin: 0 0 .25rem; font-size: .8rem; font-weight: 700; text-align: center; color: var(--lvl); }
+
+// ── Plan d'action ─────────────────────────────────────────────────────────────
+.fs-action { padding: .85rem; margin-bottom: .6rem; background: $surface; border: 1.5px solid $border; border-radius: $radius; }
+.fs-action-footer { display: flex; justify-content: flex-end; padding-top: .35rem; margin-top: .35rem; border-top: 1px solid $border; .btn { min-height: 44px; font-weight: 600; } }
+.fs-add { width: 100%; min-height: 48px; border-style: dashed; border-radius: $radius; font-weight: 600; }
+.fs-reco { margin: 1.25rem 0; padding: .75rem 1rem; font-size: .88rem; color: #1e40af; background: #eaf1ff; border-radius: 10px; }
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.fs-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  padding: .75rem 0;
+  margin-top: 1.25rem;
+  background: #fff;
+  border-top: 1px solid $border;
+  box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, .15);
+}
+.fs-btn-save { font-weight: 600; padding: .5rem 1.5rem; min-height: 46px; display: inline-flex; align-items: center; }
+
+@media (max-width: 576px) {
+  .fs-header { padding: 1rem 1.1rem; }
+  .fs-result-name { flex-basis: 110px; font-size: .78rem; }
+  .fs-actions .btn { flex: 1; min-height: 48px; justify-content: center; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .fs-header { background: none !important; color: #000 !important; border: 1px solid #999; }
+  .fs-title, .fs-subtitle { color: #000 !important; }
+  .fs-s { box-shadow: none; break-inside: avoid-page; }
+  .fs-s-head { background: #ddd !important; color: #000 !important; }
+  .fs-item { break-inside: avoid; }
+  .fs-note:not(.selected) { display: none; }
+  .fs-note.selected { color: #000 !important; background: none !important; border: 1px solid #000; }
+}

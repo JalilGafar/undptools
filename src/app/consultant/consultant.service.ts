@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, Observable, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { Company } from '../core/model/company';
 import { ToolAttrib } from '../core/model/toolAttrib';
@@ -13,6 +13,16 @@ import { UpdateGanttTaskDto } from '../core/model/updateGantt';
 import { BusinessModelCanvas } from '../core/model/businessModelCanvas';
 import { ProfilResponse } from '../core/model/entreprise-profil';
 import { CartographieResponse } from '../core/model/cartographie-clients';
+import { Minute, MinuteDetail, MinutePayload, MinutesList } from '../core/model/minutes';
+import { ProductiviteResponse } from '../core/model/productivite';
+import { FinanceResponse } from '../core/model/finance';
+import { ImageCommercialeResponse } from '../core/model/image-commerciale';
+import { Cinq5SResponse, Phase5S, Photo5S, PhotoSlot } from '../core/model/cinq-s';
+import { BpfResponse } from '../core/model/bpf';
+import { QuickWinsResponse } from '../core/model/quickwins';
+import { SuiviPhase, SuiviQuestionnaire, SuiviResponse } from '../core/model/suivi';
+import { compressImage } from '../shared/image-compress';
+import { LOAD_DONE, LOAD_FAILED, LOAD_PENDING, LoadState } from '../core/load-state';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +34,33 @@ export class ConsultantService {
   private _company$ = new BehaviorSubject<Company[]>([]);
   get company$(): Observable<Company[]> {
     return this._company$.asObservable()
+  }
+
+  // true au départ : la page lance sa requête dès l'ouverture
+  private _companyState$ = new BehaviorSubject<LoadState>(LOAD_PENDING);
+  get companyState$(): Observable<LoadState> {
+    return this._companyState$.asObservable();
+  }
+
+  // Chargements en cours des données d'un outil (réponses, libellés, ...) : true tant qu'au moins une requête est en attente
+  private pendingTool = 0;
+  private toolFailed = false;
+  private _toolState$ = new BehaviorSubject<LoadState>(LOAD_PENDING);
+  get toolState$(): Observable<LoadState> {
+    return this._toolState$.asObservable();
+  }
+  private trackTool<T>(request: Observable<T>, onData: (value: T) => void) {
+    if (this.pendingTool === 0) this.toolFailed = false;
+    this.pendingTool++;
+    this._toolState$.next(LOAD_PENDING);
+    const finish = () => {
+      this.pendingTool--;
+      if (this.pendingTool === 0) this._toolState$.next(this.toolFailed ? LOAD_FAILED : LOAD_DONE);
+    };
+    request.subscribe({
+      next: value => { onData(value); finish(); },
+      error: () => { this.toolFailed = true; finish(); }
+    });
   }
 
   private _ToolAttribData$ = new BehaviorSubject<ToolAttrib[]>([]);
@@ -80,14 +117,31 @@ export class ConsultantService {
     ).subscribe();
   }
   getCompanyForConslFromServer(id: number) {
-    let Id = new HttpParams();
-    Id = Id.append('idUser', id);
-    this.http.get<Company[]>(`${environment.apiUrl}/api/consultant/companiesUser`, { params: Id }).pipe(
-      tap(campus => {
-        this._company$.next(campus);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    const params = new HttpParams().append('idUser', id);
+    this._companyState$.next(LOAD_PENDING);
+    this._company$.next([]);
+    this.http.get<Company[]>(`${environment.apiUrl}/api/consultant/companiesUser`, { params }).subscribe({
+      next: companies => { this._company$.next(companies); this._companyState$.next(LOAD_DONE); },
+      error: () => this._companyState$.next(LOAD_FAILED)
+    });
+  }
+
+  /** Outils déjà remplis par entreprise : { companies: { [idEntreprise]: ['t1d', 't1l', ...] } } */
+  fetchLivrablesSummary(): Observable<{ companies: Record<number, string[]> }> {
+    return this.http.get<{ companies: Record<number, string[]> }>(`${environment.apiUrl}/api/consultant/livrables-summary`);
+  }
+
+  /** Entreprise lue directement (le tableau de bord ne dépend pas d'une liste déjà chargée) */
+  fetchCompany(id: number): Observable<Company> {
+    return this.http.get<Company>(`${environment.apiUrl}/api/consultant/company/${id}`);
+  }
+
+  /** Outils remplis (avec leur date de dernière modification) et minutes de réunion d'une entreprise */
+  fetchDashboard(id: number): Observable<{
+    tools: Record<string, { updated_at: string }>;
+    minutes: { id: number; etape: number; date_reunion: string; updated_at: string }[];
+  }> {
+    return this.http.get<any>(`${environment.apiUrl}/api/consultant/company/${id}/dashboard`);
   }
 
   getCompanyById(id: number): Observable<Company> {
@@ -105,16 +159,18 @@ export class ConsultantService {
   }
 
   uploadCompanyLogo(id: number, file: File): Observable<{ logo: string }> {
-    const formData = new FormData();
-    formData.append('logo', file);
-    return this.http.post<{ logo: string }>(`${environment.apiUrl}/api/consultant/company/${id}/logo`, formData);
+    // Image réduite dans le navigateur puis envoyée en JSON (la couche d'entrée de l'hébergeur refuse le multipart)
+    return from(compressImage(file, { maxSide: 800, maxBytes: 700_000, keepTransparency: true })).pipe(
+      switchMap(image => this.http.post<{ logo: string }>(`${environment.apiUrl}/api/consultant/company/${id}/logo-json`, { image })),
+      catchError(err => throwError(() => err?.error ? err : { error: { message: err?.message ?? 'Une erreur est survenue. Veuillez réessayer.' } }))
+    );
   }
 
   //Add new company
   addCompany(newCompany: {
     name: string, date_creation: number, produits: string, services: string, description: string, gerant: string,
     descrt_gerant: string, nbr_employer: string, nbr_femme: string, region: string, departement: string, ville: string,
-    commune: string, quartier: string, lieu: string, x: number, y: number, idUser: number
+    commune: string, quartier: string, lieu: string, x: number, y: number, idUser: number, id_vague?: number | null
   }): Observable<Company> {
     console.log(newCompany)
     return this.http.post<Company>(`${environment.apiUrl}/api/consultant/newCompany`, newCompany);
@@ -172,31 +228,20 @@ export class ConsultantService {
     return this.http.post<ToolAttrib>(`${environment.apiUrl}/api/tools/integral`, attribForm);
   }
 
+  // ************* SAVE RECOMMANDATIONS DU DIAGNOSTIC GÉNÉRAL (onglet Résumé : sans toucher aux réponses du questionnaire)
+  saveDiagRecommandations(payload: { cons_id: number; comp_id: number; recommandations: unknown }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/api/tools/integral/recommandations`, payload);
+  }
+
   // ************* GET TOOL ATRIB
   getAttribDataById(idUser: number, idComp: number) {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('idUser', idUser);
-    queryParams = queryParams.append('idComp', idComp);
-    console.log(queryParams)
-    this.http.get<ToolAttrib[]>(`${environment.apiUrl}/api/tools/attribut`, { params: queryParams }).pipe(
-      tap(ToolAttribData => {
-        this._ToolAttribData$.next(ToolAttribData);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    this.trackTool(this.http.get<ToolAttrib[]>(`${environment.apiUrl}/api/tools/attribut`, { params }), data => this._ToolAttribData$.next(data));
   }
 
   getMatIntegDataById(idUser: number, idComp: number) {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('idUser', idUser);
-    queryParams = queryParams.append('idComp', idComp);
-    console.log(queryParams)
-    this.http.get<ToolMatDiagInteg[]>(`${environment.apiUrl}/api/tools/integral`, { params: queryParams }).pipe(
-      tap(ToolAttribData => {
-        this._ToolMatDiagIntegData$.next(ToolAttribData);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    this.trackTool(this.http.get<ToolMatDiagInteg[]>(`${environment.apiUrl}/api/tools/integral`, { params }), data => this._ToolMatDiagIntegData$.next(data));
   }
 
   transformToMysqlJsonString(input: string): string {
@@ -227,23 +272,13 @@ export class ConsultantService {
   ////////////////// MATRICE PREDIA LABEL
 
   getMatPrediaLabel() {
-    this.http.get<PrediaLabelJSON[]>(`${environment.apiUrl}/api/tools/matPrediaLabel`).pipe(
-      tap(MatPrediaLabelData => {
-        this._MatPrediaLabel$.next(MatPrediaLabelData);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    this.trackTool(this.http.get<PrediaLabelJSON[]>(`${environment.apiUrl}/api/tools/matPrediaLabel`), data => this._MatPrediaLabel$.next(data));
   }
 
 
   ////////////////// MATRICE INETG LABEL
   getMatIntegLabel() {
-    this.http.get<IntegLabel[]>(`${environment.apiUrl}/api/tools/matIntegLabel`).pipe(
-      tap(MatPrediaLabelData => {
-        this._MatIntegLabel$.next(MatPrediaLabelData);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    this.trackTool(this.http.get<IntegLabel[]>(`${environment.apiUrl}/api/tools/matIntegLabel`), data => this._MatIntegLabel$.next(data));
   }
 
   ///////////SUIVI DES ACTIVITES
@@ -259,17 +294,8 @@ export class ConsultantService {
 
   // ************* GET TOOL ACTIVITIES
   getActivitiesById(idUser: number, idComp: number) {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('idUser', idUser);
-    queryParams = queryParams.append('idComp', idComp);
-    console.log(queryParams)
-    this.http.get<GanttTask[]>(`${environment.apiUrl}/api/tools/activities`, { params: queryParams }).pipe(
-      tap(TooActivities => {
-        console.log(TooActivities)
-        this._ToolActivities$.next(TooActivities);
-        //    this.setLoadingStatus(false);
-      })
-    ).subscribe();
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    this.trackTool(this.http.get<GanttTask[]>(`${environment.apiUrl}/api/tools/activities`, { params }), data => this._ToolActivities$.next(data));
   }
 
   // **********UPDATE TOOL ACTIVITIES
@@ -321,15 +347,128 @@ export class ConsultantService {
   }
 
   getBusinessModelCanvasById(idUser: number, idComp: number) {
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append('idUser', idUser);
-    queryParams = queryParams.append('idComp', idComp);
-    this.http.get<BusinessModelCanvas>(`${environment.apiUrl}/api/tools/bmc`, { params: queryParams }).pipe(
-      tap(bmcData => {
-        this._BusinessModelCanvas$.next(bmcData);
-      })
-    ).subscribe();
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    this.trackTool(this.http.get<BusinessModelCanvas>(`${environment.apiUrl}/api/tools/bmc`, { params }), data => this._BusinessModelCanvas$.next(data));
   }
 
+  ///////////ANALYSE FINANCIÈRE (3H)
+  fetchFinance(idUser: number, idComp: number): Observable<FinanceResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<FinanceResponse>(`${environment.apiUrl}/api/finance`, { params });
+  }
+
+  saveFinance(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/finance`, payload);
+  }
+
+  ///////////SUIVI ET ÉVALUATION (questionnaire servi par le serveur, mis en mémoire pour la session)
+  private suiviQuestionnaire$?: Observable<SuiviQuestionnaire>;
+
+  fetchSuiviQuestionnaire(): Observable<SuiviQuestionnaire> {
+    return this.suiviQuestionnaire$ ??= this.http.get<SuiviQuestionnaire>(`${environment.apiUrl}/api/suivi/questionnaire`).pipe(shareReplay(1));
+  }
+
+  fetchSuivi(idUser: number, idComp: number, phase: SuiviPhase): Observable<SuiviResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp).append('phase', phase);
+    return this.http.get<SuiviResponse>(`${environment.apiUrl}/api/suivi`, { params });
+  }
+
+  saveSuivi(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/suivi`, payload);
+  }
+
+  ///////////REGISTRE DES QUICK WINS (transversal : un registre par étape)
+  fetchQuickWins(idUser: number, idComp: number, etape: number): Observable<QuickWinsResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp).append('etape', etape);
+    return this.http.get<QuickWinsResponse>(`${environment.apiUrl}/api/quickwins`, { params });
+  }
+
+  saveQuickWins(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/quickwins`, payload);
+  }
+
+  ///////////OUTIL 5S
+  fetchCinqS(idUser: number, idComp: number, phase: Phase5S): Observable<Cinq5SResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp).append('phase', phase);
+    return this.http.get<Cinq5SResponse>(`${environment.apiUrl}/api/cinq-s`, { params });
+  }
+
+  saveCinqS(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/cinq-s`, payload);
+  }
+
+  /** Photos d'un emplacement (avant / après) d'une évaluation */
+  listCinqSPhotos(idUser: number, idComp: number, phase: Phase5S, slot: PhotoSlot): Observable<{ photos: Photo5S[] }> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp).append('phase', phase).append('slot', slot);
+    return this.http.get<{ photos: Photo5S[] }>(`${environment.apiUrl}/api/cinq-s/photos`, { params });
+  }
+
+  /** Ajoute une photo : réduite dans le navigateur puis envoyée en JSON (la couche d'entrée de l'hébergeur refuse le multipart) */
+  uploadCinqSPhoto(compId: number, phase: Phase5S, slot: PhotoSlot, file: File, legend: string): Observable<{ id: number }> {
+    return from(compressImage(file, { maxSide: 1600, maxBytes: 900_000 })).pipe(
+      switchMap(image => this.http.post<{ id: number }>(`${environment.apiUrl}/api/cinq-s/photo`, { comp_id: compId, phase, slot, legend, image })),
+      catchError(err => throwError(() => err?.error ? err : { error: { message: err?.message ?? 'Une erreur est survenue. Veuillez réessayer.' } }))
+    );
+  }
+
+  deleteCinqSPhoto(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/api/cinq-s/photo/${id}`);
+  }
+
+  /** Photo protégée : lue en blob avec le jeton (miniature ou taille réelle) */
+  cinqSPhotoBlob(id: number, size: 'thumb' | 'full'): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/api/cinq-s/photo/${id}`, { params: { size }, responseType: 'blob' });
+  }
+
+  ///////////DIAGNOSTIC D'IMAGE COMMERCIALE (1K)
+  fetchImageCommerciale(idUser: number, idComp: number): Observable<ImageCommercialeResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<ImageCommercialeResponse>(`${environment.apiUrl}/api/image-commerciale`, { params });
+  }
+
+  saveImageCommerciale(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/image-commerciale`, payload);
+  }
+
+  // Outil 1E_a : Diagnostic BPF (bonnes pratiques de fabrication)
+  fetchBpf(idUser: number, idComp: number): Observable<BpfResponse> {
+    const params = new HttpParams().set('idUser', idUser).set('idComp', idComp);
+    return this.http.get<BpfResponse>(`${environment.apiUrl}/api/bpf`, { params });
+  }
+
+  saveBpf(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/bpf`, payload);
+  }
+
+  ///////////PROFIL DE PRODUCTIVITÉ (1J)
+  fetchProductivite(idUser: number, idComp: number): Observable<ProductiviteResponse> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<ProductiviteResponse>(`${environment.apiUrl}/api/productivite`, { params });
+  }
+
+  saveProductivite(payload: Record<string, unknown>): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${environment.apiUrl}/api/productivite`, payload);
+  }
+
+  ///////////MINUTES DE RÉUNION (1B)
+  fetchMinutes(idUser: number, idComp: number): Observable<MinutesList> {
+    const params = new HttpParams().append('idUser', idUser).append('idComp', idComp);
+    return this.http.get<MinutesList>(`${environment.apiUrl}/api/minutes`, { params });
+  }
+
+  fetchMinute(id: number): Observable<MinuteDetail> {
+    return this.http.get<MinuteDetail>(`${environment.apiUrl}/api/minutes/${id}`);
+  }
+
+  /** Crée la minute (sans id) ou la modifie (avec id) */
+  saveMinute(payload: MinutePayload, id?: number): Observable<{ id: number }> {
+    return id
+      ? this.http.put<{ id: number }>(`${environment.apiUrl}/api/minutes/${id}`, payload)
+      : this.http.post<{ id: number }>(`${environment.apiUrl}/api/minutes`, payload);
+  }
+
+  deleteMinute(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/api/minutes/${id}`);
+  }
 
 }

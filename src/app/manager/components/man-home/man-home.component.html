@@ -57,6 +57,35 @@
         </div>
 
         <div class="col-12 col-sm-6 col-lg-3">
+            <div class="nav-card" (click)="seeSuivi()">
+                <i class="bi bi-graph-up-arrow nav-icon"></i>
+                <h5 class="nav-title">Suivi et évaluation</h5>
+                <p class="nav-desc">Indicateurs de tout le portefeuille : début de l'accompagnement contre clôture.</p>
+                <span class="nav-arrow"><i class="bi bi-arrow-right-circle"></i></span>
+            </div>
+        </div>
+
+        @if (isAdmin) {
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="nav-card" (click)="seeUtilisateurs()">
+                <i class="bi bi-people nav-icon"></i>
+                <h5 class="nav-title">Utilisateurs et rôles</h5>
+                <p class="nav-desc">Voir les comptes et changer le rôle d'un utilisateur (administrateur, évaluateur, modérateur, consultant).</p>
+                <span class="nav-arrow"><i class="bi bi-arrow-right-circle"></i></span>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="nav-card" (click)="seeVagues()">
+                <i class="bi bi-layers nav-icon"></i>
+                <h5 class="nav-title">Vagues</h5>
+                <p class="nav-desc">Créer, clôturer et rouvrir les vagues du programme, et répartir les entreprises.</p>
+                <span class="nav-arrow"><i class="bi bi-arrow-right-circle"></i></span>
+            </div>
+        </div>
+        }
+
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="nav-card" (click)="seeTools()">
                 <i class="bi bi-tools nav-icon"></i>
                 <h5 class="nav-title">Outils du programme</h5>

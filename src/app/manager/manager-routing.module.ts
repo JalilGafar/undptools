@@ -14,6 +14,10 @@ import { ConsultantProfileComponent } from './components/consultant-profile/cons
 import { LivrableTypesComponent } from './components/livrable-types/livrable-types.component';
 import { LivrableTypeTableComponent } from './components/livrable-type-table/livrable-type-table.component';
 import { CompanyLivrablesComponent } from './components/company-livrables/company-livrables.component';
+import { SuiviGlobalComponent } from './components/suivi-global/suivi-global.component';
+import { VaguesComponent } from './components/vagues/vagues.component';
+import { UtilisateursComponent } from './components/utilisateurs/utilisateurs.component';
+import { AdminGuard } from '../core/guard/admin.guard';
 
 
 
@@ -25,6 +29,9 @@ const routes: Routes = [
   {path: 'listconsult', component: ListConsultantComponent},
   {path: 'newCompany', component: NewCompanyComponent},
   {path: 'global', component: GlobalComponent},
+  {path: 'suivi-global', component: SuiviGlobalComponent},
+  {path: 'vagues', component: VaguesComponent, canActivate: [AdminGuard]},
+  {path: 'utilisateurs', component: UtilisateursComponent, canActivate: [AdminGuard]},
   {path: 'Tooltest', component: TooltestComponent},
   {path: 'listcompany/:id', component: ListCompanyComponent},
   {path: 'listLivrable/:id', component: ListLivrableComponent},

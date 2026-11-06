@@ -6,7 +6,11 @@
       ← Retour
     </button>
 
-    @if (livrables$ | async; as data) {
+    @if ((state$ | async)?.loading) {
+      <app-loading message="Chargement des livrables…" />
+    } @else if ((state$ | async)?.error) {
+      <app-load-error message="Impossible de charger les livrables." />
+    } @else if (livrables$ | async; as data) {
 
       <div class="lvt-card">
 
@@ -35,6 +39,7 @@
                       </span>
                     </th>
                   }
+                  <th scope="col"><span class="lvt-th-content">Évaluation</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -45,6 +50,11 @@
                         <i class="bi bi-building lvt-company-icon"></i>
                         <span class="fw-semibold">{{ item.company }}</span>
                       </div>
+                      @if ($any(item).etapes; as etapes) {
+                        <div class="mt-1">
+                          @for (e of etapes; track e) { <span class="lvt-badge me-1">Étape {{ e }}</span> }
+                        </div>
+                      }
                     </td>
                     <td>
                       <div class="lvt-consultant">
@@ -68,6 +78,7 @@
                     </td>
                     <td class="text-body-secondary">{{ item.date | date:'dd MMM yyyy' }}</td>
                     <td class="text-body-secondary">{{ item.updated_at | date:'dd MMM yyyy, HH:mm' }}</td>
+                    <td><app-review-badge [review]="review(item.comp_id, item.cons_id, item.tool_code, item.id_livrable)" /></td>
                   </tr>
                 }
               </tbody>

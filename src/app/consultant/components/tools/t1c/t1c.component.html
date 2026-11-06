@@ -1,3 +1,10 @@
+<!-- Chargement des données de l'outil : le formulaire reste en place mais est recouvert tant que tout n'est pas arrivé -->
+@if ((toolState$ | async)?.loading) {
+  <app-loading [overlay]="true" message="Chargement de l'outil…" />
+}
+@if ((toolState$ | async)?.error) {
+  <div class="container mt-2"><app-load-error message="Impossible de charger les données de l'outil." /></div>
+}
 <section class="t1ea-container">
 
   <!-- Retour -->

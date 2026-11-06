@@ -26,30 +26,32 @@
         <hr>
         <div class="card-body">
           <h4 class="card-title text-center">{{ currentUser.username }}</h4>
-          <table class="table table-sm mt-2">
-            <tbody>
-              <tr>
-                <td>Outils traités</td>
-                <td class="text-end fw-bold">09</td>
-              </tr>
-              <tr>
-                <td>Outils en attente</td>
-                <td class="text-end fw-bold">28</td>
-              </tr>
-              <tr>
-                <td colspan="2">
-                  <small class="text-muted">Progression des livrables</small>
-                  <div class="progress mt-1" style="height: 8px;">
-                    <div class="progress-bar bg-danger" role="progressbar"
-                      style="width: 25%;" aria-valuenow="10"
-                      aria-valuemin="0" aria-valuemax="100">
-                    </div>
-                  </div>
-                  <small class="text-danger">10%</small>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          @if (!(companyState$ | async)?.loading && (livrables$ | async); as counts) {
+            <table class="table table-sm mt-2">
+              <tbody>
+                <tr>
+                  <td>Livrables remplis</td>
+                  <td class="text-end fw-bold">{{ total(counts) }}</td>
+                </tr>
+                @if ((reviews$ | async); as rv) {
+                  @if (totalNouveau(rv); as nb) {
+                    <tr>
+                      <td>Nouvelles évaluations</td>
+                      <td class="text-end"><span class="badge text-bg-danger">{{ nb }}</span></td>
+                    </tr>
+                  }
+                }
+                <tr>
+                  <td>Entreprises avec livrables</td>
+                  <td class="text-end fw-bold">{{ withLivrables(counts) }}</td>
+                </tr>
+                <tr>
+                  <td>Entreprises affectées</td>
+                  <td class="text-end fw-bold">{{ (companies$ | async)?.length ?? 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          }
         </div>
       </div>
     </div>
@@ -57,7 +59,21 @@
     <!-- Liste entreprises -->
     <div class="col-12 col-lg-9 order-last order-lg-first company">
       <div class="row row-cols-1 row-cols-md-2 g-3">
-        @if(companies$ | async; as data){
+        @if ((companyState$ | async)?.loading) {
+          <div class="col-12"><app-loading message="Chargement de vos entreprises…" /></div>
+        } @else if ((companyState$ | async)?.error) {
+          <div class="col-12"><app-load-error message="Impossible de charger vos entreprises." /></div>
+        } @else if (companies$ | async; as data) {
+          @if (!data.length) {
+            <div class="col-12 text-center text-muted py-4">
+              @if (!wave.isAll()) {
+                Aucune entreprise dans « {{ wave.label() }} ».
+                <div><button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="wave.select([])">Voir toutes les vagues</button></div>
+              } @else {
+                Aucune entreprise ne vous est affectée pour le moment.
+              }
+            </div>
+          }
           @for (item of data; track $index) {
             <div class="col">
               <div class="card company-card" (click)="companySelect(item.id)">
@@ -71,6 +87,21 @@
                   <div class="col-8">
                     <div class="card-body">
                       <h5 class="card-title">{{ item.name }}</h5>
+                      @if (item.vague_nom && wave.waves().length > 1) {
+                        <span class="vague-chip" [class.closed]="item.vague_statut === 'cloturee'">
+                          <i class="bi" [class.bi-layers]="item.vague_statut !== 'cloturee'" [class.bi-lock-fill]="item.vague_statut === 'cloturee'"></i>{{ item.vague_nom }}
+                        </span>
+                      }
+                      @if ((reviews$ | async)?.[item.id]; as rv) {
+                        <div class="review-badges">
+                          @if (rv.valide) { <span class="rv rv-ok"><i class="bi bi-check-circle-fill"></i> {{ rv.valide }} validé{{ rv.valide > 1 ? 's' : '' }}</span> }
+                          @if (rv.aAmeliorer) { <span class="rv rv-warn"><i class="bi bi-exclamation-circle-fill"></i> {{ rv.aAmeliorer }} à améliorer</span> }
+                          @if (rv.nouveau) { <span class="rv rv-new">Nouvelle évaluation</span> }
+                        </div>
+                      }
+                      @if ((livrables$ | async)?.[item.id]; as n) {
+                        <span class="livrable-badge"><i class="bi bi-check2-circle"></i> {{ n }} livrable{{ n > 1 ? 's' : '' }}</span>
+                      }
                       <p class="card-text text-muted">
                         <small>Région {{ item.region }} — {{ item.ville }}</small><br>
                         <small>{{ item.description }}</small>

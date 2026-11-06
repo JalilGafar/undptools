@@ -1,0 +1,335 @@
+// Même charte que les autres outils (5S, 1K, 1D) — pensé d'abord pour le mobile : une exigence = une carte, réponses en gros boutons.
+$primary: #1a56db;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$surface: #f8fafc;
+$ok:      #0f9d58;
+$warn:    #d97706;
+$bad:     #dc3545;
+$radius:  12px;
+
+.bp-wrapper { max-width: 900px; padding-top: 1.25rem; padding-bottom: 2.5rem; color-scheme: light; }
+.bp-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+.bp-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border-radius: $radius;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+}
+.bp-header-icon { font-size: 2rem; flex-shrink: 0; opacity: .9; }
+.bp-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+.bp-subtitle { font-size: .875rem; margin: 0; color: rgba(255, 255, 255, .85); }
+.bp-empty { text-align: center; padding: 3rem 1rem; color: $muted; }
+
+// Couleurs des appréciations : BON, ACCEPTABLE, À AMÉLIORER, et « pas encore évalué »
+.lv-bon         { --lvl: #{$ok}; }
+.lv-acceptable  { --lvl: #{$warn}; }
+.lv-a_ameliorer { --lvl: #{$bad}; }
+.lv-none        { --lvl: #94a3b8; }
+
+.bp-pill {
+  display: inline-block;
+  padding: .15rem .65rem;
+  border-radius: 999px;
+  font-size: .76rem;
+  font-weight: 700;
+  color: var(--lvl);
+  background: color-mix(in srgb, var(--lvl) 14%, #fff);
+  white-space: nowrap;
+}
+
+.bp-bar { display: block; height: 12px; border-radius: 6px; background: #e8edf3; overflow: hidden; }
+.bp-bar-fill { display: block; height: 100%; border-radius: 6px; background: var(--lvl); transition: width .25s ease; }
+
+.print-only { display: none; }
+
+// ── Onglets ───────────────────────────────────────────────────────────────────
+.bp-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; padding: .3rem; margin-bottom: 1rem; background: #eef2f7; border-radius: $radius; }
+.bp-tab {
+  min-height: 46px;
+  padding: .4rem .6rem;
+  font-weight: 700;
+  font-size: .95rem;
+  color: #475569;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+
+  &.active { color: $primary; background: #fff; box-shadow: 0 1px 4px rgba(15, 23, 42, .15); }
+}
+.bp-tab-count { margin-left: .25rem; padding: .05rem .45rem; font-size: .75rem; font-weight: 700; color: $primary; background: #e0e7ff; border-radius: 999px; }
+
+.bp-section-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: .5rem;
+  margin: 1.5rem 0 .85rem;
+  border-bottom: 2px solid $primary;
+  display: inline-block;
+}
+.bp-label { display: block; font-size: .82rem; font-weight: 600; color: #374151; margin: .6rem 0 4px; }
+.bp-static { margin: 0; padding: .5rem 0; font-weight: 600; color: #1e293b; }
+
+.form-control {
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 1rem;
+
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { background-color: $surface; color: #1e293b; }
+}
+textarea.form-control { min-height: 0; resize: vertical; line-height: 1.45; }
+
+// ── Mode d'emploi (replié) ────────────────────────────────────────────────────
+.bp-fold { margin-bottom: .6rem; border: 1.5px solid $border; border-radius: 10px; background: #fff; }
+.bp-fold-btn { display: flex; align-items: center; width: 100%; min-height: 46px; padding: .5rem .9rem; font-weight: 600; color: #1e293b; background: transparent; border: 0; text-align: left; }
+.bp-guide-list { margin: 0; padding: 0 1rem 1rem 2rem; font-size: .88rem; color: #475569; li { margin-bottom: .4rem; } }
+
+// ── Résultats en direct ───────────────────────────────────────────────────────
+.bp-live { padding: .85rem; margin: 0 0 1.1rem; background: #fff; border: 1.5px solid $border; border-radius: $radius; }
+.bp-live-main { display: flex; flex-direction: column; flex: 1 1 160px; min-width: 0; }
+.bp-live-label { font-size: .9rem; font-weight: 700; color: #1e293b; }
+.bp-live-progress { font-size: .78rem; font-weight: 500; color: #4b6cb7; }
+.bp-live-toggle { display: flex; align-items: center; width: 100%; min-height: 46px; margin-top: .35rem; padding: .25rem .25rem; font-size: .88rem; font-weight: 600; color: $primary; background: transparent; border: 0; }
+
+.bp-live-row {
+  margin-top: .6rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: .2rem .6rem;
+  margin-bottom: .6rem;
+
+  .bp-bar { grid-column: 1 / -1; height: 9px; }
+}
+.bp-live-name { font-size: .85rem; font-weight: 600; color: #334155; }
+.bp-live-value { font-size: .9rem; }
+
+.bp-live-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem .75rem;
+  padding: .6rem .9rem;
+  background: #eef3ff;
+  border-radius: 10px;
+  color: #0e3fa3;
+  font-weight: 700;
+
+  strong { font-size: 1.5rem; }
+}
+
+// ── Catégories (une seule ouverte à la fois) ──────────────────────────────────
+.bp-cat { margin-bottom: .85rem; border-radius: $radius; overflow: hidden; background: #eef2f7; box-shadow: 0 2px 8px rgba(15, 23, 42, .08); scroll-margin-top: 70px; }
+
+.bp-cat-head {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  min-height: 60px;
+  padding: .6rem 1rem;
+  text-align: left;
+  color: #fff;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border: 0;
+}
+.bp-cat-badge { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #fff; color: $primary; font-size: 1.1rem; }
+.bp-cat-title { flex: 1; min-width: 0; font-weight: 700; font-size: .98rem; line-height: 1.25; small { display: block; font-weight: 500; font-size: .76rem; opacity: .85; } }
+.bp-cat-rate { flex-shrink: 0; padding: .15rem .6rem; border-radius: 999px; background: #fff; color: #0e3fa3; font-size: .78rem; font-weight: 700; }
+
+.bp-cat-body { padding: .85rem; }
+
+// ── Exigences ─────────────────────────────────────────────────────────────────
+.bp-item { padding: .85rem; margin-bottom: .6rem; background: #fff; border: 1px solid $border; border-left: 4px solid #94a3b8; border-radius: 10px; }
+.bp-item.st-conforme     { border-left-color: $ok; }
+.bp-item.st-partiel      { border-left-color: $warn; }
+.bp-item.st-non_conforme { border-left-color: $bad; }
+.bp-item.st-na           { border-left-color: #3c3c3c; background: #f4f4f5; }
+
+.bp-item-head { display: flex; align-items: flex-start; gap: .6rem; }
+.bp-num { flex-shrink: 0; min-width: 42px; padding: .15rem .4rem; border-radius: 8px; background: #e0e7ff; color: $primary; font-size: .78rem; font-weight: 700; text-align: center; }
+.bp-text { flex: 1; min-width: 0; margin: 0; font-size: .95rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
+.bp-max { flex-shrink: 0; font-size: .75rem; font-weight: 700; color: $muted; white-space: nowrap; }
+
+// Réponses : quatre gros boutons, deux par ligne sur téléphone
+.bp-choices { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin-top: .75rem; }
+@media (min-width: 576px) { .bp-choices { grid-template-columns: repeat(4, 1fr); } }
+
+.bp-choice {
+  min-width: 0;
+  min-height: 46px;
+  padding: .35rem .5rem;
+  font-weight: 600;
+  font-size: .92rem;
+  color: #475569;
+  background: #fefffe;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  transition: border-color .15s ease, background-color .15s ease;
+
+  &:disabled { opacity: 1; cursor: default; }
+  &:not(:disabled):hover { border-color: $primary; }
+
+  &.selected { color: #fff; border-color: transparent; }
+  &.selected.c-conforme     { background: $ok; }
+  &.selected.c-partiel      { background: $warn; }
+  &.selected.c-non_conforme { background: $bad; }
+  &.selected.c-na           { background: #3c3c3c; }
+}
+
+// Points : − [ 6 ] / 10 +
+.bp-points { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; margin-top: .7rem; }
+.bp-points-label { flex: 1 1 100%; font-size: .8rem; font-weight: 600; color: #374151; }
+.bp-step {
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: $primary;
+  background: #fff;
+  border: 1.5px solid $primary;
+  border-radius: 12px;
+
+  &:disabled { color: #b6bfcc; border-color: $border; }
+}
+.bp-points-input {
+  width: 68px;
+  height: 48px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  // Fond ET texte fixés ensemble, pour les deux états : sans fond propre, le champ prend celui du thème du navigateur
+  // (gris foncé en mode sombre) et le texte devient illisible ; un champ désactivé (manager) est grisé par le navigateur.
+  color: #1e293b;
+  -webkit-text-fill-color: #1e293b;
+  background-color: #fff;
+  color-scheme: light;
+  opacity: 1;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+
+  &::-webkit-inner-spin-button, &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { color: #1e293b; -webkit-text-fill-color: #1e293b; background-color: $surface; opacity: 1; }
+}
+.bp-points-max { font-size: 1rem; font-weight: 600; color: $muted; margin-right: .25rem; }
+
+// Consigne de vérification et remarque
+.bp-tools { display: flex; flex-wrap: wrap; gap: 0 1.25rem; margin-top: .35rem; }
+.bp-link { min-height: 44px; padding: 0; font-size: .85rem; font-weight: 600; color: $primary; background: transparent; border: 0; }
+.bp-dot-note { display: inline-block; width: 8px; height: 8px; margin-left: .3rem; border-radius: 50%; background: $warn; }
+.bp-guide { margin: 0 0 .5rem; padding: .6rem .8rem; font-size: .85rem; color: #475569; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; }
+
+.bp-next { width: 100%; min-height: 50px; margin-top: .35rem; font-weight: 600; border-radius: $radius; }
+
+// ── Rapport ───────────────────────────────────────────────────────────────────
+.bp-provisional { padding: .6rem .8rem; font-size: .85rem; color: #92580a; background: #fdf1de; border-radius: 10px; }
+.bp-legend { font-size: .78rem; color: $muted; }
+.bp-dot { display: inline-block; width: 10px; height: 10px; margin: 0 .3rem 0 .6rem; border-radius: 3px; vertical-align: baseline; &:first-child { margin-left: 0; } }
+.bp-dot.got { background: $primary; }
+.bp-dot.gap { background: #e8edf3; border: 1px solid #cbd5e1; }
+
+.bp-res { padding: .85rem; margin-bottom: .6rem; background: #fff; border: 1.5px solid $border; border-radius: $radius; }
+.bp-res-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .55rem; }
+.bp-res-name { font-weight: 700; font-size: .93rem; color: #1e293b; }
+
+.bp-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .5rem;
+  margin: .7rem 0 0;
+
+  div { padding: .4rem .6rem; background: $surface; border-radius: 8px; }
+  dt { font-size: .7rem; font-weight: 600; color: $muted; }
+  dd { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+}
+@media (min-width: 480px) { .bp-stats { grid-template-columns: repeat(4, 1fr); } }
+
+.bp-na-note { margin: .5rem 0 0; font-size: .78rem; color: $muted; }
+.bp-res-total { background: #eef3ff; border-color: #c7d6ff; .bp-stats div { background: #fff; } }
+.bp-global { margin: .7rem 0 0; font-size: .95rem; color: #0e3fa3; }
+
+.bp-scale {
+  margin: 1rem 0;
+  padding: .85rem 1rem;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+
+  h6 { margin: 0 0 .5rem; font-size: .85rem; font-weight: 700; color: #1e293b; }
+  ul { margin: 0; padding: 0; list-style: none; font-size: .85rem; color: #475569; }
+  li { margin-bottom: .45rem; }
+  .bp-pill { margin-right: .35rem; }
+}
+
+// Conclusions et recommandations : une catégorie dépliée à la fois
+.bp-reco { margin-bottom: .55rem; background: #fff; border: 1.5px solid $border; border-radius: 10px; }
+.bp-reco-head { display: flex; align-items: center; gap: .6rem; width: 100%; min-height: 50px; padding: .5rem .9rem; text-align: left; color: #1e293b; background: transparent; border: 0; }
+.bp-reco-title { flex: 1; font-weight: 700; font-size: .92rem; }
+.bp-reco-done { font-size: .75rem; font-weight: 700; color: $ok; }
+.bp-reco-body { padding: 0 .9rem .9rem; }
+
+.bp-action { display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .55rem; .form-control { flex: 1; } }
+.bp-action-num { flex-shrink: 0; width: 28px; height: 28px; margin-top: .55rem; border-radius: 50%; background: $primary; color: #fff; font-size: .8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.bp-action-del { flex-shrink: 0; width: 44px; height: 44px; color: $bad; background: #fff; border: 1.5px solid #f3c4c9; border-radius: 10px; }
+.bp-add { width: 100%; min-height: 48px; border-style: dashed; border-radius: $radius; font-weight: 600; small { font-weight: 500; opacity: .8; margin-left: .35rem; } }
+
+// ── Enregistrement : barre collée en bas de l'écran ──────────────────────────
+.bp-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem 0;
+  margin-top: 1.25rem;
+  background: #fff;
+  border-top: 1px solid $border;
+  box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, .15);
+}
+.bp-actions-progress { font-size: .85rem; font-weight: 600; color: $muted; }
+.bp-btn-save { font-weight: 600; padding: .5rem 1.5rem; min-height: 48px; display: inline-flex; align-items: center; }
+
+@media (max-width: 576px) {
+  .bp-header { padding: 1rem 1.1rem; }
+  .bp-btn-save { flex: 1; justify-content: center; }
+}
+
+// ── Impression : rapport d'abord, puis le détail des 92 réponses ─────────────
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  .bp-bar, .bp-bar-fill, .bp-pill, .bp-cat-head, .bp-item { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .bp-header { background: none !important; color: #000 !important; border: 1px solid #999; }
+  .bp-title, .bp-subtitle { color: #000 !important; }
+
+  .bp-pane-inspection { break-before: page; }
+  .bp-print-heading { margin: 0 0 .75rem; font-size: 1.1rem; font-weight: 700; }
+  .bp-cat { box-shadow: none; background: #fff; }
+  .bp-cat-head { color: #000 !important; background: #e5e7eb !important; min-height: 0; padding: .35rem .7rem; }
+  .bp-cat-badge { display: none; }
+  .bp-cat-body { padding: .4rem 0; }
+  .bp-item { break-inside: avoid; margin-bottom: .3rem; padding: .4rem .6rem; }
+  .bp-res, .bp-reco, .bp-scale { break-inside: avoid; }
+  // Les catégories sans conclusion ni recommandation, et les libellés sans texte, ne sont pas imprimés
+  .bp-reco-empty, .bp-hide-print { display: none !important; }
+
+  .bp-print-answer { margin: .3rem 0 0; font-size: .85rem; font-weight: 700; }
+  .bp-print-obs { margin: .2rem 0 0; font-size: .82rem; }
+  .bp-print-text { margin: 0 0 .6rem; white-space: pre-line; font-size: .9rem; }
+  .bp-print-actions { font-size: .9rem; li { margin-bottom: .3rem; white-space: pre-line; } }
+}

@@ -1,79 +1,42 @@
-<div class="container">
-    <button type="button" class="btn btn-primary p-2" onclick="history.back()">
-        ← Retour
-    </button>
+<div class="container tt-wrapper">
 
-    <!-- CTA Outils -->
-    <div class="tools-cta-banner">
-        <div class="tools-cta-content">
-            <i class="bi bi-grid-3x3-gap-fill tools-cta-icon"></i>
-            <div>
-                <h3 class="tools-cta-title">Accéder aux outils GYB</h3>
-                <p class="tools-cta-desc">Naviguez dans la bibliothèque des outils et sélectionnez un consultant pour visualiser ses données.</p>
-            </div>
-        </div>
-        <button type="button" class="btn btn-open-tools" (click)="openTools()">
-            <i class="bi bi-layout-sidebar-inset-reverse me-2"></i>
-            Ouvrir le menu des outils
-        </button>
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <header class="tt-header">
+    <div class="tt-header-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+    <div>
+      <h1 class="tt-title">Bibliothèque des outils GYB</h1>
+      <p class="tt-sub">Ouvrez un outil tel que le voit un consultant. Il s'affiche vierge et vous pouvez le remplir pour juger sa qualité : rien n'est enregistré.</p>
     </div>
+  </header>
 
-    <section class="gyb-container">
-        <header class="gyb-header">
-            <h1>Bibliothèque digitale des outils GYB</h1>
-            <p class="subtitle">
-                Renforcer l’impact du programme <strong>Growing Your Business</strong> par l’innovation.
-            </p>
-        </header>
+  @for (g of groups; track g.label; let i = $index) {
+    <section class="tt-group" [class.tt-group-soon]="g.activeCount === 0">
+      <button type="button" class="tt-group-head" (click)="toggle(g)" [attr.aria-expanded]="g.open">
+        <i class="bi {{ g.icon }} tt-group-icon"></i>
+        <span class="tt-group-title">
+          @if (i > 0) { <small class="tt-group-eyebrow">Étape {{ i }}</small> }
+          {{ g.label }}
+        </span>
+        <span class="tt-count">{{ g.activeCount }} outil{{ g.activeCount > 1 ? 's' : '' }}</span>
+        <i class="bi" [class.bi-chevron-up]="g.open" [class.bi-chevron-down]="!g.open"></i>
+      </button>
 
-
-        <div class="gyb-card">
-            <p>
-                La digitalisation des outils du programme GYB vise à offrir aux managers un accès centralisé, structuré
-                et moderne aux données collectées tout au long du programme.
-            </p>
+      @if (g.open) {
+        <div class="tt-tools">
+          @for (t of g.tools; track t.route + t.label) {
+            <button type="button" class="tt-tool" [class.soon]="t.status === 'soon'" (click)="open(t)">
+              @if (t.code) { <span class="tt-code">{{ t.code }}</span> }
+              <span class="tt-tool-name">{{ t.name }}</span>
+              @if (t.status === 'active') { <span class="tt-chip">Disponible</span> }
+              @else { <span class="tt-chip soon">Bientôt</span> }
+              <i class="bi bi-chevron-right tt-go"></i>
+            </button>
+          }
         </div>
-
-
-        <div class="gyb-grid">
-            <div class="gyb-card">
-                <h2>SDG 9 — Innovation & Infrastructure</h2>
-                <ul>
-                    <li>Modernisation des outils d’accompagnement des entreprises</li>
-                    <li>Renforcement des infrastructures numériques du programme</li>
-                    <li>Promotion de l’innovation dans la mise en œuvre des activités GYB</li>
-                </ul>
-            </div>
-
-
-            <div class="gyb-card">
-                <h2>SDG 16 — Institutions efficaces</h2>
-                <ul>
-                    <li>Standardisation des pratiques d’accompagnement</li>
-                    <li>Amélioration de la transparence et de la traçabilité</li>
-                    <li>Renforcement de l’efficacité institutionnelle du programme</li>
-                </ul>
-            </div>
-        </div>
-
-
-        <div class="gyb-card">
-            <h2>Objectifs de la plateforme</h2>
-            <ul class="checklist">
-                <li>Centraliser l’ensemble des outils GYB</li>
-                <li>Faciliter la navigation et l’utilisation par les managers</li>
-                <li>Réduire les erreurs liées à la manipulation manuelle des fichiers</li>
-                <li>Harmoniser les pratiques entre équipes et régions</li>
-                <li>Renforcer le suivi et l’évaluation des activités</li>
-            </ul>
-        </div>
-
-
-        <footer class="gyb-footer">
-            <p>
-                La digitalisation des outils GYB constitue un levier stratégique pour accroître l’impact,
-                la cohérence et la durabilité des interventions du PNUD en faveur des PME.
-            </p>
-        </footer>
+      }
     </section>
+  }
 </div>

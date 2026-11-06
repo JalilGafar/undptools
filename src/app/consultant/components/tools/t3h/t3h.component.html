@@ -1,0 +1,260 @@
+<div class="container ff-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="ff-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()">
+      <i class="bi bi-printer me-1"></i>Imprimer le compte de résultat
+    </button>
+  </div>
+
+  <!-- En-tête -->
+  <div class="ff-header">
+    <div class="ff-header-icon"><i class="bi bi-calculator"></i></div>
+    <div>
+      <h2 class="ff-title">Analyse financière</h2>
+      <p class="ff-subtitle">
+        @if (companyName) { <strong>{{ companyName }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+        @if (annee) { · {{ annee }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement de l'analyse financière…" />
+  } @else if (!companyId && !preview) {
+    <div class="ff-empty">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <app-load-error message="Impossible de charger l'analyse financière." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  }
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  }
+  @if (alertMessage) {
+    <div class="alert no-print" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">{{ alertMessage }}</div>
+  }
+
+  <!-- Paramètres : deux champs, toujours à portée -->
+  <div class="ff-params">
+    <div class="ff-param">
+      <label for="ff-annee">Année</label>
+      <input id="ff-annee" class="form-control form-control-sm" type="number" min="2000" max="2100" inputmode="numeric"
+             [(ngModel)]="annee" name="annee" [disabled]="readOnly">
+    </div>
+    <div class="ff-param">
+      <label for="ff-impot">
+        Taux d'imposition (%)
+        <app-info-tip text="Pourcentage d'impôt sur les bénéfices, appliqué à chaque mois bénéficiaire (jamais à une perte). Laissez 0 si l'entreprise n'est pas imposée." />
+      </label>
+      <input id="ff-impot" class="form-control form-control-sm" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+             [(ngModel)]="tauxImpot" name="tauxImpot" (ngModelChange)="recalc()" [disabled]="readOnly">
+    </div>
+    <p class="ff-currency">Montants en <strong>FCFA</strong></p>
+  </div>
+
+  <!-- Onglets : les rubriques du fichier Excel d'origine -->
+  <nav class="ff-tabs no-print" role="tablist" aria-label="Rubriques de l'analyse">
+    @for (t of tabs; track t.key) {
+      <button type="button" role="tab" class="ff-tab" [class.active]="tab === t.key" [attr.aria-selected]="tab === t.key" (click)="selectTab(t.key)">
+        <i class="bi {{ t.icon }}"></i><span>{{ t.short }}</span>
+        @if (hasData(t.key)) { <i class="bi bi-check-circle-fill ff-done" aria-label="Rempli"></i> }
+      </button>
+    }
+  </nav>
+
+  <!-- ══════════ Rubriques de saisie ══════════ -->
+  @if (tab !== 'resultat') {
+    @for (key of tabSections(); track key) {
+      <section class="ff-section">
+        <header class="ff-section-head">
+          <h5 class="ff-section-title">
+            {{ def(key).title }}
+            @if (def(key).tip; as tip) { <app-info-tip [text]="tip" /> }
+          </h5>
+          <span class="ff-section-total" title="Total annuel de la rubrique">{{ num(sectionTotal(key)) }} <small>FCFA / an</small></span>
+        </header>
+
+        <div class="ff-lines">
+          @for (line of lines[key]; track line) {
+            <div class="fl" [class.open]="isOpen(line)">
+              <div class="fl-main">
+                <div class="fl-label">
+                  @if (fixedLabel(line); as label) {
+                    <span>{{ label }}</span>
+                  } @else {
+                    <input class="form-control form-control-sm" type="text" maxlength="255" [name]="'lib-' + key + '-' + $index"
+                           [ngModel]="line.libelle" (ngModelChange)="line.libelle = $event"
+                           [placeholder]="placeholder(line)" [disabled]="readOnly" aria-label="Nom de la ligne">
+                  }
+                  @if (lineTip(line); as tip) { <app-info-tip [text]="tip" /> }
+                </div>
+
+                <div class="fl-amount">
+                  @if (isConstant(line)) {
+                    <input class="form-control form-control-sm" type="number" min="0" step="1" inputmode="numeric" placeholder="0"
+                           [name]="'fix-' + key + '-' + $index" [ngModel]="line.m[0]" (ngModelChange)="setFixed(line, $event)"
+                           [disabled]="readOnly" aria-label="Montant par mois">
+                    <span class="fl-unit">/ mois</span>
+                  } @else {
+                    <span class="fl-var">Variable · moy. {{ num(lineTotal(line) / 12) }} / mois</span>
+                  }
+                </div>
+
+                <div class="fl-end">
+                  <span class="fl-total" title="Total annuel">{{ num(lineTotal(line)) }}</span>
+                  <button type="button" class="fl-btn no-print" (click)="toggleOpen(line)" [attr.aria-expanded]="isOpen(line)"
+                          [title]="isOpen(line) ? 'Masquer le détail par mois' : 'Saisir mois par mois'" aria-label="Détail mois par mois">
+                    <i class="bi" [class.bi-calendar3]="!isOpen(line)" [class.bi-calendar3-fill]="isOpen(line)"></i>
+                  </button>
+                  @if (!readOnly && isRemovable(line)) {
+                    <button type="button" class="fl-btn fl-del no-print" (click)="removeLine(key, line)" title="Supprimer la ligne" aria-label="Supprimer la ligne">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (isOpen(line)) {
+                <div class="fl-months">
+                  @for (k of monthIndexes; track k) {
+                    <label class="fl-month">
+                      <span>{{ months[k] }}</span>
+                      <input class="form-control form-control-sm" type="number" min="0" step="1" inputmode="numeric"
+                             [name]="'m-' + key + '-' + $index + '-' + k" [ngModel]="line.m[k]" (ngModelChange)="setAmount(line, k, $event)"
+                             [disabled]="readOnly">
+                    </label>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        @if (!readOnly) {
+          <button type="button" class="btn btn-outline-primary btn-sm ff-add no-print" (click)="addLine(key)">
+            <i class="bi bi-plus-lg me-1"></i>Ajouter une ligne
+          </button>
+        }
+      </section>
+    }
+
+    @if (nextTab; as next) {
+      <button type="button" class="ff-next no-print" (click)="selectTab(next.key)">
+        Suivant : {{ next.label }} <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+    }
+  }
+
+  <!-- ══════════ Compte de résultat (calculé) ══════════ -->
+  @if (tab === 'resultat') {
+    <div class="ff-result-bar no-print">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="ff-usd" [checked]="showUsd" (change)="showUsd = !showUsd">
+        <label class="form-check-label small" for="ff-usd">
+          Afficher en USD <span class="text-muted">(1 USD = {{ fx.xafPerUsd }} FCFA, moyenne {{ fx.year }})</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="ff-kpis">
+      <div class="ff-kpi"><span>Chiffre d'affaires</span><strong>{{ moneyUnit(calc.ca[12]) }}</strong></div>
+      <div class="ff-kpi" [class.neg]="calc.resultatNet[12] < 0">
+        <span>Résultat net <app-info-tip text="Ce qu'il reste à l'entreprise une fois payés les coûts directs, les frais d'exploitation, les charges financières et l'impôt, en ajoutant les autres revenus." /></span>
+        <strong>{{ moneyUnit(calc.resultatNet[12]) }}</strong>
+      </div>
+      <div class="ff-kpi">
+        <span>Marge nette <app-info-tip text="Part du chiffre d'affaires qui reste en résultat net. À 20 %, l'entreprise garde 20 FCFA de bénéfice pour 100 FCFA vendus." /></span>
+        <strong>{{ pct(calc.margeNettePct[12]) }}</strong>
+      </div>
+      <div class="ff-kpi" [class.warn]="deficitMonths > 0"><span>Mois en perte</span><strong>{{ deficitMonths }}</strong></div>
+    </div>
+
+    <!-- Ce qu'il faut retenir -->
+    <section class="ff-retenir">
+      <h5 class="ff-section-title">Ce qu'il faut retenir</h5>
+      <ul>
+        @for (i of insights; track i.text) {
+          <li [class.warn]="i.warn"><i class="bi" [class.bi-exclamation-triangle-fill]="i.warn" [class.bi-check2-circle]="!i.warn"></i><span>{{ i.text }}</span></li>
+        }
+      </ul>
+    </section>
+
+    <!-- Résultat net mois par mois -->
+    @if (bars.length) {
+      <section class="ff-chart" aria-label="Résultat net par mois">
+        <h5 class="ff-section-title">Résultat net par mois ({{ showUsd ? 'USD' : 'FCFA' }})</h5>
+        <div class="ff-plot">
+          <div class="ff-zero" [style.bottom.%]="zeroLine"></div>
+          @for (b of bars; track b.month) {
+            <div class="ff-bar-col" [title]="b.month + ' : ' + money(b.net)">
+              <div class="ff-bar" [class.neg]="b.negative" [style.bottom.%]="b.bottom" [style.height.%]="b.height"></div>
+            </div>
+          }
+        </div>
+        <div class="ff-plot-labels">@for (b of bars; track b.month) { <span>{{ b.month }}</span> }</div>
+      </section>
+    }
+
+    <h5 class="ff-section-title mt-3">Détail du compte de résultat ({{ showUsd ? 'USD' : 'FCFA' }})</h5>
+    <div class="ff-grid table-responsive scroll-visible" appScrollHint>
+      <table class="table table-sm align-middle mb-0 ff-result">
+        <thead>
+          <tr><th class="ff-sticky">Concept</th>@for (m of months; track m) { <th class="text-end">{{ m }}</th> }<th class="text-end ff-total-col">Total annuel</th></tr>
+        </thead>
+        <tbody>
+          <tr class="r-strong"><td class="ff-sticky"><span class="ff-lbl">Chiffre d'affaires total</span></td>@for (v of calc.ca; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Coûts directs (total)</span></td>@for (v of calc.coutsDirects; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub2"><td class="ff-sticky"><span class="ff-lbl">Matériaux et matières premières</span></td>@for (v of calc.materiaux; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub2"><td class="ff-sticky"><span class="ff-lbl">Main-d'œuvre directe</span></td>@for (v of calc.mainOeuvre; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-key r-good"><td class="ff-sticky"><span class="ff-lbl">▶ Marge brute</span></td>@for (v of calc.margeBrute; track $index) { <td class="text-end" [class.neg]="v < 0">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Autres revenus</span></td>@for (v of calc.autresRevenus; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Frais de vente</span></td>@for (v of calc.fraisVente; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Frais administratifs</span></td>@for (v of calc.fraisAdmin; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-strong"><td class="ff-sticky"><span class="ff-lbl">Total des charges d'exploitation</span></td>@for (v of calc.charges; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-key"><td class="ff-sticky"><span class="ff-lbl">▶ Résultat d'exploitation</span></td>@for (v of calc.resultatExploitation; track $index) { <td class="text-end" [class.neg]="v < 0">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Charges financières</span></td>@for (v of calc.financier; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-key"><td class="ff-sticky"><span class="ff-lbl">▶ Résultat avant impôts</span></td>@for (v of calc.resultatAvantImpots; track $index) { <td class="text-end" [class.neg]="v < 0">{{ money(v) }}</td> }</tr>
+          <tr class="r-sub"><td class="ff-sticky"><span class="ff-lbl">Impôt sur les bénéfices ({{ tauxImpot ?? 0 }} %)</span></td>@for (v of calc.impot; track $index) { <td class="text-end">{{ money(v) }}</td> }</tr>
+          <tr class="r-net"><td class="ff-sticky"><span class="ff-lbl">▶ Résultat net de la période</span></td>@for (v of calc.resultatNet; track $index) { <td class="text-end" [class.neg]="v < 0">{{ money(v) }}</td> }</tr>
+          <tr class="r-pct"><td class="ff-sticky"><span class="ff-lbl">Marge brute (%)</span></td>@for (v of calc.margeBrutePct; track $index) { <td class="text-end" [class.neg]="(v ?? 0) < 0">{{ pct(v) }}</td> }</tr>
+          <tr class="r-pct"><td class="ff-sticky"><span class="ff-lbl">Marge nette (%)</span></td>@for (v of calc.margeNettePct; track $index) { <td class="text-end" [class.neg]="(v ?? 0) < 0">{{ pct(v) }}</td> }</tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement pour voir les 12 mois</p>
+    <p class="ff-note">Les autres revenus sont ajoutés au résultat avant impôts. Les montants entre parenthèses sont des pertes.</p>
+  }
+
+  <!-- Barre du bas : le résultat net suit la saisie en direct -->
+  @if (!readOnly || preview) {
+    <div class="ff-actions no-print">
+      <div class="ff-live" [class.neg]="calc.resultatNet[12] < 0" aria-live="polite">
+        <span>Résultat net {{ annee ?? '' }}</span>
+        <strong>{{ hasAnyAmount ? moneyUnit(calc.resultatNet[12]) : '–' }}</strong>
+      </div>
+      @if (preview) {
+        <span class="small text-muted">Aperçu : rien n'est enregistré</span>
+      } @else {
+        <button type="button" class="btn btn-success ff-btn-save" [disabled]="isSaving" (click)="save()">
+          @if (isSaving) { <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement… }
+          @else { <i class="bi bi-check-circle me-2"></i>Enregistrer }
+        </button>
+      }
+    </div>
+  }
+  }
+
+  @if (!preview) { <app-livrable-review toolCode="t3h" /> }
+</div>

@@ -1,14 +1,16 @@
-// footer.component.scss
+// Pied de page : dans le flux, à la fin de la page (il ne recouvre plus rien). Une seule ligne sur téléphone : le logo est déjà
+// dans l'en-tête, on n'y garde que la mention de droits.
+
+:host { display: block; }
 
 .app-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--app-footer-h);
+  padding: .5rem 1rem;
   background-color: #1a1a2e;
   color: #aaaaaa;
-  padding: 0.65rem 1rem;
 }
 
 .footer-inner {
@@ -16,29 +18,23 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem 1rem;
-  font-size: 0.8rem;
+  gap: .15rem .75rem;
+  font-size: .78rem;
   text-align: center;
 }
 
 .footer-brand {
+  display: none;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: .85rem;
   white-space: nowrap;
 }
 
-.footer-divider {
-  opacity: 0.3;
-}
+.footer-divider { display: none; opacity: .3; }
+.footer-copy { white-space: nowrap; }
+.footer-more { display: none; }
 
-.footer-copy {
-  white-space: nowrap;
-}
-
-// Sur très petit écran, chaque morceau passe à la ligne
-@media (max-width: 399px) {
-  .footer-inner {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+@media (min-width: 576px) {
+  .footer-brand, .footer-more { display: inline; }
+  .footer-divider { display: inline; }
 }

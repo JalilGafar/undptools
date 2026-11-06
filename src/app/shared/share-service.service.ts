@@ -6,26 +6,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class ShareServiceService {
 
-  private _menuVisible = new BehaviorSubject<boolean>(false);
-  menuVisible$ = this._menuVisible.asObservable();
-  
-  private _manMenuVisible = new BehaviorSubject<boolean>(false);
-  manMenuVisible$ = this._manMenuVisible.asObservable();
-
-  showMenu() {
-    this._menuVisible.next(true);
-  }
-  showManMenu() {
-    this._manMenuVisible.next(true);
-  }
-
-  hideMenu() {
-    this._menuVisible.next(false);
-  }
-  hideManMenu() {
-    this._manMenuVisible.next(false);
-  }
-
+  /** Panneau des outils de l'en-tête (ouvert / fermé) */
   private _sidebarOpen$ = new BehaviorSubject<boolean>(false);
   sidebarOpen$ = this._sidebarOpen$.asObservable();
 

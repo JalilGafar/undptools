@@ -4,6 +4,8 @@ import { AuthService } from '../../_services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { StorageService } from '../../_services/storage.service';
+import { hasAdminRole } from '../../core/roles';
 
 const CHARSET = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
 
@@ -22,6 +24,8 @@ export class RegisterComponent {
     password: null,
     roles: 'consultant'
   };
+  /** Seul un administrateur choisit le rôle du nouveau compte ; sinon c'est un compte consultant */
+  isAdmin = false;
   isSuccessful = false;
   isSignUpFailed = false;
   errorMessage = '';
@@ -34,8 +38,11 @@ export class RegisterComponent {
 
   constructor(
     private authService: AuthService,
+    private storage: StorageService,
     @Inject(PLATFORM_ID) private platformId: object,
-  ) {}
+  ) {
+    this.isAdmin = hasAdminRole(this.storage.getUser()?.roles);
+  }
 
   generatePassword(): void {
     const length = 12;
@@ -166,7 +173,8 @@ export class RegisterComponent {
     const map: Record<string, string> = {
       consultant: 'Consultant',
       moderator:  'Modérateur',
-      admin:      'Administrateur',
+      evaluateur: 'Évaluateur (RBLAC)',
+      admin:      'Administrateur (Bureau Pays)',
       entreprise: 'Entreprise',
     };
     return map[role] ?? role;

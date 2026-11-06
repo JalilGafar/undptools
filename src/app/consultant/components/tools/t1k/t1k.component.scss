@@ -1,0 +1,167 @@
+// Même charte que les autres outils (1L, 1G, 1B) — pensé d'abord pour le mobile : un élément = une carte, choix en gros boutons.
+$primary:  #1a56db;
+$border:   #e5e7eb;
+$muted:    #6b7280;
+$surface:  #f8fafc;
+$ok:       #0f9d58;
+$warn:     #d97706;
+$bad:      #dc3545;
+$radius:   12px;
+
+.ic-wrapper { max-width: 900px; padding-top: 1.25rem; padding-bottom: 2.5rem; }
+
+.ic-toolbar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1rem; }
+
+// ── En-tête ───────────────────────────────────────────────────────────────────
+.ic-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, $primary 0%, #0e3fa3 100%);
+  border-radius: $radius;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+}
+.ic-header-icon { font-size: 2rem; flex-shrink: 0; opacity: .9; }
+.ic-title { font-size: 1.3rem; font-weight: 700; margin: 0 0 2px; color: #fff; }
+.ic-subtitle { font-size: .875rem; margin: 0; color: rgba(255, 255, 255, .85); }
+
+.ic-empty { text-align: center; padding: 3rem 1rem; color: $muted; }
+.ic-intro { font-size: .9rem; color: $muted; }
+
+// ── Résumé ────────────────────────────────────────────────────────────────────
+.ic-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+
+.ic-sum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .6rem .4rem;
+  border-radius: 12px;
+  text-align: center;
+
+  strong { font-size: 1.7rem; line-height: 1.1; }
+  span { font-size: .78rem; font-weight: 600; }
+
+  &.ok   { background: #e6f6ee; color: #0b6b3c; }
+  &.help { background: #fdf1de; color: #92580a; }
+  &.none { background: #fdecee; color: #a32030; }
+}
+.ic-note { font-size: .78rem; color: $muted; margin: .4rem 0 1rem; }
+
+// ── Sections et éléments ──────────────────────────────────────────────────────
+.ic-section-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: .5rem;
+  margin: 1.25rem 0 .85rem;
+  border-bottom: 2px solid $primary;
+  display: inline-block;
+}
+
+.ic-item {
+  padding: .85rem;
+  margin-bottom: .75rem;
+  background: $surface;
+  border: 1.5px solid $border;
+  border-radius: $radius;
+}
+
+.ic-item-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.ic-item-title { font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b; }
+
+.ic-badge {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $primary;
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ic-field { margin-bottom: .65rem; }
+.ic-label { display: block; font-size: .82rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+
+// Choix : gros boutons confortables au doigt
+.ic-choices { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+// Quatre choix (Bonne, Passable, Médiocre, Non applicable) : deux par ligne sur téléphone, pour que « Non applicable » tienne dans son bouton
+.ic-choices-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  .ic-choice { min-width: 0; }
+
+  @media (min-width: 576px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.ic-choice {
+  flex: 1 1 0;
+  min-width: 78px;
+  min-height: 46px;
+  padding: .35rem .6rem;
+  font-weight: 600;
+  font-size: .92rem;
+  color: #475569;
+  background: #fefffe;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  transition: border-color .15s ease, background-color .15s ease;
+
+  &:disabled { opacity: 1; cursor: default; }
+  &:not(:disabled):hover { border-color: $primary; }
+
+  &.selected { color: #fff; border-color: transparent; }
+  &.selected.c-oui     { background: $ok; }
+  &.selected.c-part    { background: $warn; }
+  &.selected.c-non     { background: $bad; }
+  &.selected.c-off     { background: #3c3c3c; }
+  &.selected.c-help    { background: $primary; }
+  &.selected.c-neutral { background: #64748b; }
+}
+
+.form-control {
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 1rem;
+
+  &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); outline: none; }
+  &:disabled { background-color: $surface; color: #1e293b; }
+}
+
+// ── Actions : barre collée en bas de l'écran sur mobile ──────────────────────
+.ic-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  padding: .75rem 0;
+  margin-top: 1.25rem;
+  background: #fff;
+  border-top: 1px solid $border;
+  box-shadow: 0 -6px 12px -8px rgba(0, 0, 0, .15);
+}
+.ic-btn-save { font-weight: 600; padding: .5rem 1.5rem; min-height: 46px; display: inline-flex; align-items: center; }
+
+@media (max-width: 576px) {
+  .ic-header { padding: 1rem 1.1rem; }
+  .ic-actions .btn { flex: 1; min-height: 48px; justify-content: center; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .ic-header { background: none !important; color: #000 !important; border: 1px solid #999; }
+  .ic-title, .ic-subtitle { color: #000 !important; }
+  .ic-item { break-inside: avoid; }
+  .ic-choice:not(.selected) { display: none; }   // à l'impression, seule la réponse choisie reste
+  .ic-choice.selected { color: #000 !important; background: none !important; border: 1px solid #000; }
+}

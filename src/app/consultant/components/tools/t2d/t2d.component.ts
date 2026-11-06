@@ -6,15 +6,21 @@ import { CommonModule } from '@angular/common';
 import { BusinessModelCanvas } from '../../../../core/model/businessModelCanvas';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
+import { LoadingComponent, LoadErrorComponent } from '../../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../../core/load-state';
+import { LivrableReviewComponent } from '../../../../shared/components/livrable-review/livrable-review.component';
+import { PreviewBannerComponent } from '../../../../shared/components/preview-banner/preview-banner.component';
+import { hasManagerRole } from '../../../../core/roles';
 
 @Component({
   selector: 'app-t2d',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],                          
+  imports: [LivrableReviewComponent, LoadingComponent, LoadErrorComponent, PreviewBannerComponent, CommonModule, ReactiveFormsModule],                          
   templateUrl: './t2d.component.html',
   styleUrl: './t2d.component.scss'
 })
 export class T2dComponent implements OnInit, AfterViewInit, OnDestroy {
+  toolState$!: Observable<LoadState>;
   businessModelForm!: FormGroup;
 
   // State management
@@ -27,6 +33,12 @@ export class T2dComponent implements OnInit, AfterViewInit, OnDestroy {
   consultantId!: number;
   userId!: number;
   companyId: number = 0;
+
+  /** Aperçu manager : un manager / modérateur qui ouvre l'outil depuis le menu (sans entreprise) le voit comme un consultant, sans rien enregistrer. */
+  get preview(): boolean {
+    const roles: string[] = this.storageService.getUser()?.roles ?? [];
+    return hasManagerRole(roles) && !this.storageService.CompanyId;
+  }
   isLoading = false;
   errorMessage = '';
 
@@ -162,6 +174,7 @@ export class T2dComponent implements OnInit, AfterViewInit, OnDestroy {
 
   
   ngOnInit(): void {
+    this.toolState$ = this.toolService.toolState$;
     this.consultantId = this.storageService.ConsultantId;
     this.userId = this.storageService.getUser().id
 
@@ -290,6 +303,15 @@ onSubmit(): void {
       updatedAt: new Date()
     };
 
+    // Aperçu manager : le canevas est généré à l'écran, mais jamais enregistré
+    if (this.preview) {
+      this.canvasData = bmcData;
+      this.isFormVisible = false;
+      this.isCanvasVisible = true;
+      this.isLoading = false;
+      return;
+    }
+
     // Save to backend
     this.consultantService.saveBusinessModelCanvas(bmcData)
       .pipe(takeUntil(this.destroy$))
@@ -302,7 +324,7 @@ onSubmit(): void {
         },
         error: (error) => {
           console.error('Error saving Business Model Canvas:', error);
-          this.errorMessage = 'Failed to save Business Model Canvas. Please try again.';
+          this.errorMessage = error.error?.message ?? 'Failed to save Business Model Canvas. Please try again.';
           this.isLoading = false;
         }
       });

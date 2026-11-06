@@ -36,16 +36,19 @@ export const TOOL_GROUPS: ToolGroup[] = [
     icon: 'bi-1-circle-fill',
     children: [
       { label: '1A Rapport Final - Étape 1', route: 't1a', status: 'soon' },
-      { label: '1B Minutes de réunion', route: 't1b', status: 'soon' },            // écran présent, enregistrement à brancher
-      { label: '1C Suivi des activités', route: 't1c', status: 'soon' },           // modification des tâches (PUT) à implémenter
-      { label: '1D Diagnostic intégral', route: 't1d', status: 'active' },
-      { label: '1E_a Diagnostic BPF', route: 't1ea', status: 'soon' },
-      { label: '1E_b Diagnostic BPA', route: 't1eb', status: 'soon' },
-      { label: '1F Rapport sur la capacité de production', route: 't1f', status: 'soon' },
+      { label: 'Minute de réunion', route: 't1b', status: 'active' },            // outil transversal : présent à chaque étape, sans code
+      { label: 'Registre des Quick Wins', route: 'tqw1', status: 'active' },
+      { label: '1D Diagnostic Général', route: 't1d', status: 'active' },
+      { label: '1E_a Diagnostic BPF', route: 't1ea', status: 'active' },
       { label: '1G Cartographie des clients', route: 't1g', status: 'active' },
       { label: "1H Photos de l'entreprise", route: 't1h', status: 'active' },
       { label: '1i Ligne de base - Capture initiale', route: 't1i', status: 'soon' },
-      { label: "1L Profil d'informations", route: 't1l', status: 'active' },
+      { label: "1J Profil de productivité de l'entreprise", route: 't1j', status: 'active' },
+      { label: "1K Diagnostic d'image commerciale", route: 't1k', status: 'active' },
+      { label: "1L Profil des participants", route: 't1l', status: 'active' },
+      { label: '1M Analyse financière', route: 't3h', status: 'active' },   // route et code interne « t3h » conservés (identifiant technique)
+      { label: '5S Mise en œuvre des 5S – initial', route: 't5s', status: 'active' },
+      { label: 'SE Suivi et évaluation – initial', route: 'tse', status: 'active' },
     ]
   },
   {
@@ -53,7 +56,8 @@ export const TOOL_GROUPS: ToolGroup[] = [
     icon: 'bi-2-circle-fill',
     children: [
       { label: '2A Rapport Final', route: 't2a', status: 'soon' },
-      { label: '2B Minutes de réunion', route: 't1b', status: 'soon' },            // réutilise l'écran 1B
+      { label: 'Minute de réunion', route: 't1b', status: 'active' },
+      { label: 'Registre des Quick Wins', route: 'tqw2', status: 'active' },
       { label: '2C Suivi des activités', route: 't2c', status: 'soon' },
       { label: '2D Business modèle CANVAS impact', route: 't2d', status: 'active' },
       { label: "2E Matrice du Plan d'Amélioration", route: 't2e', status: 'soon' },
@@ -66,12 +70,12 @@ export const TOOL_GROUPS: ToolGroup[] = [
     icon: 'bi-3-circle-fill',
     children: [
       { label: '3A Rapport Final', route: 'onbuild', status: 'soon' },
-      { label: '3B Minutes de réunion', route: 'onbuild', status: 'soon' },
+      { label: 'Minute de réunion', route: 't1b', status: 'active' },
+      { label: 'Registre des Quick Wins', route: 'tqw3', status: 'active' },
       { label: '3C Suivi des activités', route: 'onbuild', status: 'soon' },
       { label: '3D Rapport de Formation', route: 'onbuild', status: 'soon' },
       { label: '3E Cartographie des institutions de soutien', route: 'onbuild', status: 'soon' },
       { label: '3G SyECFo_Evaluation des fournisseurs', route: 'onbuild', status: 'soon' },
-      { label: '3H Analyse financière basique', route: 'onbuild', status: 'soon' },
     ]
   },
   {
@@ -79,26 +83,15 @@ export const TOOL_GROUPS: ToolGroup[] = [
     icon: 'bi-4-circle-fill',
     children: [
       { label: '4A Rapport Final', route: 'onbuild', status: 'soon' },
-      { label: '4B Minutes de réunion', route: 'onbuild', status: 'soon' },
+      { label: 'Minute de réunion', route: 't1b', status: 'active' },
+      { label: 'Registre des Quick Wins', route: 'tqw4', status: 'active' },
       { label: '4C Suivi des activités', route: 'onbuild', status: 'soon' },
       { label: '4D Rapport de Formation', route: 'onbuild', status: 'soon' },
       { label: "4E Intérêt d'achat-vente des participants-clients", route: 'onbuild', status: 'soon' },
       { label: '4F Plan de travail détaillé (GANTT)', route: 'onbuild', status: 'soon' },
       { label: '4G Fiche projet', route: 'onbuild', status: 'soon' },
-    ]
-  },
-  {
-    label: 'Promotion des relations commerciales',
-    icon: 'bi-5-circle-fill',
-    children: [
-      { label: '5A Rapport Final', route: 'onbuild', status: 'soon' },
-      { label: '5B Minutes de réunion', route: 'onbuild', status: 'soon' },
-      { label: '5C Suivi des activités', route: 'onbuild', status: 'soon' },
-      { label: "5D Intérêt d'achat-vente des participants-clients", route: 'onbuild', status: 'soon' },
-      { label: '5E Ligne de base - Capture finale', route: 'onbuild', status: 'soon' },
-      { label: '5F Formulaire de livraison de matériel', route: 'onbuild', status: 'soon' },
-      { label: "5G Photos de l'entreprise", route: 'onbuild', status: 'soon' },
-      { label: '5H Évaluation du programme', route: 'onbuild', status: 'soon' },
+      { label: '5S Mise en œuvre des 5S – final', route: 't5sf', status: 'active' },
+      { label: 'SE Suivi et évaluation – final', route: 'tsef', status: 'active' },
     ]
   },
 ];

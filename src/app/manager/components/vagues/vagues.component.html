@@ -1,0 +1,176 @@
+<div class="container vg-wrapper">
+
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i> Retour
+  </button>
+
+  <header class="vg-header">
+    <div class="vg-header-icon"><i class="bi bi-layers"></i></div>
+    <div>
+      <h1 class="vg-title">Vagues du programme</h1>
+      <p class="vg-sub">Chaque vague dure 6 à 7 mois. Une entreprise appartient à une seule vague. Clôturer une vague verrouille les saisies des consultants.</p>
+    </div>
+  </header>
+
+  @if (message(); as m) {
+    <div class="alert vg-alert" [class.alert-success]="m.type === 'success'" [class.alert-danger]="m.type === 'danger'" role="status">
+      <span>{{ m.text }}</span>
+      <button type="button" class="btn-close" aria-label="Fermer" (click)="dismiss()"></button>
+    </div>
+  }
+
+  <!-- ── Vagues ───────────────────────────────────────────────────────────── -->
+  <div class="vg-bar">
+    <h2 class="vg-h2">Vagues</h2>
+    <button type="button" class="btn btn-primary vg-new" (click)="newWave()"><i class="bi bi-plus-lg me-1"></i>Nouvelle vague</button>
+  </div>
+
+  @if (editor(); as e) {
+    @if (e.id === null) {
+      <section class="vg-card vg-editor" aria-label="Nouvelle vague">
+        <h3 class="vg-card-title">Nouvelle vague</h3>
+        <ng-container *ngTemplateOutlet="form; context: { $implicit: e }"></ng-container>
+      </section>
+    }
+  }
+
+  @for (v of wave.waves(); track v.id) {
+    <section class="vg-card" [class.closed]="v.statut === 'cloturee'">
+      <div class="vg-card-head">
+        <div class="vg-card-main">
+          <h3 class="vg-card-title">{{ v.nom }}</h3>
+          <p class="vg-card-meta">{{ periodOf(v) || 'Dates non renseignées' }}</p>
+        </div>
+        <span class="vg-state" [class]="'vg-state ' + v.statut">{{ statusLabel(v.statut) }}</span>
+      </div>
+      <p class="vg-count"><i class="bi bi-building me-1"></i>{{ v.nb_entreprises }} entreprise{{ v.nb_entreprises > 1 ? 's' : '' }}</p>
+
+      @if (editor(); as e) {
+        @if (e.id === v.id) {
+          <ng-container *ngTemplateOutlet="form; context: { $implicit: e }"></ng-container>
+        }
+      }
+
+      @if (pending(); as p) {
+        @if (p.id === v.id) {
+          <div class="vg-confirm" role="alertdialog">
+            @switch (p.kind) {
+              @case ('cloturer') { <p><strong>Clôturer « {{ v.nom }} » ?</strong> Les consultants ne pourront plus rien enregistrer sur ses {{ v.nb_entreprises }} entreprise{{ v.nb_entreprises > 1 ? 's' : '' }} (lecture seule). Vous pourrez la rouvrir.</p> }
+              @case ('rouvrir') { <p><strong>Rouvrir « {{ v.nom }} » ?</strong> Les consultants pourront de nouveau saisir sur ses entreprises.</p> }
+              @case ('supprimer') { <p><strong>Supprimer « {{ v.nom }} » ?</strong> Cette action est définitive.</p> }
+            }
+            <div class="vg-confirm-actions">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelAsk()">Annuler</button>
+              <button type="button" class="btn" [class.btn-danger]="p.kind !== 'rouvrir'" [class.btn-success]="p.kind === 'rouvrir'" [disabled]="busy()" (click)="confirm(v)">
+                {{ p.kind === 'cloturer' ? 'Clôturer' : p.kind === 'rouvrir' ? 'Rouvrir' : 'Supprimer' }}
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      @if (!(editor()?.id === v.id) && !(pending()?.id === v.id)) {
+        <div class="vg-actions">
+          <button type="button" class="btn btn-outline-primary" (click)="edit(v)"><i class="bi bi-pencil me-1"></i>Modifier</button>
+          @switch (v.statut) {
+            @case ('planifiee') { <button type="button" class="btn btn-outline-success" [disabled]="busy()" (click)="start(v)"><i class="bi bi-play-fill me-1"></i>Démarrer</button> }
+            @case ('en_cours') { <button type="button" class="btn btn-outline-warning" (click)="ask('cloturer', v)"><i class="bi bi-lock me-1"></i>Clôturer</button> }
+            @case ('cloturee') { <button type="button" class="btn btn-outline-success" (click)="ask('rouvrir', v)"><i class="bi bi-unlock me-1"></i>Rouvrir</button> }
+          }
+          @if (v.nb_entreprises === 0) {
+            <button type="button" class="btn btn-outline-danger" (click)="ask('supprimer', v)" aria-label="Supprimer la vague"><i class="bi bi-trash"></i></button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Formulaire d'une vague (création et modification) -->
+  <ng-template #form let-e>
+    <form class="vg-form" (ngSubmit)="save()">
+      <div>
+        <label class="form-label" for="vg-nom">Nom</label>
+        <input id="vg-nom" name="nom" class="form-control" type="text" maxlength="100" [(ngModel)]="e.nom" placeholder="Vague 3" required>
+      </div>
+      <div class="vg-form-dates">
+        <div>
+          <label class="form-label" for="vg-debut">Début</label>
+          <input id="vg-debut" name="debut" class="form-control" type="date" [(ngModel)]="e.date_debut">
+        </div>
+        <div>
+          <label class="form-label" for="vg-fin">Fin</label>
+          <input id="vg-fin" name="fin" class="form-control" type="date" [(ngModel)]="e.date_fin">
+        </div>
+      </div>
+      <div>
+        <label class="form-label" for="vg-statut">Statut</label>
+        <select id="vg-statut" name="statut" class="form-select" [(ngModel)]="e.statut">
+          @for (s of STATUTS; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+        </select>
+      </div>
+      <div class="vg-form-actions">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()">Annuler</button>
+        <button type="submit" class="btn btn-primary" [disabled]="busy()">
+          @if (busy()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> }Enregistrer
+        </button>
+      </div>
+    </form>
+  </ng-template>
+
+  <!-- ── Répartition des entreprises ──────────────────────────────────────── -->
+  <h2 class="vg-h2 vg-h2-spaced">Répartir les entreprises</h2>
+  <p class="vg-note">Cochez des entreprises, choisissez la vague de destination, puis déplacez-les. Toutes les entreprises existantes ont été placées dans la première vague.</p>
+
+  @if (loadingCompanies()) {
+    <app-loading message="Chargement des entreprises…" />
+  } @else {
+    <section class="vg-card">
+      <div class="vg-filters">
+        <div>
+          <label class="form-label" for="vg-src">Afficher</label>
+          <select id="vg-src" class="form-select" [(ngModel)]="filterWave" name="src">
+            <option [ngValue]="0">Toutes les vagues</option>
+            @for (w of wave.waves(); track w.id) { <option [ngValue]="w.id">{{ w.nom }}</option> }
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="vg-q">Rechercher</label>
+          <input id="vg-q" class="form-control" type="search" [(ngModel)]="search" name="q" placeholder="Entreprise ou consultant">
+        </div>
+      </div>
+
+      @if (rows().length) {
+        <button type="button" class="vg-all" (click)="toggleAllShown()">
+          <span class="vg-check" [class.on]="allShownSelected()"><i class="bi bi-check-lg"></i></span>
+          {{ allShownSelected() ? 'Tout désélectionner' : 'Tout sélectionner (' + rows().length + ')' }}
+        </button>
+        <ul class="vg-list">
+          @for (c of rows(); track c.id) {
+            <li>
+              <button type="button" class="vg-company" [class.on]="isSelected(c)" role="checkbox" [attr.aria-checked]="isSelected(c)" (click)="toggleCompany(c)">
+                <span class="vg-check" [class.on]="isSelected(c)"><i class="bi bi-check-lg"></i></span>
+                <span class="vg-company-text"><strong>{{ c.name }}</strong><small>{{ c.consultant }}</small></span>
+                <span class="vg-chip">{{ waveName(c.id_vague) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="vg-empty">Aucune entreprise ne correspond.</p>
+      }
+
+      <div class="vg-move">
+        <div>
+          <label class="form-label" for="vg-target">Déplacer vers</label>
+          <select id="vg-target" class="form-select" [(ngModel)]="target" name="target">
+            <option [ngValue]="0">Choisir une vague…</option>
+            @for (w of wave.waves(); track w.id) { <option [ngValue]="w.id">{{ w.nom }} ({{ statusLabel(w.statut) }})</option> }
+          </select>
+        </div>
+        <button type="button" class="btn btn-primary" [disabled]="!selectedIds().length || !target || busy()" (click)="move()">
+          <i class="bi bi-arrow-right-circle me-1"></i>Déplacer ({{ selectedIds().length }})
+        </button>
+      </div>
+    </section>
+  }
+</div>

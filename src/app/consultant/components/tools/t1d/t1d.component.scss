@@ -339,6 +339,186 @@ $high:     #0f9d58;
     span { white-space: nowrap; }
   }
 
+  // ── Résumé : deux boutons (détail / recommandations), l'un sous l'autre sur téléphone ─────
+  .td-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .6rem;
+    margin-top: 1rem;
+
+    .btn { min-height: 46px; font-weight: 600; }
+  }
+
+  // ── Dernière étape du questionnaire ────────────────────────────────────────
+  .td-qtop { scroll-margin-top: 70px; }
+  .td-final-text { margin: 0 0 .75rem; font-size: .92rem; color: #334155; line-height: 1.5; }
+
+  // ── Champ des recommandations ───────────────────────────────────────────────
+  .td-reco-section { margin-top: 1.5rem; scroll-margin-top: 70px; }
+
+  .td-hint { margin: -.25rem 0 .85rem; font-size: .85rem; color: $muted; line-height: 1.45; }
+
+  .td-lines { display: flex; flex-direction: column; gap: .65rem; }
+  .td-line {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+
+    .td-badge { flex-shrink: 0; margin-top: 9px; }
+    .form-control { flex: 1; min-width: 0; }
+  }
+
+  // Retirer un élément d'une liste (cible tactile de 44 px)
+  .td-line-del {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: $low;
+    font-size: 1.1rem;
+
+    &:hover { background: #fdecee; }
+  }
+
+  .td-problems { display: flex; flex-direction: column; gap: .85rem; }
+  .td-problem {
+    border: 1.5px solid $border;
+    border-radius: 12px;
+    background: $surface;
+    padding: .85rem;
+  }
+  .td-problem-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+
+  // Deux lignes (référence, indicateur, valeur initiale, prévision) par problème
+  .td-ligne {
+    margin-top: .75rem;
+    padding-top: .75rem;
+    border-top: 1px dashed #cbd5e1;
+  }
+
+  // Rien d'enregistré : message + bouton (l'un sous l'autre sur téléphone, côte à côte ensuite)
+  .td-reco-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .85rem;
+    text-align: center;
+
+    .td-reco-empty-msg { color: #64748b; i { font-size: 2rem; color: #94a3b8; } p { margin: .4rem 0 0; font-size: .92rem; } }
+    .btn { min-height: 46px; font-weight: 600; }
+    .td-reco-why { margin: 0; font-size: .85rem; color: $muted; }
+  }
+
+  // Raccourci vers les conclusions et recommandations, sous la barre de progression
+  .td-shortcut {
+    width: 100%;
+    min-height: 46px;
+    margin-bottom: .75rem;
+    font-weight: 600;
+  }
+
+  // Retour de l'enregistrement automatique des réponses
+  .td-results-notice {
+    margin: 0 0 .75rem;
+    padding: .5rem .75rem;
+    border-radius: 8px;
+    font-size: .88rem;
+    font-weight: 600;
+
+    &.info { background: #eef3ff; color: $primary; }
+    &.success { background: #e8f6ee; color: #0b7a43; }
+    &.danger { background: #fdecee; color: #b02a37; }
+  }
+
+  .td-reco-save {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+
+    .btn { min-height: 46px; font-weight: 600; }
+  }
+
+  .td-reco-notice {
+    margin: 0;
+    font-size: .88rem;
+    font-weight: 600;
+
+    &.ok { color: $high; }
+    &.ko { color: $low; }
+  }
+
+  @media (min-width: 576px) {
+    .td-reco-empty {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+
+      .td-reco-empty-msg { display: flex; align-items: center; gap: .85rem; p { margin: 0; } }
+      .btn { flex-shrink: 0; }
+    }
+    .td-shortcut { width: auto; }
+    .td-actions { grid-template-columns: 1fr 1fr; }
+    .td-reco-save { flex-direction: row; align-items: center; }
+  }
+
+  // ── Barre d'actions : Retour à gauche, Imprimer / PDF à droite ──────────────
+  .td-toolbar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+
+    .btn { min-height: 44px; font-weight: 600; }
+  }
+
+  // ── Rapport imprimé ─────────────────────────────────────────────────────────
+  // Éléments propres à l'impression : invisibles à l'écran
+  .td-print-only { display: none; }
+  .td-print-meta { margin: 0 0 .85rem; font-size: .9rem; color: #334155; }
+
+  .td-print-reco {
+    margin-top: 1rem;
+
+    h6:not(.td-section-title) { margin: .9rem 0 .35rem; font-size: .95rem; font-weight: 700; color: #1e293b; }
+    ol { margin: 0; padding-left: 1.4rem; font-size: .9rem; li { margin-bottom: .3rem; white-space: pre-wrap; } }
+    .td-print-none { margin: 0; font-size: .9rem; color: $muted; }
+  }
+
+  .td-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .82rem;
+
+    th, td { border: 1px solid #94a3b8; padding: .3rem .45rem; vertical-align: top; white-space: pre-wrap; }
+    th { background: #e8eef9; text-align: left; }
+  }
+
+  @media print {
+    max-width: none;
+    padding: 0;
+
+    .no-print { display: none !important; }
+    .td-print-only { display: block !important; }
+
+    .td-header { background: none !important; color: #000 !important; border: 1px solid #999; padding: .6rem .9rem; margin-bottom: .6rem; }
+    .td-title, .td-subtitle { color: #000 !important; }
+    .td-header-icon { display: none; }
+
+    .td-card { box-shadow: none; border: 1px solid #bbb; padding: .6rem .8rem; margin-bottom: .6rem; break-inside: avoid; }
+    .td-domain { break-inside: avoid; }
+    .td-score { margin-bottom: .4rem; }
+    .td-chart { height: 300px; display: flex; justify-content: center; }
+    .td-section-title { break-after: avoid; }
+    .td-print-reco h6 { break-after: avoid; }
+    .td-print-table tbody { break-inside: avoid; }
+
+    // Les fonds colorés (barres de score, pastilles de réponse) sont conservés à l'impression
+    .progress, .progress-bar, .td-chip, .td-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
   @media (max-width: 576px) {
     .td-header { padding: 1rem 1.1rem; }
     .td-card { padding: .85rem; }

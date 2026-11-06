@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StorageService } from '../../../_services/storage.service';
 
 @Component({
   selector: 'app-consul-home',
@@ -9,18 +8,12 @@ import { StorageService } from '../../../_services/storage.service';
   templateUrl: './consul-home.component.html',
   styleUrl: './consul-home.component.scss'
 })
-export class ConsulHomeComponent implements OnInit {
+export class ConsulHomeComponent {
 
   showAlert: boolean = false;
   alertType: string = 'info';
   alertMessage: string = '';
   dismissible: boolean = true;
-
-  constructor(private storageService: StorageService) { }
-
-  ngOnInit(): void {
-    this.storageService.setVisibleToolsFalse();
-  }
 
   showAlertMessage(): void {
     this.alertMessage = 'Ce profil de ne vous donne pas accès aux outils de ce programme';

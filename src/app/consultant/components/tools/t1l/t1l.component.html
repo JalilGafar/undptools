@@ -25,7 +25,7 @@
   <div class="pf-header">
     <div class="pf-header-icon"><i class="bi bi-person-vcard"></i></div>
     <div>
-      <h2 class="pf-title">Profil du participant</h2>
+      <h2 class="pf-title">Profil des participants</h2>
       @if (companyName) {
         <p class="pf-subtitle">
           <strong>{{ companyName }}</strong>
@@ -40,7 +40,7 @@
       <div class="spinner-border text-primary" role="status"></div>
       <p>Chargement des données…</p>
     </div>
-  } @else if (!companyId) {
+  } @else if (!companyId && !preview) {
     <div class="pf-loading">
       <p>Aucune entreprise sélectionnée.</p>
       <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
@@ -49,9 +49,12 @@
     <div class="alert alert-danger">Impossible de charger le profil. Veuillez réessayer.</div>
   } @else {
 
+  @if (preview) {
+    <app-preview-banner />
+  }
   @if (readOnly) {
     <div class="alert alert-info py-2 no-print">
-      <i class="bi bi-eye me-1"></i>Consultation en lecture seule : seul le consultant concerné peut modifier ce profil.
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
     </div>
   }
 
@@ -348,7 +351,9 @@
         </div>
       </div>
     }
-    @if (!readOnly) {
+    @if (preview) {
+      <div class="col-12"><app-preview-banner [end]="true" /></div>
+    } @else if (!readOnly) {
       <div class="col-12 pf-actions no-print">
         <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
           <i class="bi bi-x-circle me-1"></i> Annuler
@@ -364,4 +369,6 @@
     }
   </form>
   }
+
+  @if (!preview) { <app-livrable-review toolCode="t1l" /> }
 </div>

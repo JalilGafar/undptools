@@ -13,6 +13,12 @@ import { T1fComponent } from './components/tools/t1f/t1f.component';
 import { T1gComponent } from './components/tools/t1g/t1g.component';
 import { T1hComponent } from './components/tools/t1h/t1h.component';
 import { T1iComponent } from './components/tools/t1i/t1i.component';
+import { T1jComponent } from './components/tools/t1j/t1j.component';
+import { T1kComponent } from './components/tools/t1k/t1k.component';
+import { T3hComponent } from './components/tools/t3h/t3h.component';
+import { T5sComponent } from './components/tools/t5s/t5s.component';
+import { TqwComponent } from './components/tools/tqw/tqw.component';
+import { TseComponent } from './components/tools/tse/tse.component';
 import { T1lComponent } from './components/tools/t1l/t1l.component';
 import { InmotionComponent } from './components/tools/inmotion/inmotion.component';
 import { EvaluationComponent } from './components/tools/evaluation/evaluation.component';
@@ -46,12 +52,21 @@ const routes: Routes = [
   {path: 'tool/t1c', component: T1cComponent},
   {path: 'tool/t1d', component: T1dComponent},
   {path: 'tool/t1ea', component: T1eaComponent},
-  {path: 'tool/t1eb', component: OnconstructionComponent},
-  {path: 'tool/t1f', component: OnconstructionComponent},
   {path: 'tool/t1g', component: T1gComponent},
   {path: 'tool/t1h', component: T1hComponent},
   {path: 'tool/t1i', component: OnconstructionComponent},
+  {path: 'tool/t1j', component: T1jComponent},
+  {path: 'tool/t1k', component: T1kComponent},
   {path: 'tool/t1l', component: T1lComponent},
+  {path: 'tool/t3h', component: T3hComponent},
+  {path: 'tool/t5s', component: T5sComponent, data: { phase: 'initial' }},
+  {path: 'tool/t5sf', component: T5sComponent, data: { phase: 'final' }},
+  {path: 'tool/tse', component: TseComponent, data: { phase: 'initial' }},
+  {path: 'tool/tsef', component: TseComponent, data: { phase: 'final' }},
+  {path: 'tool/tqw1', component: TqwComponent, data: { etape: 1 }},
+  {path: 'tool/tqw2', component: TqwComponent, data: { etape: 2 }},
+  {path: 'tool/tqw3', component: TqwComponent, data: { etape: 3 }},
+  {path: 'tool/tqw4', component: TqwComponent, data: { etape: 4 }},
   
   {path: 'tool/t2a', component: OnconstructionComponent},
   {path: 'tool/t2b', component: OnconstructionComponent},

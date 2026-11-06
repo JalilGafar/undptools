@@ -11,12 +11,15 @@ import { PrediaLabel } from '../../../../core/model/predia_mat_label';
 import { PrediaLabelJSON } from '../../../../core/model/prediaJSON';
 import { Child } from '../../../../core/model/child';
 import { AttribPdfService, PdfScores } from './attrib-pdf.service';
+import { LoadingComponent, LoadErrorComponent } from '../../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../../core/load-state';
+import { LivrableReviewComponent } from '../../../../shared/components/livrable-review/livrable-review.component';
 
 @Component({
   selector: 'app-attribut',
   standalone: true,
   imports: [
-    CommonModule,
+    LivrableReviewComponent, LoadingComponent, LoadErrorComponent, CommonModule,
     ReactiveFormsModule,
     NgxChartsModule,
 
@@ -25,6 +28,7 @@ import { AttribPdfService, PdfScores } from './attrib-pdf.service';
   styleUrl: './attribut.component.scss'
 })
 export class AttributComponent implements OnInit, OnDestroy {
+  toolState$!: Observable<LoadState>;
 
   private destroy$ = new Subject<void>();
 
@@ -120,6 +124,7 @@ export class AttributComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.toolState$ = this.toolService.toolState$;
     this.matAttribForm = this.formBuilder.group({
       note_1: [null],
       comment_1: [null],
@@ -402,12 +407,12 @@ export class AttributComponent implements OnInit, OnDestroy {
           : this.storageService.ConsultantId;
         this.toolService.getAttribDataById(id, this.storageService.CompanyId);
       },
-      error: () => {
+      error: err => {
         this.modalInstance?.hide();
         this.isSaving = false;
         this.showAlert = true;
         this.alertType = 'danger';
-        this.alertMessage = 'Une erreur est survenue. Veuillez réessayer.';
+        this.alertMessage = err.error?.message ?? 'Une erreur est survenue. Veuillez réessayer.';
       }
     });
   }

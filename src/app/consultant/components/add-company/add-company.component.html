@@ -5,6 +5,17 @@
 
       <form class="row g-3" [formGroup]="companyForm">
 
+        <!-- Vague -->
+        <div class="col-12">
+          <label for="id_vague" class="form-label">Vague du programme</label>
+          <select id="id_vague" class="form-select" formControlName="id_vague">
+            @for (w of wave.openWaves(); track w.id) {
+              <option [ngValue]="w.id">{{ w.nom }}{{ w.statut === 'en_cours' ? ' (en cours)' : ' (planifiée)' }}</option>
+            }
+          </select>
+          <div class="form-text">Une entreprise appartient à une seule vague. Seule l'administrateur peut la changer ensuite.</div>
+        </div>
+
         <!-- Infos générales -->
         <h5 class="mt-3">Informations générales</h5>
         <div class="col-md-6">
@@ -83,7 +94,8 @@
 
         <!-- Boutons -->
         <div class="col-12 text-center mt-4">
-          <button type="submit" class="btn btn-success me-2" [disabled]="companyForm.invalid" (click)="onSubmitForm()">
+          @if (error) { <div class="alert alert-danger text-start">{{ error }}</div> }
+          <button type="submit" class="btn btn-success me-2" [disabled]="companyForm.invalid || isSaving" (click)="onSubmitForm()">
             <i class="bi bi-check-circle"></i> Enregistrer
           </button>
           <button type="button" class="btn btn-secondary" (click)="onGoBack()">

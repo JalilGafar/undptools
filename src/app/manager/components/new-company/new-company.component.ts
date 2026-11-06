@@ -14,6 +14,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Button } from 'primeng/button';
 import { GeolocationService } from '../../../_services/geolocation.service';
+import { WaveService } from '../../../shared/wave.service';
 
 @Component({
   selector: 'app-new-company',
@@ -51,7 +52,8 @@ export class NewCompanyComponent implements OnInit {
     private storageService: StorageService,
     private managerService: ManagerService,
     private confirmationService: ConfirmationService,
-    private appRout: Router
+    private appRout: Router,
+    readonly wave: WaveService
   ) { }
 
   ngOnInit(): void {
@@ -74,9 +76,13 @@ export class NewCompanyComponent implements OnInit {
       lieu: [''],
       x: [null],
       y: [null],
-      idUser: [null, Validators.required]
+      idUser: [null, Validators.required],
+      id_vague: [null]
 
     });
+
+    this.chooseDefaultWave();
+    void this.wave.refresh(true).then(() => this.chooseDefaultWave());
 
     // this.idUser = this.storageService.getUser().id;
 
@@ -107,7 +113,9 @@ export class NewCompanyComponent implements OnInit {
       },
       accept: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Form is submitted', life: 5000 });
-        this.managerService.addCompany(this.companyForm.value).subscribe();
+        this.managerService.addCompany(this.companyForm.value).subscribe({
+          error: err => this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? "L'enregistrement a échoué.", life: 6000 })
+        });
         setTimeout(() => {
             this.appRout.navigateByUrl('manager/listcompany/999999');
         }, 3000);
@@ -125,6 +133,14 @@ export class NewCompanyComponent implements OnInit {
   }
 
 
+
+  /** Vague en cours, ou à défaut la première vague ouverte ; ne touche pas à un choix déjà fait */
+  private chooseDefaultWave(): void {
+    if (this.companyForm.value.id_vague) return;
+    const open = this.wave.openWaves();
+    const current = open.find(w => w.statut === 'en_cours') ?? open[0];
+    if (current) this.companyForm.patchValue({ id_vague: current.id });
+  }
 
   onSubmitForm() {
     this.formSubmitted = true;

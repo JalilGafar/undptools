@@ -1,124 +1,132 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+<header class="hdr" [class.hdr-wide]="isManager()">
+  <div class="hdr-bar">
 
-  <!-- Brand -->
-  <a class="navbar-brand ms-3" routerLink="/">
-    <strong>SGD</strong>VC <span class="brand-sep">|</span> UNDP Cameroon
-  </a>
-
-  <!-- Hamburger (visible < md) -->
-  <button class="navbar-toggler me-2" type="button"
-    (click)="toggleNav()" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <!-- Liens collapsibles -->
-  <div class="collapse navbar-collapse" [class.show]="isNavOpen">
-
-    <!-- Liens gauche -->
-    <ul class="navbar-nav me-auto" routerLinkActive="active">
-
-      @if (showAdminBoard) {
-        @if ((visibleTools$ | async) || (menuVisible$ | async)) {
-          <li class="nav-item">
-            <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">
-              Tools
-            </a>
-          </li>
-        }
-        <li class="nav-item">
-          <a class="nav-link" routerLink="manager" (click)="closeNav()">Admin Board</a>
-        </li>
-      }
-
-      @if (showModeratorBoard) {
-        @if ((visibleTools$ | async) || (menuVisible$ | async)) {
-          <li class="nav-item">
-            <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">
-              Tools
-            </a>
-          </li>
-        }
-        <li class="nav-item">
-          <a class="nav-link" routerLink="manager" (click)="closeNav()">Moderator Board</a>
-        </li>
-      }
-
-      @if (showConsultantBoard) {
-        @if (visibleTools$ | async) {
-          <li class="nav-item">
-            <a class="nav-link blinking-button" style="cursor:pointer;" (click)="toggleSidebar(); closeNav()">
-              Tools
-            </a>
-          </li>
-        }
-        <li class="nav-item">
-          <a class="nav-link" routerLink="consultant" (click)="closeNav()">Program</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="consultant/companies" (click)="closeNav()">Entreprises</a>
-        </li>
-      }
-    </ul>
-
-    <!-- Liens droite (login / user) -->
-    @if (!isLoggedIn) {
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="login" (click)="closeNav()">Login</a>
-        </li>
-      </ul>
-    } @else {
-      <ul class="navbar-nav ms-auto align-items-center gap-2 pe-2">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="profile" (click)="closeNav()">{{ username }}</a>
-        </li>
-        <li class="nav-item">
-          <button class="btn btn-sm btn-outline-light" (click)="logout()">LogOut</button>
-        </li>
-      </ul>
+    @if (isLoggedIn()) {
+      <!-- Menu de navigation (téléphone et tablette) -->
+      <button type="button" class="hdr-btn hdr-burger" (click)="toggleNav()"
+              [attr.aria-expanded]="navOpen()" aria-controls="hdr-drawer" aria-label="Menu de navigation">
+        <i class="bi" [class.bi-list]="!navOpen()" [class.bi-x-lg]="navOpen()"></i>
+      </button>
     }
 
-  </div>
-</nav>
+    <a class="hdr-brand" [routerLink]="homeLink()" aria-label="SGDVC, accueil">
+      <strong>SGD</strong>VC<span class="hdr-brand-sub"><span class="hdr-sep">|</span>UNDP Cameroon</span>
+    </a>
 
-<!-- Backdrop sidebar sur mobile -->
-@if (isSidebarOpen) {
-  <div class="sidebar-backdrop d-md-none" (click)="toggleSidebar()"></div>
-}
-
-<div class="container-fluid p-0">
-  <div id="wrapper" [ngClass]="{ 'toggled': isSidebarOpen, 'toggled-2': isSidebarMini }">
-    <!-- Sidebar -->
-    <div id="sidebar-wrapper">
-      <ul class="sidebar-nav nav flex-column" id="menu">
-        @for (item of menu; track $index) {
-          <li class="nav-item">
-            <a role="button" class="nav-link"
-              (click)="item.children.length ? toggleSubmenu(item) : null">
-              <i class="licon" [ngClass]="item.icon"></i> {{ item.label }}
-              @if (item.children.length) {
-                <span class="float-end">
-                  <i class="bi" [ngClass]="item.expanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                </span>
-              }
+    @if (isLoggedIn()) {
+      <!-- Navigation principale (grand écran) -->
+      <nav class="hdr-links" aria-label="Navigation principale">
+        @for (l of links(); track l.path) {
+          @if (!l.drawerOnly) {
+            <a class="hdr-link" [routerLink]="l.path" [class.active]="activePath() === l.path"
+               [attr.aria-current]="activePath() === l.path ? 'page' : null">
+              <i class="bi {{ l.icon }}"></i><span>{{ l.label }}</span>
             </a>
-            <ul class="submenu" [class.open]="item.expanded">
-              @for (child of item.children; track $index) {
-                <li class="nav-item" (click)="toggleSidebar()">
-                  <a [routerLink]="['consultant/tool', child.route]"
-                    [queryParams]="{ toolName: child.label }"
-                    class="nav-link tool-link" [class.tool-soon]="child.status === 'soon'">
-                    <span class="tool-label">{{ child.label }}</span>
-                    @if (child.status === 'active') {
+          }
+        }
+      </nav>
+    }
+
+    <span class="hdr-spacer"></span>
+
+    @if (isLoggedIn()) {
+      <button type="button" class="hdr-tools" [class.is-off]="!toolsEnabled()" (click)="openTools()"
+              [attr.aria-disabled]="!toolsEnabled()" [attr.aria-expanded]="toolsOpen()" aria-controls="hdr-tools-panel">
+        <i class="bi bi-tools"></i><span>Outils</span>
+      </button>
+
+      <div class="hdr-user">
+        <button type="button" class="hdr-avatar" (click)="toggleUser()" aria-haspopup="menu"
+                [attr.aria-expanded]="userMenuOpen()" [attr.aria-label]="'Compte de ' + user()?.username">
+          <img [src]="user()?.photo | avatar" (error)="onAvatarError($event)" alt="">
+        </button>
+        @if (userMenuOpen()) {
+          <div class="hdr-menu" role="menu">
+            <div class="hdr-menu-id"><strong>{{ user()?.username }}</strong><small>{{ roleLabel() }}</small></div>
+            <a class="hdr-menu-item" role="menuitem" routerLink="/profile"><i class="bi bi-person-circle"></i>Mon profil</a>
+            @if (isAdmin()) {
+              <a class="hdr-menu-item" role="menuitem" routerLink="/manager/utilisateurs"><i class="bi bi-people"></i>Utilisateurs et rôles</a>
+              <a class="hdr-menu-item" role="menuitem" routerLink="/manager/vagues"><i class="bi bi-layers"></i>Vagues</a>
+            }
+            <button type="button" class="hdr-menu-item" role="menuitem" (click)="logout()" [disabled]="loggingOut()">
+              <i class="bi bi-box-arrow-right"></i>{{ loggingOut() ? 'Déconnexion…' : 'Se déconnecter' }}
+            </button>
+          </div>
+        }
+      </div>
+    } @else {
+      <a class="hdr-login" routerLink="/login">Connexion</a>
+    }
+  </div>
+
+  <!-- Outils indisponibles : on dit pourquoi (une infobulle ne s'affiche pas au doigt) -->
+  @if (toolsHint()) {
+    <div class="hdr-hint" role="status">
+      <i class="bi bi-info-circle"></i>
+      <p>Ouvrez d'abord une entreprise pour accéder à ses outils.</p>
+      <a class="hdr-hint-link" routerLink="/consultant/companies">Mes entreprises</a>
+    </div>
+  }
+</header>
+
+@if (isLoggedIn()) {
+  <div class="hdr-backdrop" [class.show]="navOpen() || toolsOpen()" (click)="closeAll()"></div>
+
+  <!-- Tiroir de navigation (téléphone et tablette) -->
+  <nav id="hdr-drawer" class="hdr-drawer" [class.hdr-wide]="isManager()" [class.open]="navOpen()" [attr.inert]="navOpen() ? null : ''" aria-label="Menu de navigation">
+    <p class="hdr-drawer-title">Navigation</p>
+    @for (l of links(); track l.path) {
+      <a class="hdr-drawer-link" [routerLink]="l.path" [class.active]="activePath() === l.path"
+         [attr.aria-current]="activePath() === l.path ? 'page' : null">
+        <i class="bi {{ l.icon }}"></i>{{ l.label }}
+      </a>
+    }
+    <div class="hdr-drawer-foot">
+      <div class="hdr-menu-id"><strong>{{ user()?.username }}</strong><small>{{ roleLabel() }}</small></div>
+      <a class="hdr-drawer-link" routerLink="/profile"><i class="bi bi-person-circle"></i>Mon profil</a>
+      @if (isAdmin()) {
+        <a class="hdr-drawer-link" routerLink="/manager/utilisateurs"><i class="bi bi-people"></i>Utilisateurs et rôles</a>
+        <a class="hdr-drawer-link" routerLink="/manager/vagues"><i class="bi bi-layers"></i>Vagues</a>
+      }
+      <button type="button" class="hdr-drawer-link" (click)="logout()" [disabled]="loggingOut()">
+        <i class="bi bi-box-arrow-right"></i>{{ loggingOut() ? 'Déconnexion…' : 'Se déconnecter' }}
+      </button>
+    </div>
+  </nav>
+
+  <!-- Panneau des outils -->
+  <aside id="hdr-tools-panel" class="hdr-panel" [class.open]="toolsOpen()" [attr.inert]="toolsOpen() ? null : ''" aria-label="Outils du programme">
+    <div class="hdr-panel-head">
+      <strong><i class="bi bi-tools"></i>Outils du programme</strong>
+      <button type="button" class="hdr-btn tools-close" (click)="closeTools()" aria-label="Fermer les outils"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <ul class="hdr-groups">
+      @for (g of menu; track g.label; let gi = $index) {
+        <li>
+          <button type="button" class="hdr-group" (click)="toggleGroup(g)" [attr.aria-expanded]="!!g.expanded">
+            <i class="bi {{ g.icon }}"></i>
+            <span>{{ g.label }}</span>
+            <i class="bi hdr-chev" [class.bi-chevron-up]="g.expanded" [class.bi-chevron-down]="!g.expanded"></i>
+          </button>
+          <div class="hdr-sub" [class.open]="g.expanded">
+            <ul>
+              @for (c of g.children; track $index) {
+                <li>
+                  <a class="hdr-tool" [routerLink]="['/consultant/tool', c.route]" [queryParams]="toolQuery(c, gi)"
+                     [class.soon]="c.status === 'soon'" [class.current]="isCurrent(c)"
+                     [attr.aria-current]="isCurrent(c) ? 'page' : null" (click)="openTool()">
+                    <span class="tool-label">{{ c.label }}</span>
+                    @if (c.status === 'active') {
                       <span class="tool-dot" title="Outil actif" role="img" aria-label="Outil actif"></span>
                     }
                   </a>
                 </li>
               }
             </ul>
-          </li>
-        }
-      </ul>
-    </div>
-  </div>
-</div>
+          </div>
+        </li>
+      }
+    </ul>
+  </aside>
+}

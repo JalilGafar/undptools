@@ -1,0 +1,259 @@
+<div class="container fs-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="fs-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()">
+      <i class="bi bi-printer me-1"></i>Imprimer / PDF
+    </button>
+  </div>
+
+  <!-- En-tête -->
+  <div class="fs-header">
+    <div class="fs-header-icon"><i class="bi bi-stars"></i></div>
+    <div>
+      <h2 class="fs-title">Outil de mise en œuvre des 5S pour les PME</h2>
+      <p class="fs-subtitle">
+        <strong>{{ phase === 'final' ? 'Évaluation finale' : 'Évaluation initiale' }}</strong>
+        @if (companyName) { · }@if (companyName) { <strong>{{ companyName }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement de l'évaluation 5S…" />
+  } @else if (!companyId && !preview) {
+    <div class="fs-empty">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <app-load-error message="Impossible de charger l'évaluation 5S." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  }
+  @if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  }
+
+  @if (alertMessage) {
+    <div class="alert no-print" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">{{ alertMessage }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <!-- Mode d'emploi et échelle : repliés pour laisser la place à l'évaluation -->
+    <div class="fs-fold no-print">
+      <button type="button" class="fs-fold-btn" (click)="showGuide = !showGuide" [attr.aria-expanded]="showGuide">
+        <i class="bi bi-info-circle me-2"></i>Mode d'emploi <i class="bi ms-auto" [class.bi-chevron-up]="showGuide" [class.bi-chevron-down]="!showGuide"></i>
+      </button>
+      @if (showGuide) {
+        <ul class="fs-guide">
+          @for (line of modeEmploi; track line) { <li>{{ line }}</li> }
+        </ul>
+      }
+    </div>
+
+    <div class="fs-fold no-print">
+      <button type="button" class="fs-fold-btn" (click)="showScale = !showScale" [attr.aria-expanded]="showScale">
+        <i class="bi bi-rulers me-2"></i>Échelle d'évaluation <i class="bi ms-auto" [class.bi-chevron-up]="showScale" [class.bi-chevron-down]="!showScale"></i>
+      </button>
+      @if (showScale) {
+        <ul class="fs-scale">
+          @for (n of niveaux; track n.note) {
+            <li><span class="fs-lvl lvl-{{ n.note }}">{{ n.note }} · {{ n.label }}</span> {{ n.description }}</li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Informations -->
+    <h5 class="fs-section-title"><i class="bi bi-building me-2"></i>Informations sur l'entreprise</h5>
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label" for="responsable">Responsable</label>
+        <input id="responsable" class="form-control" type="text" formControlName="responsable" maxlength="255">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="date_evaluation">Date</label>
+        <input id="date_evaluation" class="form-control" type="date" formControlName="date_evaluation">
+      </div>
+    </div>
+
+    <!-- Panneau des résultats globaux : se met à jour à chaque note -->
+    <section class="fs-results" aria-label="Résultats globaux">
+      <h5 class="fs-results-title">Panneau des résultats globaux</h5>
+      @for (sec of sections; track sec.s) {
+        <div class="fs-result-row">
+          <span class="fs-result-name">{{ sec.s }}<sup>{{ sec.s === 1 ? 'er' : 'e' }}</sup> S – {{ sec.name }}</span>
+          <span class="fs-bar"><span class="fs-bar-fill lvl-{{ levelOf(average(sec.s))?.note ?? 0 }}" [style.width.%]="pct(average(sec.s))"></span></span>
+          <strong class="fs-result-value">{{ fmt(average(sec.s)) }}</strong>
+          @if (phase === 'final' && initial) {
+            <span class="fs-compare">
+              <small>initial {{ fmt(initialAverage(sec.s)) }}</small>
+              @if (progress(average(sec.s), initialAverage(sec.s)); as p) { <span class="fs-delta {{ p.sign }}">{{ p.text }}</span> }
+            </span>
+          }
+        </div>
+      }
+      <div class="fs-global">
+        <span>Note globale des 5S</span>
+        <strong>{{ fmt(globalScore) }}</strong>
+        @if (levelOf(globalScore); as lvl) { <span class="fs-lvl lvl-{{ lvl.note }}">{{ lvl.label }}</span> }
+        @if (phase === 'final' && initial) {
+          <span class="fs-compare">
+            <small>initial {{ fmt(initialGlobal) }}</small>
+            @if (progress(globalScore, initialGlobal); as p) { <span class="fs-delta {{ p.sign }}">{{ p.text }}</span> }
+          </span>
+        }
+      </div>
+    </section>
+
+    <!-- Les cinq « S » -->
+    @for (sec of sections; track sec.s) {
+      <section class="fs-s">
+        <button type="button" class="fs-s-head" (click)="toggleS(sec.s)" [attr.aria-expanded]="openS === sec.s || openS === 0">
+          <span class="fs-s-badge">{{ sec.s }}</span>
+          <span class="fs-s-title">{{ sec.s }}<sup>{{ sec.s === 1 ? 'er' : 'e' }}</sup> S – {{ sec.name }} <small>({{ sec.translation }})</small></span>
+          @if (average(sec.s) !== null) { <span class="fs-lvl lvl-{{ levelOf(average(sec.s))?.note }}">{{ fmt(average(sec.s)) }}</span> }
+          <i class="bi no-print" [class.bi-chevron-up]="openS === sec.s" [class.bi-chevron-down]="openS !== sec.s"></i>
+        </button>
+
+        @if (openS === sec.s || openS === 0) {
+          <div class="fs-s-body">
+            <p class="fs-objective"><strong>Quel est l'objectif ?</strong> {{ sec.objective }}</p>
+
+            @for (c of sec.criteres; track $index; let i = $index) {
+              <article class="fs-item" [formGroup]="note(sec.s, i + 1)">
+                <header class="fs-item-head">
+                  <span class="fs-item-num">{{ i + 1 }}</span>
+                  <p class="fs-item-text">{{ c.text }}</p>
+                </header>
+
+                <button type="button" class="fs-help-btn no-print" (click)="toggleHelp(sec.s, i + 1)" [attr.aria-expanded]="isHelpOpen(sec.s, i + 1)">
+                  <i class="bi bi-lightbulb me-1"></i>Questions suggérées
+                </button>
+                @if (isHelpOpen(sec.s, i + 1)) {
+                  <p class="fs-help">{{ c.questions }}</p>
+                }
+
+                <div class="fs-notes" role="group" [attr.aria-label]="'Note du critère ' + (i + 1)">
+                  @for (n of notes5; track n) {
+                    <button type="button" class="fs-note lvl-{{ n }}" [class.selected]="note(sec.s, i + 1).get('note')?.value === n"
+                            [disabled]="readOnly" [attr.aria-pressed]="note(sec.s, i + 1).get('note')?.value === n"
+                            (click)="pick(sec.s, i + 1, n)">{{ n }}</button>
+                  }
+                </div>
+                @if (levelOf(note(sec.s, i + 1).get('note')?.value); as lvl) {
+                  <p class="fs-level lvl-{{ lvl.note }}">{{ lvl.label }}</p>
+                }
+
+                <label class="fs-label" [for]="'obs-' + sec.s + '-' + i">Observations / preuves</label>
+                <textarea [id]="'obs-' + sec.s + '-' + i" class="form-control" rows="2" formControlName="observations" maxlength="1000"></textarea>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Plan d'action immédiat -->
+    <h5 class="fs-section-title mt-4"><i class="bi bi-list-check me-2"></i>Plan d'action immédiat</h5>
+    <p class="fs-hint">Identifiez les actions prioritaires à mettre en œuvre pour appliquer ou améliorer la méthode 5S dans votre entreprise.</p>
+
+    <div formArrayName="actions">
+      @for (a of actions.controls; track a; let i = $index) {
+        <article class="fs-action" [formGroupName]="i">
+          <div class="row g-2">
+            <div class="col-6 col-md-3">
+              <label class="fs-label" [for]="'act-s-' + i">S concerné</label>
+              <select [id]="'act-s-' + i" class="form-select" formControlName="s">
+                <option [ngValue]="null">—</option>
+                @for (sec of sections; track sec.s) { <option [ngValue]="sec.s">{{ sec.s }} – {{ sec.name }}</option> }
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="fs-label" [for]="'act-date-' + i">Date limite</label>
+              <input [id]="'act-date-' + i" class="form-control" type="date" formControlName="date_limite">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="fs-label" [for]="'act-statut-' + i">Statut</label>
+              <select [id]="'act-statut-' + i" class="form-select" formControlName="statut">
+                <option [ngValue]="null">—</option>
+                @for (st of statuts; track st.value) { <option [ngValue]="st.value">{{ st.label }}</option> }
+              </select>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="fs-label" [for]="'act-pb-' + i">Problème / opportunité identifié(e)</label>
+              <textarea [id]="'act-pb-' + i" class="form-control" rows="2" formControlName="probleme" maxlength="500"></textarea>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="fs-label" [for]="'act-act-' + i">Action proposée</label>
+              <textarea [id]="'act-act-' + i" class="form-control" rows="2" formControlName="action" maxlength="500"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="fs-label" [for]="'act-res-' + i">Résultat / preuve</label>
+              <input [id]="'act-res-' + i" class="form-control" type="text" formControlName="resultat" maxlength="500">
+            </div>
+            @if (!readOnly) {
+              <div class="col-12 fs-action-footer no-print">
+                <button type="button" class="btn btn-outline-danger" (click)="removeAction(i)">
+                  <i class="bi bi-trash me-1"></i>Supprimer ce plan d'action
+                </button>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+    @if (!readOnly) {
+      <button type="button" class="btn btn-outline-primary fs-add no-print" (click)="addAction()">
+        <i class="bi bi-plus-lg me-1"></i>Ajouter une action
+      </button>
+    }
+
+    <p class="fs-reco"><i class="bi bi-lightbulb-fill me-2"></i><strong>Recommandation :</strong> {{ recommandation }}</p>
+
+    <!-- Photos avant / après : plusieurs photos, chacune avec une légende -->
+    <h5 class="fs-section-title"><i class="bi bi-camera me-2"></i>Photos</h5>
+    @if (preview) {
+      <p class="text-muted small">Chaque « avant » et « après » accepte plusieurs photos, chacune avec sa légende. L'ajout de photos est réservé aux consultants, sur la fiche d'une entreprise.</p>
+    } @else {
+      <div class="row g-3">
+        @for (p of slots; track p.slot) {
+          <div class="col-md-6">
+            <app-cinq-s-photos [title]="p.title" [slot]="p.slot" [phase]="phase" [consultantId]="consultantId"
+                               [companyId]="companyId" [canWrite]="!readOnly" />
+          </div>
+        }
+      </div>
+    }
+
+    @if (preview) {
+      <app-preview-banner [end]="true" />
+    } @else if (!readOnly) {
+      <div class="fs-actions no-print">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+          <i class="bi bi-x-circle me-1"></i> Annuler
+        </button>
+        <button type="submit" class="btn btn-success fs-btn-save" [disabled]="isSaving">
+          @if (isSaving) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+          } @else {
+            <i class="bi bi-check-circle me-2"></i>Enregistrer l'évaluation
+          }
+        </button>
+      </div>
+    }
+  </form>
+  }
+
+  @if (!preview) { <app-livrable-review [toolCode]="toolCode" /> }
+</div>

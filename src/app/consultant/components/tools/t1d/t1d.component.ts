@@ -11,6 +11,11 @@ import { ConsultantService } from '../../../consultant.service';
 import { IntegLabel } from '../../../../core/model/mat_integ_label';
 import { ToolMatDiagInteg } from '../../../../core/model/tool1D';
 import { curveLinearClosed } from 'd3-shape';
+import { LoadingComponent, LoadErrorComponent } from '../../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../../core/load-state';
+import { LivrableReviewComponent } from '../../../../shared/components/livrable-review/livrable-review.component';
+import { PreviewBannerComponent } from '../../../../shared/components/preview-banner/preview-banner.component';
+import { hasManagerRole } from '../../../../core/roles';
 
 /** Domaines évalués : plages de questions (reper). 60 questions au total ; les éléments 61 à 64 sont les rubriques SWOT. */
 const DOMAINES = [
@@ -36,12 +41,35 @@ const REPONSES = [
 const QUESTION_COUNT = 60;
 const MAX_NOTE = 5;
 
+/**
+ * « Champ des recommandations » (page Résumé de l'outil original), tout est facultatif : conclusions et lacunes, recommandations
+ * et problèmes identifiés. Un seul élément de chaque liste au départ ; le consultant en ajoute à son gré, 15 au plus.
+ * Chaque problème garde 2 lignes (référence, indicateur, valeur initiale, prévision) comme sur la feuille d'origine.
+ */
+const RECO_MAX = 15;
+const RECO_LIGNES = 2;
+type RecoList = 'conclusions' | 'recommandations' | 'problemes';
+
+/** Un problème identifié, tel qu'il est imprimé (cases vides écartées) */
+interface PrintProblem {
+  probleme: string;
+  lignes: { reference: string; indicateur: string; valeur_initiale: string; prevision: string }[];
+}
+
+/** Les recommandations en texte lisible pour l'impression (les zones de saisie couperaient les textes longs) */
+interface PrintReco {
+  conclusions: string[];
+  recommandations: string[];
+  problemes: PrintProblem[];
+  empty: boolean;
+}
+
 
 @Component({
   selector: 'app-t1d',
   standalone: true,
   imports: [
-    CommonModule,
+    LivrableReviewComponent, LoadingComponent, LoadErrorComponent, PreviewBannerComponent, CommonModule,
     ReactiveFormsModule,
     NgxChartsModule,
   ],
@@ -50,6 +78,7 @@ const MAX_NOTE = 5;
   styleUrl: './t1d.component.scss'
 })
 export class T1dComponent implements OnInit,  OnDestroy {
+  toolState$!: Observable<LoadState>;
 
   private destroyRef = inject(DestroyRef);
 
@@ -134,7 +163,27 @@ export class T1dComponent implements OnInit,  OnDestroy {
   /** « resume » : scores et graphique ; « form » : questionnaire (une question à la fois) */
   mode: 'resume' | 'form' = 'resume';
   showDetail = false;
+  /** Résumé : section « Conclusions et recommandations » déroulée */
+  showReco = false;
   isSaving = false;
+  isSavingReco = false;
+  /** Le consultant a choisi de remplir les recommandations (Résumé, quand aucune n'est encore saisie) */
+  recoEditing = false;
+  // ── Impression ──────────────────────────────────────────────────────────────
+  /** Renseigné le temps de l'impression : le détail des réponses et les recommandations (en texte) sont alors affichés en entier */
+  printReco: PrintReco | null = null;
+  companyName = '';
+  consultantLabel = '';
+  printDate = '';
+  diagnosticDate = '';
+  /** Retour de l'enregistrement automatique des réponses, affiché en haut de la dernière étape */
+  resultsNotice: { type: 'success' | 'danger' | 'info'; text: string } | null = null;
+  /** Les réponses ont été enregistrées depuis cette page (avant même que la liste du Résumé soit rechargée) */
+  private savedOnce = false;
+  /** Le Résumé affiche d'anciennes données : à recharger à son ouverture */
+  private dataStale = false;
+  /** Retour d'enregistrement affiché sous le bouton des recommandations (visible sans remonter en haut de page) */
+  recoNotice: { type: 'success' | 'danger'; text: string } | null = null;
 
   readonly domaines = DOMAINES;
   readonly reponses = REPONSES;
@@ -150,14 +199,50 @@ export class T1dComponent implements OnInit,  OnDestroy {
   readonly swotReps = [61, 62, 63, 64];
   readonly swotRows = [1, 2, 3];
 
-  /** Seul le consultant concerné modifie ; un manager (ou un autre utilisateur) consulte en lecture seule. */
-  get readOnly(): boolean {
-    return this.consultanId !== 0 && this.consultanId != this.userId;
+  /** Champ des recommandations : conclusions et lacunes, recommandations, problèmes identifiés (3 × 2 lignes) */
+  recoForm!: FormGroup;
+
+  /**
+   * Aperçu manager : un manager / modérateur qui ouvre l'outil depuis le menu (sans entreprise) le voit comme un consultant
+   * et peut le remplir pour en juger la qualité, mais rien n'est enregistré.
+   */
+  get preview(): boolean {
+    const roles: string[] = this.storageService.getUser()?.roles ?? [];
+    return hasManagerRole(roles) && !this.storageService.CompanyId;
   }
 
-  /** Score d'un domaine, en % (0–100) */
-  score(index: number): number {
-    return [this.crit_1, this.crit_2, this.crit_3, this.crit_4, this.crit_5, this.crit_6, this.crit_7, this.crit_8][index] ?? 0;
+  get printing(): boolean { return this.printReco !== null; }
+
+  /** Le bouton « Imprimer / PDF » est proposé quand un diagnostic enregistré est affiché dans le Résumé */
+  get canPrint(): boolean { return this.mode === 'resume' && (this.matDiagIntegData?.length ?? 0) > 0; }
+
+  /** Peut remplir les champs (le consultant concerné, ou un manager en aperçu, sans enregistrement) */
+  get canFill(): boolean { return !this.readOnly; }
+
+  /** Peut enregistrer : le consultant concerné, hors aperçu */
+  get canSave(): boolean { return !this.readOnly && !this.preview; }
+
+  /** Pourquoi la saisie est impossible (affiché à la place du bouton « remplir ») */
+  get readOnlyReason(): string {
+    const wave = this.storageService.LockedWaveName;
+    return wave
+      ? `${wave} est clôturée : les saisies sont verrouillées. L'administrateur peut la rouvrir.`
+      : 'Seul le consultant en charge de cette entreprise peut remplir cette partie.';
+  }
+
+  /**
+   * Champs des recommandations affichés ? Oui dès qu'il y a du contenu, ou quand celui qui peut remplir l'a demandé
+   * (bouton du Résumé) ou arrive de la dernière étape du questionnaire. Sinon : le message « aucune conclusion » et son bouton.
+   */
+  get recoShown(): boolean {
+    return this.recoHasContent() || (this.canFill && (this.recoEditing || this.finalStep));
+  }
+
+  /** Seul le consultant concerné modifie ; un manager (ou un autre utilisateur) consulte en lecture seule. */
+  get readOnly(): boolean {
+    if (this.preview) return false;
+    // Vague clôturée : lecture seule pour le consultant lui-même
+    return (this.consultanId !== 0 && this.consultanId != this.userId) || this.storageService.CompanyLocked;
   }
 
   /** Numéros de questions d'un domaine */
@@ -210,7 +295,15 @@ export class T1dComponent implements OnInit,  OnDestroy {
   }
 
   get progress(): number {
-    return this.matIntegLength ? Math.round((this.currentIndex + 1) * 100 / this.matIntegLength) : 0;
+    return this.matIntegLength ? Math.min(100, Math.round((this.currentIndex + 1) * 100 / this.matIntegLength)) : 0;
+  }
+
+  /**
+   * Dernière étape du questionnaire : atteinte une fois le dernier élément (le 64e) passé. Elle montre les graphiques,
+   * le champ des recommandations et, seulement ici, le bouton « Enregistrer l'outil ».
+   */
+  get finalStep(): boolean {
+    return !!this.matIntegLength && this.currentIndex >= this.matIntegLength;
   }
 
   /** Note de la question n dans le formulaire (0 = sans réponse) */
@@ -239,12 +332,26 @@ export class T1dComponent implements OnInit,  OnDestroy {
     return v.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
   }
 
-  /** Score d'un domaine en %, d'après les questions répondues : moyenne ÷ 5 × 100 */
+  /** Score de chaque domaine en %, d'après les questions répondues : moyenne ÷ 5 × 100 */
+  private pctOf(el: ToolMatDiagInteg): number[] {
+    return DOMAINES.map(d => Math.round(this.average(el, d) * 100 / MAX_NOTE * 10) / 10);
+  }
+
+  /** Nouvelle référence à chaque fois : ngx-charts ne redessine pas toujours après une mutation en place */
+  private resultsOf(pct: number[]) {
+    return [{ name: 'Score', series: DOMAINES.map((d, i) => ({ name: d.short, value: pct[i] })) }];
+  }
+
+  /** Scores du diagnostic enregistré (page Résumé) */
   private computeScores(el: ToolMatDiagInteg): void {
-    const pct = DOMAINES.map(d => Math.round(this.average(el, d) * 100 / MAX_NOTE * 10) / 10);
-    [this.crit_1, this.crit_2, this.crit_3, this.crit_4, this.crit_5, this.crit_6, this.crit_7, this.crit_8] = pct;
-    // Nouvelle référence : ngx-charts ne redessine pas toujours après une mutation en place
-    this.single = [{ name: 'Score', series: DOMAINES.map((d, i) => ({ name: d.short, value: pct[i] })) }];
+    this.scores = this.pctOf(el);
+    this.single = this.resultsOf(this.scores);
+  }
+
+  /** Scores d'après les réponses en cours de saisie (dernière étape du questionnaire, avant l'enregistrement) */
+  refreshLive(): void {
+    this.liveScores = this.pctOf(this.matIntegForm.getRawValue() as ToolMatDiagInteg);
+    this.liveSingle = this.resultsOf(this.liveScores);
   }
 
   /** Les notes lues en base doivent être des nombres pour que la réponse correspondante soit cochée. */
@@ -263,15 +370,11 @@ export class T1dComponent implements OnInit,  OnDestroy {
   matIntegLength!: number;
 
 
-  crit_1 = 0;
-  crit_2 = 0;
-  crit_3 = 0;
-  crit_4 = 0;
-  crit_5 = 0;
-  crit_6 = 0;
-  crit_7 = 0;
-  crit_8 = 0;
-  eval_total = 0;
+  /** Score en % de chaque domaine, d'après le diagnostic enregistré */
+  scores: number[] = DOMAINES.map(() => 0);
+  /** Idem, d'après les réponses en cours de saisie (dernière étape) */
+  liveScores: number[] = DOMAINES.map(() => 0);
+  liveSingle = this.resultsOf(this.liveScores);
 Array: any;
 private _: any;
 
@@ -307,10 +410,110 @@ private _: any;
     }
   }
 
+  private createRecoLine(): FormGroup {
+    return this.formBuilder.group({ reference: [''], indicateur: [''], valeur_initiale: [''], prevision: [''] });
+  }
+
+  private createRecoProblem(): FormGroup {
+    return this.formBuilder.group({
+      probleme: [''],
+      lignes: this.formBuilder.array(Array.from({ length: RECO_LIGNES }, () => this.createRecoLine()))
+    });
+  }
+
+  /** Un seul élément de chaque liste au départ : le consultant en ajoute autant qu'il le souhaite (15 au plus) */
+  private buildRecoForm(): FormGroup {
+    return this.formBuilder.group({
+      conclusions: this.formBuilder.array([this.formBuilder.control('')]),
+      recommandations: this.formBuilder.array([this.formBuilder.control('')]),
+      problemes: this.formBuilder.array([this.createRecoProblem()])
+    });
+  }
+
+  get conclusionsCtrls(): FormControl<string | null>[] { return (this.recoForm.get('conclusions') as FormArray<FormControl<string | null>>).controls; }
+  get recommandationsCtrls(): FormControl<string | null>[] { return (this.recoForm.get('recommandations') as FormArray<FormControl<string | null>>).controls; }
+  get problemesCtrls(): FormGroup[] { return (this.recoForm.get('problemes') as FormArray<FormGroup>).controls; }
+  lignesCtrls(problem: FormGroup): FormGroup[] { return (problem.get('lignes') as FormArray<FormGroup>).controls; }
+
+  readonly recoMax = RECO_MAX;
+
+  /** Ajoute un élément à une liste (15 au plus) et place le curseur dessus */
+  addReco(list: RecoList): void {
+    const arr = this.recoForm.get(list) as FormArray;
+    if (!this.canFill || arr.length >= RECO_MAX) return;
+    arr.push(list === 'problemes' ? this.createRecoProblem() : this.formBuilder.control(''));
+    this.recoForm.markAsDirty();
+    const id = list === 'problemes' ? `reco-pb-${arr.length - 1}` : `reco-${list}-${arr.length - 1}`;
+    if (typeof document !== 'undefined') setTimeout(() => document.getElementById(id)?.focus(), 60);
+  }
+
+  /** Retire un élément d'une liste ; il en reste toujours au moins un */
+  removeReco(list: RecoList, index: number): void {
+    const arr = this.recoForm.get(list) as FormArray;
+    if (!this.canFill || arr.length <= 1) return;
+    arr.removeAt(index);
+    this.recoForm.markAsDirty();
+  }
+
+  private isFilled(v: unknown): boolean {
+    return Array.isArray(v) ? v.some(x => this.isFilled(x))
+      : v && typeof v === 'object' ? Object.values(v).some(x => this.isFilled(x))
+      : typeof v === 'string' && v.trim() !== '';
+  }
+
+  /** Vrai dès qu'une case du champ des recommandations est remplie */
+  recoHasContent(): boolean {
+    return this.isFilled(this.recoForm.getRawValue());
+  }
+
+  /** Remplit le formulaire avec les recommandations enregistrées (JSON en base) ; sans effet si rien n'a été saisi ou si l'on est en train d'y écrire */
+  private patchReco(raw: string | null | undefined): void {
+    if (!raw || this.recoForm.dirty) return;
+    try {
+      const saved = JSON.parse(raw);
+      if (saved && typeof saved === 'object') this.applyReco(saved);
+    } catch { /* texte illisible : on laisse les champs vides plutôt que de bloquer l'outil */ }
+  }
+
+  /**
+   * Reconstruit les listes d'après l'enregistrement : autant d'éléments que d'éléments enregistrés (au moins un, 15 au plus).
+   * Les anciens enregistrements, qui comptaient 4 conclusions, 4 recommandations et 3 problèmes dont certains vides, sont raccourcis.
+   */
+  private applyReco(saved: Record<string, unknown>): void {
+    const kept = <T>(list: unknown): T[] => {
+      const out = (Array.isArray(list) ? list : []).slice(0, RECO_MAX) as T[];
+      while (out.length && !this.isFilled(out[out.length - 1])) out.pop();
+      return out;
+    };
+    for (const name of ['conclusions', 'recommandations'] as const) {
+      const values = kept<unknown>(saved[name]).map(v => typeof v === 'string' ? v : '');
+      const arr = this.recoForm.get(name) as FormArray;
+      arr.clear({ emitEvent: false });
+      (values.length ? values : ['']).forEach(v => arr.push(this.formBuilder.control(v), { emitEvent: false }));
+    }
+    const problems = kept<Record<string, unknown>>(saved['problemes']);
+    const arr = this.recoForm.get('problemes') as FormArray;
+    arr.clear({ emitEvent: false });
+    (problems.length ? problems : [{}]).forEach(p => {
+      const group = this.createRecoProblem();
+      if (p && typeof p === 'object') group.patchValue(p, { emitEvent: false });
+      arr.push(group, { emitEvent: false });
+    });
+    // Les nouveaux champs naissent actifs : en lecture seule on désactive à nouveau l'ensemble
+    if (this.readOnly) this.recoForm.disable({ emitEvent: false });
+  }
+
+  /** Entrée dans une case courte : ne valide pas le questionnaire (les zones de texte gardent leur retour à la ligne) */
+  blockEnter(event: Event): void {
+    if ((event.target as HTMLElement).tagName === 'INPUT') event.preventDefault();
+  }
+
   ngOnInit(): void {
+    this.toolState$ = this.toolService.toolState$;
     this.infoEntrepriseForm = this.formBuilder.group({
       personnel: this.formBuilder.array([this.createPersonnelRow()])
     });
+    this.recoForm = this.buildRecoForm();
 
     this.matIntegForm = this.formBuilder.group({
       note_1: [0],
@@ -459,6 +662,7 @@ private _: any;
     if (this.readOnly) {
       this.matIntegForm.disable();
       this.infoEntrepriseForm.disable();
+      this.recoForm.disable();
     }
 
     this.matIntegForm.patchValue({
@@ -644,6 +848,7 @@ private _: any;
               comp_id: element.comp_id
 
             })
+            this.patchReco(element.recommandations);
           });
 
         }
@@ -673,8 +878,112 @@ private _: any;
 
   // 🔹 Navigation
   nextItem(): void {
-    if (this.currentIndex < this.matIntegLength - 1) {
+    // Après le dernier élément (le 64e) : « Voir les résultats »
+    if (this.currentIndex + 1 >= this.matIntegLength) {
+      this.goToResults();
+    } else {
       this.currentIndex++;
+    }
+  }
+
+  /**
+   * Dernière étape : résultats, champ des recommandations et enregistrement. Accessible à tout moment du questionnaire (bouton
+   * « Conclusions et recommandations »), sans parcourir les 64 éléments. Le consultant concerné voit ses réponses enregistrées
+   * automatiquement si elles ont changé.
+   */
+  goToResults(): void {
+    if (!this.matIntegLength) return;
+    this.currentIndex = this.matIntegLength;
+    this.refreshLive();
+    this.resultsNotice = null;
+    this.autoSaveAnswers();
+  }
+
+  /** Enregistre les réponses en cours en arrivant aux résultats ; sans effet s'il n'y a rien de nouveau (ni réponse, ni changement) */
+  private autoSaveAnswers(): void {
+    if (!this.canSave || this.isSaving) return;
+    const hasRow = this.savedOnce || (this.matDiagIntegData?.length ?? 0) > 0;
+    if (!(this.matIntegForm.dirty || (!hasRow && this.answeredCount > 0))) return;
+    this.isSaving = true;
+    this.resultsNotice = { type: 'info', text: 'Enregistrement de vos réponses…' };
+    this.toolService.saveToolMatDiagInteg(this.savePayload(false)).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.savedOnce = true;
+        this.dataStale = true;
+        this.matIntegForm.markAsPristine();
+        const done = this.answeredCount;
+        this.resultsNotice = {
+          type: 'success',
+          text: done === QUESTION_COUNT
+            ? 'Vos réponses ont été enregistrées.'
+            : `Vos réponses ont été enregistrées (${done} / ${QUESTION_COUNT} questions répondues).`
+        };
+      },
+      error: err => {
+        this.isSaving = false;
+        this.resultsNotice = { type: 'danger', text: err.error?.message ?? "L'enregistrement automatique de vos réponses a échoué. Utilisez « Enregistrer l'outil » pour réessayer." };
+      }
+    });
+  }
+
+  /** Contenu envoyé au serveur ; les recommandations seulement si elles ont été modifiées (ou si on l'exige) : sinon celles de la base restent */
+  private savePayload(withReco: boolean) {
+    const payload: Record<string, unknown> = { ...this.matIntegForm.value };
+    if (withReco || this.recoForm.dirty) payload['recommandations'] = this.recoForm.getRawValue();
+    return payload as Parameters<ConsultantService['saveToolMatDiagInteg']>[0];
+  }
+
+  /**
+   * Imprimer / enregistrer en PDF : le rapport contient les scores et le radar, le détail des réponses (toutes les rubriques) et les
+   * recommandations, quel que soit ce qui est déplié à l'écran. Le nom de l'entreprise et du consultant sont repris en tête.
+   */
+  printReport(): void {
+    if (this.printing || typeof window === 'undefined' || !this.canPrint) return;
+    const start = () => {
+      const long = { day: 'numeric', month: 'long', year: 'numeric' } as const;
+      const saved = this.matDiagIntegData?.[0]?.['updated_at'] ?? this.matDiagIntegData?.[0]?.['date'];
+      const savedDate = saved ? new Date(saved) : null;
+      this.printDate = new Date().toLocaleDateString('fr-FR', long);
+      this.diagnosticDate = savedDate && !isNaN(savedDate.getTime()) ? savedDate.toLocaleDateString('fr-FR', long) : '';
+      this.printReco = this.buildPrintReco();
+      const done = () => { this.printReco = null; window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done);
+      // Laisse le temps d'afficher le détail et les recommandations avant d'ouvrir la fenêtre d'impression
+      setTimeout(() => window.print(), 350);
+    };
+    const companyId = this.storageService.CompanyId;
+    if (this.companyName || !companyId) { start(); return; }
+    this.toolService.getCompanyDetailById(companyId).subscribe({
+      next: c => {
+        this.companyName = c.name ?? '';
+        this.consultantLabel = c.consultant ?? (this.consultanId === 0 ? (this.storageService.getUser()?.username ?? '') : '');
+        start();
+      },
+      error: () => start()    // l'impression reste possible sans le nom de l'entreprise
+    });
+  }
+
+  private buildPrintReco(): PrintReco {
+    const raw = this.recoForm.getRawValue();
+    const texts = (v: (string | null)[]) => v.map(x => (x ?? '').trim()).filter(x => x);
+    const problemes: PrintProblem[] = (raw.problemes as { probleme: string | null; lignes: Record<string, string | null>[] }[])
+      .filter(p => this.isFilled(p))
+      .map(p => {
+        const lignes = p.lignes.filter(l => this.isFilled(l)).map(l => ({
+          reference: l['reference'] ?? '', indicateur: l['indicateur'] ?? '', valeur_initiale: l['valeur_initiale'] ?? '', prevision: l['prevision'] ?? ''
+        }));
+        return { probleme: (p.probleme ?? '').trim(), lignes: lignes.length ? lignes : [{ reference: '', indicateur: '', valeur_initiale: '', prevision: '' }] };
+      });
+    return { conclusions: texts(raw.conclusions), recommandations: texts(raw.recommandations), problemes, empty: !this.isFilled(raw) };
+  }
+
+  /** Onglet Résumé : recharge les données si des réponses viennent d'être enregistrées depuis le questionnaire */
+  openResume(): void {
+    this.mode = 'resume';
+    if (this.dataStale) {
+      this.dataStale = false;
+      this.toolService.getMatIntegDataById(this.consultanId === 0 ? this.userId : this.consultanId, this.storageService.CompanyId);
     }
   }
 
@@ -693,15 +1002,20 @@ private _: any;
 
 
   saveTool() {
-    if (this.readOnly || this.isSaving) return;
+    if (this.readOnly || this.preview || this.isSaving) return;
     this.isSaving = true;
-    this.toolService.saveToolMatDiagInteg(this.matIntegForm.value).subscribe({
+    this.toolService.saveToolMatDiagInteg(this.savePayload(true)).subscribe({
       next: () => {
         this.isSaving = false;
+        this.savedOnce = true;
+        this.dataStale = false;
+        this.matIntegForm.markAsPristine();
+        this.recoForm.markAsPristine();
+        this.resultsNotice = null;
         const done = this.answeredCount;
         this.alertMessage = done === QUESTION_COUNT
-          ? 'La matrice a été enregistrée : les 60 questions ont une réponse.'
-          : `La matrice a été enregistrée (${done} / ${QUESTION_COUNT} questions répondues). Vous pourrez la compléter plus tard.`;
+          ? "L'outil a été enregistré : les 60 questions ont une réponse."
+          : `L'outil a été enregistré (${done} / ${QUESTION_COUNT} questions répondues). Vous pourrez le compléter plus tard.`;
         this.alertType = 'success';
         this.showAlert = true;
         // Rafraîchit les scores et revient au résumé
@@ -709,6 +1023,9 @@ private _: any;
         this.toolService.getMatIntegDataById(id, this.storageService.CompanyId);
         this.mode = 'resume';
         this.currentIndex = 0;
+        this.showReco = false;
+        this.recoEditing = false;
+        this.recoNotice = null;
         if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: () => {
@@ -716,6 +1033,38 @@ private _: any;
         this.alertMessage = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
         this.alertType = 'danger';
         this.showAlert = true;
+      }
+    });
+  }
+
+  /** Résumé : déroule ou replie les recommandations, et amène la section à l'écran quand elle s'ouvre */
+  toggleReco(): void {
+    this.showReco = !this.showReco;
+    this.recoNotice = null;
+    if (!this.showReco) this.recoEditing = false;
+    if (this.showReco && typeof document !== 'undefined') {
+      setTimeout(() => document.getElementById('td-reco')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    }
+  }
+
+  /** Enregistre seulement les recommandations (le consultant en charge, depuis le Résumé), sans toucher aux réponses */
+  saveReco(): void {
+    if (!this.canSave || this.isSavingReco) return;
+    this.isSavingReco = true;
+    this.recoNotice = null;
+    this.toolService.saveDiagRecommandations({
+      cons_id: this.userId,
+      comp_id: this.storageService.CompanyId,
+      recommandations: this.recoForm.getRawValue()
+    }).subscribe({
+      next: () => {
+        this.isSavingReco = false;
+        this.recoForm.markAsPristine();
+        this.recoNotice = { type: 'success', text: 'Les recommandations ont été enregistrées.' };
+      },
+      error: err => {
+        this.isSavingReco = false;
+        this.recoNotice = { type: 'danger', text: err.error?.message ?? "L'enregistrement a échoué. Vérifiez votre connexion et réessayez." };
       }
     });
   }

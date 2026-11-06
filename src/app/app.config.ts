@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, RouteReuseStrategy } from '@angular/router';
+import { WaveRouteReuseStrategy } from './shared/wave-route-reuse.strategy';
 import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
     httpInterceptorProviders,
+    { provide: RouteReuseStrategy, useClass: WaveRouteReuseStrategy },
     provideAnimationsAsync("animations"),
         providePrimeNG({
             theme: {

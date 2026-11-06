@@ -122,3 +122,23 @@
     height: 70px;
   }
 }
+
+.vague-chip { display: inline-flex; align-items: center; gap: .3rem; margin: 0 .4rem .3rem 0; padding: .1rem .6rem; font-size: .75rem; font-weight: 700; color: #0e3fa3; background: #e0e7ff; border-radius: 999px;
+  &.closed { color: #7a4b00; background: #fff4d6; } }
+
+.livrable-badge {
+  display: inline-block;
+  margin-bottom: .35rem;
+  padding: .15rem .6rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #0f9d58;
+  background: #e6f6ee;
+}
+
+.review-badges { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .35rem; }
+.rv { padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+.rv-ok   { color: #0f9d58; background: #e6f6ee; }
+.rv-warn { color: #d97706; background: #fdf1de; }
+.rv-new  { color: #fff; background: #dc3545; }

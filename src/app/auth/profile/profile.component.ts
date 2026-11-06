@@ -14,7 +14,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   currentUser: any;
 
-  private readonly PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+  private readonly PHOTO_MAX_BYTES = 25 * 1024 * 1024;
   private readonly PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   photoPreview: string | null = null;
   photoFile: File | null = null;
@@ -29,10 +29,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUser = this.storageService.getUser();
-
-    setTimeout(() => {
-      this.storageService.setVisibleToolsFalse();
-    });
   }
 
   ngOnDestroy(): void {
@@ -49,7 +45,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
     if (file.size > this.PHOTO_MAX_BYTES) {
-      this.showMessage('Image trop volumineuse (10 Mo maximum).', 'danger');
+      this.showMessage('Image trop volumineuse (25 Mo maximum).', 'danger');
       return;
     }
     this.cancelPhoto();

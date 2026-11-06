@@ -11,7 +11,7 @@ $success-text: #155724;
 
 // ── Wrapper pleine page ───────────────────────────────────────────────────────
 .register-wrapper {
-  min-height: 100vh;
+  min-height: var(--app-page-h);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -11,8 +11,23 @@
         }
     </div>
 
+    @if ((companyState$ | async)?.loading || (livrablesState$ | async)?.loading) {
+        <app-loading message="Chargement des entreprises…" />
+    } @else if ((companyState$ | async)?.error) {
+        <app-load-error message="Impossible de charger les entreprises." />
+    } @else {
     <div class="row">
         @if(companies$ | async; as data){
+        @if (!data.length) {
+            <p class="text-center text-muted py-4">
+                @if (!wave.isAll()) {
+                    Aucune entreprise dans « {{ wave.label() }} ».
+                    <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="wave.select([])">Voir toutes les vagues</button>
+                } @else {
+                    Aucune entreprise à afficher.
+                }
+            </p>
+        }
         @for (item of data; track $index) {
 
         <!-- <div class="col">
@@ -43,6 +58,11 @@
                         </div>
                         <div class="col-md-8">
                             <h5 class="card-title"> {{item.name}} </h5>
+                            @if (item.vague_nom && wave.waves().length > 1) {
+                                <span class="badge rounded-pill mb-2" [class.text-bg-primary]="item.vague_statut !== 'cloturee'" [class.text-bg-warning]="item.vague_statut === 'cloturee'">
+                                    {{ item.vague_nom }}{{ item.vague_statut === 'cloturee' ? ' · clôturée' : '' }}
+                                </span>
+                            }
                             <p class="card-text">Rérion {{item.region}} Situè à {{item.ville}}, {{item.description}}
                             </p>
 
@@ -92,4 +112,5 @@
         }
         }
     </div>
+    }
 </div>

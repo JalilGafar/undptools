@@ -15,7 +15,7 @@ describe('LivrableTypeTableComponent', () => {
 
   const mockLivrables: LivrableGlobal[] = [
     { tool_code: 'attribut', company: 'A', consultant: 'x', comp_id: 1, cons_id: 11, date: '2026-01-01', updated_at: '2026-01-02', livrable: 'Prédiagnostic', tableur: '', id_livrable: 1 } as LivrableGlobal,
-    { tool_code: 't1d', company: 'B', consultant: 'y', comp_id: 2, cons_id: 22, date: '2026-01-03', updated_at: '2026-01-04', livrable: 'Diagnostic intégral', tableur: '', id_livrable: 2 } as LivrableGlobal,
+    { tool_code: 't1d', company: 'B', consultant: 'y', comp_id: 2, cons_id: 22, date: '2026-01-03', updated_at: '2026-01-04', livrable: 'Diagnostic Général', tableur: '', id_livrable: 2 } as LivrableGlobal,
   ];
 
   beforeEach(async () => {

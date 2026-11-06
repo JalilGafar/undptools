@@ -1,96 +1,28 @@
-<!-- @if (menuVisible$ | async) {
-    <app-header/>
-}
-@if (manMenuVisible$ | async) {
-    <app-man-header/>
-} -->
 <div id="app">
+  <!-- Nouvelle version détectée : fenêtre au centre de l'écran, fond flouté, plus rien d'accessible tant qu'on n'a pas mis à jour -->
   @if (updateAvailable) {
-    <div class="update-banner">
-      <span><i class="bi bi-arrow-clockwise me-2"></i>Une nouvelle version est disponible.</span>
-      <button class="btn btn-sm btn-light ms-3" (click)="applyUpdate()">Mettre à jour</button>
+    <div class="update-overlay" role="alertdialog" aria-modal="true" aria-labelledby="update-title" aria-describedby="update-text">
+      <div class="update-card">
+        <div class="update-icon"><i class="bi bi-arrow-repeat" [class.spin]="updating"></i></div>
+        <h2 id="update-title" class="update-title">Nouvelle version disponible</h2>
+        <p id="update-text" class="update-text">
+          Pour continuer à utiliser la plateforme correctement, mettez-la à jour maintenant. La page va se recharger.
+        </p>
+        <button type="button" class="update-btn" (click)="applyUpdate()" [disabled]="updating" autofocus>
+          @if (updating) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Mise à jour en cours… }
+          @else { <i class="bi bi-arrow-clockwise me-2"></i>Mettre à jour maintenant }
+        </button>
+        <p class="update-note">Si vous aviez une saisie en cours non enregistrée, elle sera perdue.</p>
+      </div>
     </div>
   }
-  <app-header/>
-  <!-- <nav class="navbar navbar-expand navbar-dark bg-dark">
-    <a href="#" class="navbar-brand mx-4"> <strong>SGD</strong>VC | UNDP Cameroon</a>
-    <ul class="navbar-nav mr-auto" routerLinkActive="active">
-      @if (showAdminBoard) {
-      <li class="nav-item">
-        <a class="nav-link" routerLink="manager">Admin Board</a>
-      </li>
-      }
-      @if (showModeratorBoard) {
-      <li class="nav-item">
-        <a href="/mod" class="nav-link" routerLink="mod">Moderator Board</a>
-      </li>
-      }
-      @if (showConsultantBoard) {
-
-      @if (visibleTools$ |async) {
-      <li class="nav-item" style="cursor: pointer;" (click)="toggleSidebar()">
-        <a class="nav-link">Tools</a>
-      </li>
-      }
-      <li class="nav-item">
-        <a class="nav-link" routerLink="consultant">Program</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="consultant/companies">Entreprises</a>
-      </li>
-      }
-    </ul>
-
-    @if (!isLoggedIn) {
-    <ul class="navbar-nav gogo">
-
-      <li class="nav-item">
-        <a href="/login" class="nav-link" routerLink="login">Login</a>
-      </li>
-    </ul>
-    } @else {
-    <ul class="navbar-nav gogo">
-      <li class="nav-item">
-        <a class="nav-link" routerLink="profile">{{ username }}</a>
-      </li>
-      <li class="nav-item">
-        <button class="btn btn-secondary" (click)="logout()">LogOut</button>
-      </li>
-    </ul>
-    }
-  </nav>
-
-  <div class="container">
-    <div id="wrapper" [ngClass]="{ 'toggled': isSidebarOpen, 'toggled-2': isSidebarMini }">
-      <div id="sidebar-wrapper">
-        <ul class="sidebar-nav nav flex-column" id="menu">
-          @for (item of menu; track $index) {
-          <li class="nav-item">
-            <a role="button" class="nav-link" (click)="item.children.length ? toggleSubmenu(item) : null">
-              <i class="licon" [ngClass]="item.icon" width="32"></i> {{ item.label }}
-              <span *ngIf="item.children.length" class="float-end">
-                <i class="bi" [ngClass]="item.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-              </span>
-            </a>
-
-            <ul class="submenu" [class.open]="item.expanded">
-              @for (child of item.children; track $index) {
-              <li class="nav-item" (click)="toggleSidebar()">
-                <a [routerLink]="['consultant/tool', child.route]" [queryParams]="{toolName: child.label}"
-                  class="nav-link">
-                  <i class="fa" [ngClass]="child"></i> {{ child.label }}
-                </a>
-              </li>
-              }
-            </ul>
-          </li>
-          }
-        </ul>
-      </div>
-
-
-    </div>
-  </div> -->
-  <router-outlet></router-outlet>
-  <app-footer/>
+  <!-- Contenu du site : bloqué (souris et clavier) tant que la mise à jour n'est pas faite.
+       En-tête fixe ; la page occupe tout l'espace restant et le pied de page vient après elle (styles.scss, « coque de l'application »). -->
+  <div class="app-content" [attr.inert]="updateAvailable ? '' : null" [attr.aria-hidden]="updateAvailable ? 'true' : null">
+    <app-header/>
+    <app-wave-bar/>
+    <app-closed-wave-banner/>
+    <router-outlet></router-outlet>
+    <app-footer/>
+  </div>
 </div>

@@ -86,3 +86,17 @@
     .nav-desc   { font-size: 0.78rem; }
     .nav-arrow  { display: none; }
 }
+
+// ── En-tête de page et choix de l'affichage (cartes par type / tableau) ───────
+.lt-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+
+.lt-modes {
+  display: inline-flex; padding: 3px; background: #eef2f7; border-radius: 12px;
+
+  button {
+    display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: 0 1rem; font: inherit; font-size: .9rem; font-weight: 600;
+    color: #475569; background: transparent; border: 0; border-radius: 9px; cursor: pointer;
+    &.on { color: #1a56db; background: #fff; box-shadow: 0 1px 4px rgba(15, 23, 42, .15); }
+    &:focus-visible { outline: 2px solid #1a56db; outline-offset: 1px; }
+  }
+}

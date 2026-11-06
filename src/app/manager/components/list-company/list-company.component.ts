@@ -5,13 +5,18 @@ import { Company } from '../../../core/model/company';
 import { ManagerService } from '../../manager.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { WaveService } from '../../../shared/wave.service';
 import { StorageService } from '../../../_services/storage.service';
 import { CompanyLogoPipe } from '../../../core/company-logo.pipe';
+import { LoadingComponent, LoadErrorComponent } from '../../../shared/components/loading/loading.component';
+import { LoadState } from '../../../core/load-state';
 
 @Component({
   selector: 'app-list-company',
   standalone: true,
   imports: [
+    LoadingComponent,
+    LoadErrorComponent,
     CommonModule,
     RouterLink,
     CompanyLogoPipe
@@ -22,6 +27,8 @@ import { CompanyLogoPipe } from '../../../core/company-logo.pipe';
 export class ListCompanyComponent implements OnInit {
 
   companies$!: Observable<Company[]>;
+  companyState$!: Observable<LoadState>;
+  livrablesState$!: Observable<LoadState>;
   userId!: number;
   isAdmin = false;
   livrableCounts = new Map<number, number>();
@@ -31,7 +38,8 @@ export class ListCompanyComponent implements OnInit {
     private ManagerServices: ManagerService,
     private route: ActivatedRoute,
     private appRout: Router,
-    private storageService: StorageService
+    private storageService: StorageService,
+    readonly wave: WaveService
   ){}
   
   ngOnInit(): void {
@@ -50,6 +58,8 @@ export class ListCompanyComponent implements OnInit {
     }
 
     this.companies$ = this.ManagerServices.company$;
+    this.companyState$ = this.ManagerServices.companyState$;
+    this.livrablesState$ = this.ManagerServices.allLivrablesState$;
 
     // Nombre réel de livrables par entreprise
     this.ManagerServices.getAllLivrables();

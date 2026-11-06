@@ -1,0 +1,122 @@
+// Tableau des livrables : base = téléphone (cartes, commandes de 44 px) ; le vrai tableau apparaît à partir de 768 px.
+$primary: #1a56db;
+$navy:    #0e3fa3;
+$border:  #e5e7eb;
+$muted:   #6b7280;
+$ink:     #1e293b;
+$ok:      #0f9d58;
+$warn:    #d97706;
+
+:host { display: block; }
+
+// ── Recherche ─────────────────────────────────────────────────────────────────
+.tf-search { position: relative; margin-bottom: .75rem;
+  > i { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: $muted; pointer-events: none; }
+  input { width: 100%; min-height: 48px; padding: .5rem 2.75rem .5rem 2.5rem; font: inherit; color: $ink; background: #fff; border: 1.5px solid $border; border-radius: 12px;
+    &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); } } }
+.tf-clear { position: absolute; right: .25rem; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; color: $muted; background: none; border: 0; cursor: pointer; }
+
+// ── Statut (pastilles-filtres) ────────────────────────────────────────────────
+// Téléphone : une seule rangée qui défile (les pastilles ne passent pas à la ligne)
+.tf-chips { display: flex; flex-wrap: nowrap; gap: .5rem; margin: 0 -1rem .75rem; padding: 0 1rem .15rem; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar { display: none; } }
+.tf-chip {
+  display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; padding: .3rem .85rem; font: inherit; font-size: .9rem; font-weight: 600;
+  flex-shrink: 0; white-space: nowrap; color: $ink; background: #fff; border: 1.5px solid $border; border-radius: 999px; cursor: pointer;
+  b { padding: .05rem .5rem; font-size: .8rem; color: $navy; background: #e0e7ff; border-radius: 999px; }
+  &.on { color: #fff; background: $primary; border-color: $primary; b { color: $primary; background: #fff; } }
+  &.ok:not(.on) i { color: $ok; } &.warn:not(.on) i { color: $warn; } &.non:not(.on) i { color: $muted; } &.wait:not(.on) i { color: #0e7490; }
+  &:disabled { opacity: .55; cursor: wait; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+
+// ── Outils ────────────────────────────────────────────────────────────────────
+.tf-tools { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; align-items: end; margin-bottom: .6rem; }
+.tf-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 44px; padding: .3rem .9rem; font: inherit; font-size: .9rem; font-weight: 600;
+  color: $primary; background: #fff; border: 1.5px solid #bcd0f5; border-radius: 10px; cursor: pointer;
+  &.on { color: #fff; background: $primary; border-color: $primary; .tf-n { color: $primary; background: #fff; } }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+}
+.tf-n { padding: 0 .45rem; font-size: .75rem; font-weight: 700; color: #fff; background: $primary; border-radius: 999px; }
+
+.tf-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; margin: 0;
+  > span:first-child { font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: $muted; }
+  select { width: 100%; min-height: 44px; padding: .3rem .6rem; font: inherit; font-size: .9rem; color: $ink; background: #fff; border: 1.5px solid $border; border-radius: 10px; }
+  select:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .12); } }
+.tf-sort { display: flex; gap: .4rem; > select { flex: 1; min-width: 0; } }
+.tf-dir { width: 44px; min-height: 44px; flex-shrink: 0; color: $primary; font-size: 1.1rem; background: #fff; border: 1.5px solid $border; border-radius: 10px; cursor: pointer; }
+
+.tf-filters { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-bottom: .6rem; padding: .85rem; background: #f8fafc; border: 1px solid $border; border-radius: 12px; }
+
+.tf-summary { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: .4rem 0 .6rem; font-size: .88rem; color: #475569; }
+.tf-reset { min-height: 36px; padding: 0 .3rem; font: inherit; font-size: .85rem; font-weight: 600; color: $primary; background: none; border: 0; text-decoration: underline; cursor: pointer; }
+
+// ── Résultats ─────────────────────────────────────────────────────────────────
+.tf-empty { padding: 2.5rem 1rem; text-align: center; color: $muted; i { font-size: 2.2rem; } p { margin: .5rem 0 1rem; } }
+
+.tf-livrable { display: inline-flex; align-items: flex-start; gap: .5rem; font-weight: 600; color: $ink; line-height: 1.3; overflow-wrap: anywhere;
+  > i { margin-top: .12rem; color: $primary; } }
+.tf-strong { font-weight: 600; color: $ink; }
+.tf-muted { color: $muted; }
+.tf-nowrap { white-space: nowrap; }
+.tf-none { display: inline-block; padding: .15rem .6rem; font-size: .75rem; font-weight: 700; color: #64748b; background: #eef2f7; border-radius: 999px; white-space: nowrap; }
+.tf-tag { display: inline-block; padding: .1rem .6rem; font-size: .75rem; font-weight: 600; color: #334155; background: #eef2f7; border-radius: 999px; white-space: nowrap;
+  &.wave { color: $navy; background: #e0e7ff; } }
+.tf-sub { display: block; font-size: .75rem; color: $muted; }
+.tf-mark { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .6rem; font-size: .75rem; font-weight: 700; white-space: nowrap; border-radius: 999px;
+  &.ok { color: $ok; background: #e6f6ee; } &.warn { color: $warn; background: #fdf1de; } }
+.tf-cmt { display: inline-flex; align-items: center; gap: .25rem; margin-left: .5rem; font-size: .75rem; font-weight: 600; color: $muted; }
+.tf-new { margin-left: .5rem; padding: 0 .4rem; font-size: .65rem; font-weight: 700; color: #fff; background: #dc3545; border-radius: 999px; }
+
+// Regroupement
+.tf-group { display: flex; align-items: center; gap: .6rem; width: 100%; min-height: 48px; padding: .4rem .75rem; font: inherit; text-align: left; color: $ink; background: #eef2f7; border: 0; cursor: pointer;
+  strong { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; } }
+.tf-group-count { padding: .05rem .55rem; font-size: .78rem; font-weight: 700; color: $navy; background: #e0e7ff; border-radius: 999px; white-space: nowrap; }
+.tf-group-progress { font-size: .78rem; color: $muted; white-space: nowrap; }
+
+// Cartes (téléphone)
+.tf-cards { display: flex; flex-direction: column; gap: .6rem; }
+.tf-group-card { margin-top: .4rem; border-radius: 10px; }
+.tf-card { padding: .85rem; background: #fff; border: 1.5px solid $border; border-radius: 12px; cursor: pointer;
+  &:active { background: #f8fafc; }
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; } }
+.tf-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; margin-bottom: .4rem; }
+.tf-card-status { flex-shrink: 0; }
+.tf-card-line { display: flex; align-items: flex-start; gap: .5rem; margin: 0 0 .15rem; font-size: .88rem; line-height: 1.35; overflow-wrap: anywhere;
+  > i { margin-top: .12rem; color: $muted; } }
+.tf-card-foot { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.tf-card-date { margin-left: auto; font-size: .78rem; }
+
+.tf-more { display: block; width: 100%; min-height: 48px; margin-top: .75rem; font: inherit; font-weight: 700; color: $primary; background: #fff; border: 1.5px solid #bcd0f5; border-radius: 12px; cursor: pointer; }
+
+// ── Tableau (écran large) ─────────────────────────────────────────────────────
+.tf-table-wrap { overflow-x: auto; background: #fff; border: 1.5px solid $border; border-radius: 12px; }
+.tf-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .88rem;
+  thead th { padding: 0; text-align: left; white-space: nowrap; background: #f1f5fb; border-bottom: 1.5px solid $border;
+    &[aria-sort='ascending'], &[aria-sort='descending'] { background: #e3ebfb; }
+    button { display: flex; align-items: center; gap: .4rem; width: 100%; min-height: 44px; padding: .4rem .75rem; font: inherit; font-size: .78rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: #475569; background: none; border: 0; cursor: pointer;
+      i { font-size: .8rem; opacity: .6; } &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; } }
+    &[aria-sort='ascending'] button i, &[aria-sort='descending'] button i { opacity: 1; color: $primary; } }
+  td { padding: .6rem .75rem; vertical-align: top; border-bottom: 1px solid #eef2f7; }
+  .tf-row { cursor: pointer; &:hover td { background: #f6f9ff; } &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; } }
+  .tf-group-row td { padding: 0; border-bottom: 1px solid $border; }
+  th:first-child, td:first-child { min-width: 220px; } }
+.tf-person { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
+.tf-avatar { display: inline-grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; font-size: .75rem; font-weight: 700; color: $navy; background: #e0e7ff; border-radius: 50%; }
+
+@media (min-width: 768px) {
+  // Recherche et statuts sur la même rangée
+  .tf-top { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: .75rem; align-items: center; margin-bottom: .75rem; }
+  .tf-top .tf-search, .tf-top .tf-chips { margin: 0; padding: 0; }
+  .tf-chips { flex-wrap: wrap; overflow: visible; }
+  .tf-tools { grid-template-columns: auto minmax(200px, 260px) 1fr; }
+  .tf-tools .tf-export { justify-self: end; }
+  .tf-filters { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1100px) {
+  .tf-filters { grid-template-columns: repeat(6, 1fr); }
+}

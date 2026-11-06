@@ -6,7 +6,7 @@ import {
   CompanyImage, IMAGE_CATEGORIES, IMAGE_STAGES, ImageCategory, ImageStage
 } from '../../../core/model/company-image';
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 25 * 1024 * 1024;   // l'image est réduite dans le navigateur avant l'envoi
 const MAX_FILES = 8;
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -125,7 +125,7 @@ export class CompanyGalleryComponent implements OnChanges, OnDestroy {
     }
     const invalid = selected.find(f => !TYPES.includes(f.type) || f.size > MAX_BYTES);
     if (invalid) {
-      this.showMessage(`« ${invalid.name} » n'est pas valide (JPG, PNG ou WEBP, 10 Mo maximum).`, 'danger');
+      this.showMessage(`« ${invalid.name} » n'est pas valide (JPG, PNG ou WEBP, 25 Mo maximum).`, 'danger');
       return;
     }
     this.message = '';

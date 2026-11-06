@@ -1,8 +1,9 @@
 <div class="container mr-wrapper">
 
   <!-- Retour -->
-  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="goBack()">
-    <i class="bi bi-arrow-left me-1"></i> Retour
+  <button type="button" class="btn btn-outline-secondary btn-sm mb-3 no-print"
+          (click)="mode === 'form' ? backToList() : goBack()">
+    <i class="bi bi-arrow-left me-1"></i> {{ mode === 'form' ? 'Liste des minutes' : 'Retour' }}
   </button>
 
   <!-- En-tête -->
@@ -10,108 +11,315 @@
     <div class="mr-header-icon"><i class="bi bi-journal-text"></i></div>
     <div>
       <h2 class="mr-title">{{ toolName || 'Minutes de réunion' }}</h2>
-      <p class="mr-subtitle">Compte rendu de la réunion et fiche de présence</p>
+      <p class="mr-subtitle">
+        @if (list?.company; as c) { {{ c.name }} · }
+        Compte rendu de la réunion, fiche de présence et signatures
+      </p>
     </div>
   </div>
 
-  <form [formGroup]="MeetForm" novalidate>
-
-    <!-- ── La réunion ──────────────────────────────────────────────────── -->
-    <h5 class="mr-section-title"><i class="bi bi-calendar-event me-2"></i>La réunion</h5>
-    <div class="row g-3 mb-4">
-      <div class="col-12 col-md-4">
-        <label class="form-label" for="etape">Étape</label>
-        <input id="etape" class="form-control" type="text" formControlName="etape" placeholder="ex. Étape 1">
-      </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label" for="date">Date</label>
-        <input id="date" class="form-control" type="date" formControlName="date">
-      </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label" for="lieu">Lieu</label>
-        <input id="lieu" class="form-control" type="text" formControlName="lieu" placeholder="ex. siège de l'entreprise">
-      </div>
+  @if (alertMessage) {
+    <div class="alert alert-{{ alertType }} alert-dismissible no-print" role="alert">
+      {{ alertMessage }}
+      <button type="button" class="btn-close" (click)="alertMessage = ''" aria-label="Fermer"></button>
     </div>
+  }
 
-    <!-- ── Contenu ─────────────────────────────────────────────────────── -->
-    <h5 class="mr-section-title"><i class="bi bi-card-text me-2"></i>Contenu de la réunion</h5>
-    <div class="row g-3 mb-4">
-      <div class="col-12">
-        <label class="form-label" for="objectif">Objectifs de la réunion</label>
-        <textarea id="objectif" class="form-control" rows="3" formControlName="objectif"></textarea>
-      </div>
-      <div class="col-12">
-        <label class="form-label" for="ordre">Ordre du jour</label>
-        <textarea id="ordre" class="form-control" rows="4" formControlName="ordre"></textarea>
-      </div>
-      <div class="col-12">
-        <label class="form-label" for="resultats">Résultats et engagements</label>
-        <textarea id="resultats" class="form-control" rows="4" formControlName="resultats"></textarea>
-      </div>
-      <div class="col-12">
-        <label class="form-label" for="remarque">Remarques</label>
-        <textarea id="remarque" class="form-control" rows="3" formControlName="remarque"></textarea>
-      </div>
-    </div>
+  @if (!companyId && !preview) {
+    <div class="alert alert-warning">Aucune entreprise sélectionnée. Revenez à la liste des entreprises et choisissez-en une.</div>
+  } @else if (mode === 'list') {
 
-    <!-- ── Fiche de présence ───────────────────────────────────────────── -->
-    <h5 class="mr-section-title"><i class="bi bi-people me-2"></i>Fiche de présence</h5>
+    <!-- ════════════════ LISTE DES MINUTES ════════════════ -->
+    @if (isLoading) {
+      <app-loading message="Chargement des minutes…" />
+    } @else if (loadError) {
+      <app-load-error message="Impossible de charger les minutes de réunion." />
+    } @else if (list) {
 
-    <div formArrayName="presents" class="mr-attendees">
-      @for (p of presents.controls; track p; let i = $index) {
-        <div class="mr-attendee" [formGroupName]="i">
-          <span class="mr-badge">{{ i + 1 }}</span>
-          <div class="row g-2 flex-grow-1">
-            <div class="col-12 col-md-7">
-              <label class="form-label" [for]="'present-nom-' + i">Nom et prénom</label>
-              <input [id]="'present-nom-' + i" class="form-control" type="text" formControlName="nom"
-                     autocomplete="off" autocapitalize="words">
-            </div>
-            <div class="col-12 col-md-5">
-              <label class="form-label" [for]="'present-contact-' + i">Contact</label>
-              <input [id]="'present-contact-' + i" class="form-control" type="text" formControlName="contact"
-                     autocomplete="off" placeholder="Téléphone ou e-mail">
-            </div>
-          </div>
-          <button type="button" class="mr-del" (click)="removeAttendee(i)" title="Retirer cette personne"
-                  aria-label="Retirer cette personne">
-            <i class="bi bi-trash"></i>
-          </button>
+      @if (canCreate) {
+        <button type="button" class="btn btn-primary mr-new" (click)="openNew()">
+          <i class="bi bi-plus-circle me-2"></i>Nouvelle minute de réunion
+        </button>
+      }
+
+      @if (list.minutes.length) {
+        <div class="mr-list">
+          @for (m of list.minutes; track m.id) {
+            <button type="button" class="mr-item" (click)="openMinute(m.id)">
+              <div class="mr-item-top">
+                <span class="mr-date"><i class="bi bi-calendar-event me-1"></i>{{ m.date_reunion | date:'dd/MM/yyyy' }}</span>
+                <span class="mr-chip">Étape {{ m.etape }}</span>
+                @if (m.numero) { <span class="mr-chip">Réunion n° {{ m.numero }}</span> }
+                <app-review-badge [review]="review(m.id)" />
+                @if (m.signed_complete) { <span class="mr-chip ok"><i class="bi bi-patch-check me-1"></i>Signée</span> }
+                @else { <span class="mr-chip warn">Signatures incomplètes</span> }
+              </div>
+              <p class="mr-item-obj">{{ m.objectif }}</p>
+              <small class="text-muted">
+                @if (m.lieu) { <i class="bi bi-geo-alt me-1"></i>{{ m.lieu }} · }
+                <i class="bi bi-people me-1"></i>{{ m.nb_presents }} participant{{ m.nb_presents > 1 ? 's' : '' }}
+              </small>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="mr-empty">
+          <i class="bi bi-journal-x"></i>
+          <p>Aucune minute de réunion pour cette entreprise.</p>
         </div>
       }
-    </div>
+    }
 
-    <button type="button" class="btn btn-outline-primary mr-add" (click)="addAttendee()">
-      <i class="bi bi-person-plus me-1"></i>Ajouter une personne
-    </button>
+  } @else {
 
-    <!-- ── Actions (barre collée en bas de l'écran sur mobile) ─────────── -->
-    <div class="mr-actions">
-      <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
-        <i class="bi bi-x-circle me-1"></i> Annuler
-      </button>
-      <button type="button" class="btn btn-primary mr-btn-save" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        <i class="bi bi-check-circle me-2"></i>Enregistrer
-      </button>
-    </div>
-  </form>
+    <!-- ════════════════ FORMULAIRE D'UNE MINUTE ════════════════ -->
+    @if (isFormLoading) {
+      <app-loading message="Chargement de la minute…" />
+    } @else {
 
-  <!-- Modal de confirmation -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Enregistrer la minute de réunion ?</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-        </div>
-        <div class="modal-footer mr-modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" routerLink="../../companies">
-            Enregistrer la minute de réunion
-          </button>
-        </div>
+      @if (preview) { <app-preview-banner /> }
+      <div class="mr-toolbar no-print">
+        @if (readOnly) {
+          <span class="mr-readonly"><i class="bi bi-eye me-1"></i>Consultation (lecture seule)</span>
+        }
+        <button type="button" class="btn btn-outline-primary btn-sm ms-auto" (click)="print()">
+          <i class="bi bi-printer me-1"></i>Imprimer / PDF
+        </button>
       </div>
-    </div>
-  </div>
+
+      <form [formGroup]="MeetForm" (ngSubmit)="save()" novalidate>
+
+        <!-- ── En-tête de la fiche ─────────────────────────────────────────── -->
+        <h5 class="mr-section-title"><i class="bi bi-calendar-event me-2"></i>La réunion</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md-6">
+            <span class="form-label d-block">Entreprise</span>
+            <div class="form-control mr-fixed">{{ list?.company?.name || '—' }}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <span class="form-label d-block">Consultant</span>
+            <div class="form-control mr-fixed">{{ list?.consultant?.username || '—' }}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="etape">Étape</label>
+            <select id="etape" class="form-select form-control" formControlName="etape">
+              @for (e of etapes; track e.value) {
+                <option [ngValue]="e.value">{{ e.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="numero">Réunion n°</label>
+            <input id="numero" class="form-control" type="number" min="1" max="9999" inputmode="numeric" formControlName="numero">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="date">Date *</label>
+            <input id="date" class="form-control" type="date" formControlName="date_reunion"
+                   [class.is-invalid]="MeetForm.get('date_reunion')?.touched && MeetForm.get('date_reunion')?.invalid">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="hdebut">Heure de début</label>
+            <input id="hdebut" class="form-control" type="time" formControlName="heure_debut">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="hfin">Heure de fin</label>
+            <input id="hfin" class="form-control" type="time" formControlName="heure_fin">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="lieu">Lieu / Mode</label>
+            <input id="lieu" class="form-control" type="text" formControlName="lieu" maxlength="255"
+                   placeholder="ex. siège de l'entreprise, visioconférence">
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="objectif">Sujet principal *</label>
+            <input id="objectif" class="form-control" type="text" formControlName="objectif" maxlength="500"
+                   [class.is-invalid]="MeetForm.get('objectif')?.touched && MeetForm.get('objectif')?.invalid">
+          </div>
+        </div>
+
+        <!-- ── Contenu ─────────────────────────────────────────────────────── -->
+        <h5 class="mr-section-title"><i class="bi bi-card-text me-2"></i>Compte rendu</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-12">
+            <label class="form-label" for="ordre">Ordre du jour</label>
+            <textarea id="ordre" class="form-control" rows="4" formControlName="ordre_jour" maxlength="5000"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="discussion">Discussion et points abordés</label>
+            <textarea id="discussion" class="form-control" rows="6" formControlName="discussion" maxlength="5000"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="resultats">Accords et décisions</label>
+            <textarea id="resultats" class="form-control" rows="5" formControlName="resultats" maxlength="5000"></textarea>
+          </div>
+        </div>
+
+        <!-- ── Engagements et prochaines étapes ────────────────────────────── -->
+        <h5 class="mr-section-title"><i class="bi bi-list-task me-2"></i>Engagements et prochaines étapes</h5>
+        <div formArrayName="engagements" class="mr-attendees">
+          @for (g of engagements.controls; track g; let i = $index) {
+            <div class="mr-attendee" [formGroupName]="i">
+              <span class="mr-badge">{{ i + 1 }}</span>
+              <div class="row g-2 flex-grow-1">
+                <div class="col-12">
+                  <label class="form-label" [for]="'eng-tache-' + i">Tâche / Engagement</label>
+                  <textarea [id]="'eng-tache-' + i" class="form-control" rows="2" formControlName="tache" maxlength="1000"></textarea>
+                </div>
+                <div class="col-12 col-md-7">
+                  <label class="form-label" [for]="'eng-resp-' + i">Responsable</label>
+                  <input [id]="'eng-resp-' + i" class="form-control" type="text" formControlName="responsable" maxlength="255" autocomplete="off">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label" [for]="'eng-ech-' + i">Échéance</label>
+                  <input [id]="'eng-ech-' + i" class="form-control" type="date" formControlName="echeance">
+                </div>
+              </div>
+              @if (!readOnly) {
+                <button type="button" class="mr-del no-print" (click)="removeEngagement(i)" title="Retirer cette ligne"
+                        aria-label="Retirer cette ligne">
+                  <i class="bi bi-trash"></i>
+                </button>
+              }
+            </div>
+          }
+          @if (readOnly && !engagements.length) {
+            <p class="text-muted small mb-0">Aucun engagement noté.</p>
+          }
+        </div>
+        @if (!readOnly) {
+          <button type="button" class="btn btn-outline-primary mr-add no-print" (click)="addEngagement()">
+            <i class="bi bi-plus-lg me-1"></i>Ajouter un engagement
+          </button>
+        }
+
+        <!-- ── Observations ────────────────────────────────────────────────── -->
+        <h5 class="mr-section-title mt-4"><i class="bi bi-chat-left-text me-2"></i>Observations et commentaires</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-12">
+            <textarea id="remarque" class="form-control" rows="4" formControlName="remarques" maxlength="5000"
+                      aria-label="Observations et commentaires"></textarea>
+          </div>
+        </div>
+
+        <!-- ── Participants ────────────────────────────────────────────────── -->
+        <h5 class="mr-section-title"><i class="bi bi-people me-2"></i>Participants</h5>
+
+        <div formArrayName="presents" class="mr-attendees">
+          @for (p of presents.controls; track p; let i = $index) {
+            <div class="mr-attendee" [formGroupName]="i">
+              <span class="mr-badge">{{ i + 1 }}</span>
+              <div class="row g-2 flex-grow-1">
+                <div class="col-12 col-md-7">
+                  <label class="form-label" [for]="'present-nom-' + i">Nom et prénom</label>
+                  <input [id]="'present-nom-' + i" class="form-control" type="text" formControlName="nom"
+                         autocomplete="off" autocapitalize="words">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label" [for]="'present-poste-' + i">Poste</label>
+                  <input [id]="'present-poste-' + i" class="form-control" type="text" formControlName="poste"
+                         autocomplete="off" maxlength="255">
+                </div>
+                <div class="col-12 mr-sign">
+                  @if (p.get('signature')?.value; as sig) {
+                    <img class="mr-sign-img" [src]="sig" alt="Signature de {{ p.get('nom')?.value }}">
+                    <div class="mr-sign-meta">
+                      <span class="mr-sign-ok"><i class="bi bi-check-circle-fill me-1"></i>Signé</span>
+                    </div>
+                    @if (!readOnly) {
+                      <button type="button" class="btn btn-outline-secondary btn-sm no-print" (click)="openSign({ kind: 'present', index: i })">Refaire</button>
+                      <button type="button" class="btn btn-outline-danger btn-sm no-print" (click)="clearSignature({ kind: 'present', index: i })" aria-label="Effacer la signature"><i class="bi bi-x-lg"></i></button>
+                    }
+                  } @else if (!readOnly) {
+                    <button type="button" class="btn btn-outline-primary btn-sm no-print" (click)="openSign({ kind: 'present', index: i })">
+                      <i class="bi bi-pen me-1"></i>Signature
+                    </button>
+                  } @else {
+                    <small class="text-muted">Non signé</small>
+                  }
+                </div>
+              </div>
+              @if (!readOnly) {
+                <button type="button" class="mr-del no-print" (click)="removeAttendee(i)" title="Retirer cette personne"
+                        aria-label="Retirer cette personne">
+                  <i class="bi bi-trash"></i>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        @if (!readOnly) {
+          <button type="button" class="btn btn-outline-primary mr-add no-print" (click)="addAttendee()">
+            <i class="bi bi-person-plus me-1"></i>Ajouter une personne
+          </button>
+        }
+
+        <!-- ── Signature du consultant ─────────────────────────────────────── -->
+        <h5 class="mr-section-title mt-4"><i class="bi bi-pen me-2"></i>Signature du consultant</h5>
+        <div class="mr-attendee mr-consultant">
+          <div class="mr-sign flex-grow-1">
+            <strong class="me-2">{{ consultantName }}</strong>
+            @if (MeetForm.get('consultant_signature')?.value; as sig) {
+              <img class="mr-sign-img" [src]="sig" alt="Signature du consultant">
+              <div class="mr-sign-meta">
+                <span class="mr-sign-ok"><i class="bi bi-check-circle-fill me-1"></i>Signé</span>
+              </div>
+              @if (!readOnly) {
+                <button type="button" class="btn btn-outline-secondary btn-sm no-print" (click)="openSign({ kind: 'consultant' })">Refaire</button>
+                <button type="button" class="btn btn-outline-danger btn-sm no-print" (click)="clearSignature({ kind: 'consultant' })" aria-label="Effacer la signature"><i class="bi bi-x-lg"></i></button>
+              }
+            } @else if (!readOnly) {
+              <button type="button" class="btn btn-outline-primary btn-sm no-print" (click)="openSign({ kind: 'consultant' })">
+                <i class="bi bi-pen me-1"></i>Signature
+              </button>
+            } @else {
+              <small class="text-muted">Non signé</small>
+            }
+          </div>
+        </div>
+
+        <!-- ── Actions (barre collée en bas de l'écran sur mobile) ─────────── -->
+        @if (preview) {
+          <app-preview-banner [end]="true" />
+        } @else if (!readOnly) {
+          @if (confirmDelete) {
+            <div class="alert alert-danger mt-4 no-print">
+              Supprimer définitivement cette minute (et ses signatures) ?
+              <div class="d-flex gap-2 mt-2">
+                <button type="button" class="btn btn-danger btn-sm" (click)="deleteMinute()">Supprimer</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="confirmDelete = false">Annuler</button>
+              </div>
+            </div>
+          }
+          <div class="mr-actions no-print">
+            @if (editingId !== null) {
+              <button type="button" class="btn btn-outline-danger me-auto" (click)="confirmDelete = true">
+                <i class="bi bi-trash me-1"></i> Supprimer
+              </button>
+            }
+            <button type="button" class="btn btn-outline-secondary" (click)="backToList()">
+              <i class="bi bi-x-circle me-1"></i> Fermer
+            </button>
+            @if (MeetForm.dirty) { <span class="mr-unsaved">Modifications non enregistrées</span> }
+            <button type="submit" class="btn btn-primary mr-btn-save" [disabled]="isSaving">
+              @if (isSaving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              @else { <i class="bi bi-check-circle me-2"></i> }
+              Enregistrer
+            </button>
+          </div>
+        }
+      </form>
+
+      <!-- Évaluation de cette minute (chaque minute est un livrable) -->
+      @if (editingId !== null && !preview) {
+        <app-livrable-review toolCode="t1b" [itemId]="editingId" />
+      }
+
+    }
+  }
+
+  @if (signTarget) {
+    <app-signature-pad [title]="signTitle()" subtitle="Tracez la signature sur l'écran, puis validez." (signed)="onSigned($event)" (cancelled)="signTarget = null" />
+  }
 
 </div>

@@ -226,3 +226,23 @@ $radius:     12px;
   i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
   p  { margin: 0; font-size: 0.9rem; }
 }
+
+// Rôle du compte + raccourci administrateur vers la page « Utilisateurs et rôles »
+.cp-role-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.cp-role-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}

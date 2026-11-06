@@ -194,7 +194,7 @@ export class GlobalComponent implements OnInit {
     ] as [string, Ratio][]).filter(([, r]) => r.pct !== null).map(([name, r]) => ({ name, value: r.pct as number }));
     this.livrables = [
       { name: 'Prédiagnostic', value: rows.filter(r => r.nb_predia > 0).length },
-      { name: 'Diagnostic intégral', value: rows.filter(r => r.nb_diag > 0).length },
+      { name: 'Diagnostic Général', value: rows.filter(r => r.nb_diag > 0).length },
       { name: 'Profil (1L)', value: profiled.length },
     ];
   }

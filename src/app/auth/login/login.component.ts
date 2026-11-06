@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../_services/auth.service';
 import { StorageService } from '../../_services/storage.service';
+import { hasManagerRole } from '../../core/roles';
 
 @Component({
   selector: 'app-login',
@@ -55,7 +56,7 @@ export class LoginComponent implements OnInit {
         this.isLoggedIn = true;
         this.roles = this.storageService.getUser().roles;
 
-        if (this.roles.includes('ROLE_ADMIN') || this.roles.includes('ROLE_MODERATOR')) {
+        if (hasManagerRole(this.roles)) {
           this.router.navigateByUrl('/manager');
         } else {
           this.router.navigateByUrl('/consultant');

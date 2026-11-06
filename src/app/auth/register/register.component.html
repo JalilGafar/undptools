@@ -72,16 +72,21 @@
         </div>
       </div>
 
-      <!-- Rôle -->
+      <!-- Rôle : choisi par un administrateur ; sinon le compte est un compte consultant -->
+      @if (isAdmin) {
       <div class="form-group">
         <label for="roles">Rôle attribué</label>
         <select id="roles" name="roles" class="form-select" [(ngModel)]="form.roles" required #roles="ngModel">
           <option value="consultant">Consultant</option>
-          <option value="moderator">Modérateur</option>
+          <option value="moderator">Modérateur (commente, n'évalue pas)</option>
+          <option value="evaluateur">Évaluateur (RBLAC)</option>
+          <option value="admin">Administrateur (Bureau Pays)</option>
           <option value="entreprise">Entreprise</option>
-          <option value="admin">Admin</option>
         </select>
       </div>
+      } @else {
+      <p class="form-text">Le compte créé sera un compte <strong>consultant</strong>. Seul un administrateur peut attribuer un autre rôle.</p>
+      }
 
       <!-- Bouton -->
       <div class="form-group mt-4">

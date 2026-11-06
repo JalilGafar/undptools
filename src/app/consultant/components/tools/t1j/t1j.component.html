@@ -1,0 +1,340 @@
+<div class="container pf-wrapper">
+
+  <!-- Barre d'actions (non imprimée) -->
+  <div class="pf-toolbar no-print">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <div class="ms-auto d-flex flex-wrap gap-3 align-items-center">
+      @if (isManagerRole) {
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="usdSwitch" [checked]="showUsd" (change)="showUsd = !showUsd">
+          <label class="form-check-label small" for="usdSwitch">
+            Afficher en USD
+            <span class="text-muted">(1 USD = {{ fx.xafPerUsd }} FCFA, moyenne {{ fx.year }})</span>
+          </label>
+        </div>
+      }
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="print()">
+        <i class="bi bi-printer me-1"></i>Imprimer / PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- En-tête -->
+  <div class="pf-header">
+    <div class="pf-header-icon"><i class="bi bi-speedometer2"></i></div>
+    <div>
+      <h2 class="pf-title">Profil de productivité de l'entreprise</h2>
+      <p class="pf-subtitle">
+        Diagnostic rapide
+        @if (companyName) { · <strong>{{ companyName }}</strong> }
+        @if (consultantName) { · Consultant : {{ consultantName }} }
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <app-loading message="Chargement du profil de productivité…" />
+  } @else if (!companyId && !preview) {
+    <div class="pf-loading">
+      <p>Aucune entreprise sélectionnée.</p>
+      <a routerLink="/consultant/companies" class="btn btn-outline-primary btn-sm">Choisir une entreprise</a>
+    </div>
+  } @else if (loadError) {
+    <app-load-error message="Impossible de charger le profil de productivité." />
+  } @else {
+
+  @if (preview) {
+    <app-preview-banner />
+  } @else if (readOnly) {
+    <div class="alert alert-info py-2 no-print">
+      <i class="bi bi-eye me-1"></i>Consultation en lecture seule.
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="row g-3">
+
+    <!-- ── 1. Produits ─────────────────────────────────────────────────── -->
+    <div class="col-12">
+      <h5 class="pf-section-title"><i class="bi bi-box-seam me-2"></i>1. Produits</h5>
+    </div>
+
+    <div class="col-12">
+      <div class="pf-card table-responsive scroll-visible" appScrollHint>
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Nom du produit et variante / référence</th>
+              <th>Volume mensuel</th>
+              <th class="text-end">Valeur par mois ({{ showUsd ? 'USD' : 'FCFA' }})</th>
+              @if (!readOnly) { <th class="no-print"></th> }
+            </tr>
+          </thead>
+          <tbody formArrayName="produits">
+            @for (line of produits.controls; track line; let i = $index) {
+              <tr [formGroupName]="i">
+                <td><input class="form-control form-control-sm" type="text" formControlName="produit" maxlength="255"
+                           placeholder="ex. jus de gingembre 33 cl"></td>
+                <td class="pf-vol"><input class="form-control form-control-sm" type="text" formControlName="volume_mensuel" maxlength="100"
+                           placeholder="ex. 500 litres"></td>
+                <td class="pf-amount">
+                  @if (readOnly) {
+                    <span class="text-end d-block">{{ money(line.get('valeur_fcfa')?.value) }}</span>
+                  } @else {
+                    <input class="form-control form-control-sm text-end" type="number" min="0" step="1" inputmode="numeric"
+                           formControlName="valeur_fcfa" placeholder="FCFA">
+                  }
+                </td>
+                @if (!readOnly) {
+                  <td class="text-center no-print">
+                    <button type="button" class="btn btn-link btn-sm text-danger p-0" (click)="removeLine(i)" title="Supprimer la ligne">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="pf-total">
+              <td colspan="2">Valeur mensuelle totale</td>
+              <td class="text-end">{{ money(totalValeurFcfa) }}</td>
+              @if (!readOnly) { <td class="no-print"></td> }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="scroll-hint no-print"><i class="bi bi-arrow-left-right"></i>Faites glisser le tableau horizontalement</p>
+      @if (!readOnly) {
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2 no-print" (click)="addLine()">
+          <i class="bi bi-plus-lg me-1"></i>Ajouter une ligne
+        </button>
+      }
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="nb_gammes">Nombre total de gammes de produits (familles)</label>
+      <input id="nb_gammes" class="form-control" type="number" min="0" inputmode="numeric" formControlName="nb_gammes"
+             [class.is-invalid]="isInvalid('nb_gammes') || variantesInferieuresAuxGammes">
+      <div class="form-text">Par exemple : 3.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="nb_variantes">Nombre total de variantes / références actives</label>
+      <input id="nb_variantes" class="form-control" type="number" min="0" inputmode="numeric" formControlName="nb_variantes"
+             [class.is-invalid]="isInvalid('nb_variantes') || variantesInferieuresAuxGammes">
+      @if (variantesInferieuresAuxGammes) {
+        <div class="invalid-feedback d-block">Les variantes ne peuvent pas être moins nombreuses que les gammes.</div>
+      } @else {
+        <div class="form-text">Par exemple : 12.</div>
+      }
+    </div>
+
+    <!-- ── 2. Volumes de production ────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-gear-wide-connected me-2"></i>2. Volumes de production</h5>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="production_quotidienne">Production quotidienne (unités / kg / litres)</label>
+      <input id="production_quotidienne" class="form-control" type="text" formControlName="production_quotidienne" maxlength="255">
+      <div class="form-text">Par exemple : 200 kg/jour pour l'ensemble des produits.</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="heures_par_jour">Heures par jour à pleine capacité</label>
+      <input id="heures_par_jour" class="form-control" type="number" min="0" max="24" step="0.5" inputmode="decimal"
+             formControlName="heures_par_jour" [class.is-invalid]="isInvalid('heures_par_jour')">
+      <div class="form-text">Par exemple : 16 (deux équipes).</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="jours_par_semaine">Jours par semaine à pleine capacité</label>
+      <input id="jours_par_semaine" class="form-control" type="number" min="0" max="7" inputmode="numeric"
+             formControlName="jours_par_semaine" [class.is-invalid]="isInvalid('jours_par_semaine')">
+      <div class="form-text">Par exemple : 7.</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="mois_par_an">Mois par an à pleine capacité</label>
+      <input id="mois_par_an" class="form-control" type="number" min="0" max="12" inputmode="numeric"
+             formControlName="mois_par_an" [class.is-invalid]="isInvalid('mois_par_an')">
+      <div class="form-text">Par exemple : 10.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="capacite_utilisee_pct">Part de la capacité maximale actuellement utilisée (%)</label>
+      <input id="capacite_utilisee_pct" class="form-control" type="number" min="0" max="100" inputmode="numeric"
+             formControlName="capacite_utilisee_pct" [class.is-invalid]="isInvalid('capacite_utilisee_pct')">
+      <div class="form-text">Par exemple : 65.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="production_type">Production pour le stock, sur commande, ou les deux ?</label>
+      <select id="production_type" class="form-select" formControlName="production_type">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option value="stock">Pour le stock</option>
+        <option value="commande">Sur commande</option>
+        <option value="les_deux">Les deux</option>
+      </select>
+    </div>
+
+    <!-- ── 3. Installations et équipements ─────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-building-gear me-2"></i>3. Installations et équipements</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="surface_m2">Surface de production (m²)</label>
+      <input id="surface_m2" class="form-control" type="number" min="0" step="0.5" inputmode="decimal"
+             formControlName="surface_m2" [class.is-invalid]="isInvalid('surface_m2')">
+      <div class="form-text">Par exemple : 80.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="propriete">Propriété ou location ?</label>
+      <select id="propriete" class="form-select" formControlName="propriete">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option value="propriete">Propriété</option>
+        <option value="location">Location</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="nb_machines_cles">Nombre de machines clés</label>
+      <input id="nb_machines_cles" class="form-control" type="number" min="0" inputmode="numeric" formControlName="nb_machines_cles"
+             [class.is-invalid]="isInvalid('nb_machines_cles')">
+      <div class="form-text">Par exemple : 5.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="machine_principale">Machine la plus importante (nom + année)</label>
+      <input id="machine_principale" class="form-control" type="text" formControlName="machine_principale" maxlength="255">
+      <div class="form-text">Par exemple : four, 2019.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="jours_perdus_mois">Jours perdus par mois à cause de pannes (moyenne des 6 derniers mois)</label>
+      <input id="jours_perdus_mois" class="form-control" type="number" min="0" max="31" step="0.5" inputmode="decimal"
+             formControlName="jours_perdus_mois" [class.is-invalid]="isInvalid('jours_perdus_mois')">
+      <div class="form-text">Par exemple : 3 jours par mois.</div>
+    </div>
+
+    <!-- ── 4. Effectif ─────────────────────────────────────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-people me-2"></i>4. Effectif</h5>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label" for="effectif_production">Effectif total en production</label>
+      <input id="effectif_production" class="form-control" type="number" min="0" inputmode="numeric" formControlName="effectif_production"
+             [class.is-invalid]="isInvalid('effectif_production')">
+      <div class="form-text">Par exemple : 4.</div>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label" for="effectif_temps_plein">Dont à temps plein</label>
+      <input id="effectif_temps_plein" class="form-control" type="number" min="0" inputmode="numeric" formControlName="effectif_temps_plein"
+             [class.is-invalid]="isInvalid('effectif_temps_plein')">
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label" for="effectif_temps_partiel">Dont à temps partiel</label>
+      <input id="effectif_temps_partiel" class="form-control" type="number" min="0" inputmode="numeric" formControlName="effectif_temps_partiel"
+             [class.is-invalid]="isInvalid('effectif_temps_partiel')">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="formes_securite">Des personnes sont-elles formées à la sécurité alimentaire / aux BPF ?</label>
+      <select id="formes_securite" class="form-select" formControlName="formes_securite">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    @if (isYes('formes_securite')) {
+      <div class="col-md-6">
+        <label class="form-label" for="nb_formes_securite">Combien de personnes formées ?</label>
+        <input id="nb_formes_securite" class="form-control" type="number" min="0" inputmode="numeric" formControlName="nb_formes_securite"
+               [class.is-invalid]="isInvalid('nb_formes_securite')">
+      </div>
+    }
+    <div class="col-12">
+      <label class="form-label" for="lacune_competences">Principale lacune en matière de compétences au sein de l'équipe</label>
+      <input id="lacune_competences" class="form-control" type="text" formControlName="lacune_competences" maxlength="500">
+      <div class="form-text">Par exemple : maintenance, conditionnement.</div>
+    </div>
+
+    <!-- ── 5. Goulets d'étranglement et saisonnalité ───────────────────── -->
+    <div class="col-12 mt-2">
+      <h5 class="pf-section-title"><i class="bi bi-funnel me-2"></i>5. Goulets d'étranglement et saisonnalité</h5>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="saisonnalite">Les ventes présentent-elles une saisonnalité ?</label>
+      <select id="saisonnalite" class="form-select" formControlName="saisonnalite">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    @if (isYes('saisonnalite')) {
+      <div class="col-md-6">
+        <label class="form-label" for="saisonnalite_detail">Quand et dans quelle mesure ?</label>
+        <input id="saisonnalite_detail" class="form-control" type="text" formControlName="saisonnalite_detail" maxlength="500">
+        <div class="form-text">Par exemple : 40 % des ventes entre novembre et janvier.</div>
+      </div>
+    }
+    <div class="col-12">
+      <label class="form-label" for="goulot">Principal goulot d'étranglement qui limite la production aujourd'hui</label>
+      <input id="goulot" class="form-control" type="text" formControlName="goulot" maxlength="500">
+      <div class="form-text">Par exemple : four trop petit.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="augmentation_possible_pct">Augmentation de la production possible SANS nouvel investissement (%)</label>
+      <input id="augmentation_possible_pct" class="form-control" type="number" min="0" max="1000" inputmode="numeric"
+             formControlName="augmentation_possible_pct" [class.is-invalid]="isInvalid('augmentation_possible_pct')">
+      <div class="form-text">Par exemple : 20.</div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="commandes_refusees">Des commandes ont-elles été refusées l'an dernier faute de capacité ?</label>
+      <select id="commandes_refusees" class="form-select" formControlName="commandes_refusees">
+        <option [ngValue]="null">Sélectionner…</option>
+        <option [ngValue]="true">Oui</option>
+        <option [ngValue]="false">Non</option>
+      </select>
+    </div>
+    @if (isYes('commandes_refusees')) {
+      <div class="col-md-6">
+        <label class="form-label" for="commandes_refusees_fcfa">Estimation du manque à gagner ({{ showUsd ? 'USD' : 'FCFA' }})</label>
+        @if (readOnly) {
+          <div class="form-control">{{ money(form.get('commandes_refusees_fcfa')?.value) }}</div>
+        } @else {
+          <input id="commandes_refusees_fcfa" class="form-control" type="number" min="0" step="1" inputmode="numeric"
+                 formControlName="commandes_refusees_fcfa" placeholder="FCFA" [class.is-invalid]="isInvalid('commandes_refusees_fcfa')">
+        }
+      </div>
+    }
+    <div class="col-12">
+      <label class="form-label" for="certifications">Certifications détenues ou nécessaires à la croissance</label>
+      <input id="certifications" class="form-control" type="text" formControlName="certifications" maxlength="500">
+      <div class="form-text">Par exemple : HACCP, bio.</div>
+    </div>
+
+    <!-- ── Actions ─────────────────────────────────────────────────────── -->
+    @if (alertMessage) {
+      <div class="col-12 no-print">
+        <div class="alert mb-0" [class.alert-success]="alertType === 'success'" [class.alert-danger]="alertType === 'danger'">
+          {{ alertMessage }}
+        </div>
+      </div>
+    }
+    @if (preview) {
+      <div class="col-12"><app-preview-banner [end]="true" /></div>
+    } @else if (!readOnly) {
+      <div class="col-12 pf-actions no-print">
+        <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+          <i class="bi bi-x-circle me-1"></i> Annuler
+        </button>
+        <button type="submit" class="btn btn-success pf-btn-save" [disabled]="isSaving">
+          @if (isSaving) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>Enregistrement…
+          } @else {
+            <i class="bi bi-check-circle me-2"></i>Enregistrer le profil
+          }
+        </button>
+      </div>
+    }
+  </form>
+  }
+
+  @if (!preview) { <app-livrable-review toolCode="t1j" /> }
+</div>

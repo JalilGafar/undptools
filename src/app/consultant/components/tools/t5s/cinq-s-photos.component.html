@@ -1,0 +1,82 @@
+<section class="csp" [class.avant]="slot === 'avant'" [class.apres]="slot === 'apres'">
+  <h6 class="csp-title">{{ title }}</h6>
+
+  @if (message) {
+    <div class="alert py-2 no-print" [class.alert-success]="messageType === 'success'" [class.alert-danger]="messageType === 'danger'">{{ message }}</div>
+  }
+
+  <!-- Ajout -->
+  @if (canWrite) {
+    <div class="csp-upload no-print">
+      <input #fileInput type="file" class="d-none" multiple accept="image/jpeg,image/png,image/webp" (change)="onFilesSelected($event)">
+      @if (!files.length) {
+        <button type="button" class="btn btn-primary btn-sm" (click)="fileInput.click()">
+          <i class="bi bi-camera me-1"></i>Ajouter des photos
+        </button>
+      } @else {
+        <p class="csp-selected">
+          <strong>{{ files.length }} photo{{ files.length > 1 ? 's' : '' }} sélectionnée{{ files.length > 1 ? 's' : '' }}</strong>
+          <span class="text-muted small ms-1">{{ files[0].name }}@if (files.length > 1) { , … }</span>
+        </p>
+        <label class="csp-label" [for]="'csp-legend-' + slot">Légende (optionnelle, la même pour ce lot)</label>
+        <input [id]="'csp-legend-' + slot" type="text" class="form-control form-control-sm" maxlength="255"
+               [(ngModel)]="legend" placeholder="Ex. : atelier, zone de stockage">
+        <div class="csp-buttons">
+          <button type="button" class="btn btn-success btn-sm" [disabled]="isUploading" (click)="upload()">
+            @if (isUploading) { <span class="spinner-border spinner-border-sm me-1"></span>Envoi en cours… }
+            @else { <i class="bi bi-check-circle me-1"></i>Envoyer }
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="isUploading" (click)="clearFiles()">Annuler</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Photos -->
+  @if (isLoading) {
+    <div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+  } @else if (loadError) {
+    <div class="alert alert-danger py-2 no-print">Impossible de charger les photos.</div>
+  } @else if (!photos.length) {
+    <p class="csp-empty">Aucune photo</p>
+  } @else {
+    <div class="csp-grid">
+      @for (photo of photos; track photo.id; let i = $index) {
+        <figure class="csp-card">
+          <button type="button" class="csp-thumb" (click)="openLightbox(i)" [attr.aria-label]="'Agrandir la photo ' + (i + 1)">
+            @if (thumbs.get(photo.id); as url) {
+              <img [src]="url" [alt]="photo.legend || title">
+            } @else {
+              <span class="spinner-border spinner-border-sm text-secondary"></span>
+            }
+          </button>
+          @if (photo.legend) { <figcaption class="csp-legend">{{ photo.legend }}</figcaption> }
+          @if (canWrite) {
+            <button type="button" class="btn btn-outline-danger btn-sm csp-del no-print" (click)="remove(photo)">
+              <i class="bi bi-trash me-1"></i>Supprimer
+            </button>
+          }
+        </figure>
+      }
+    </div>
+  }
+</section>
+
+<!-- Agrandissement -->
+@if (current; as photo) {
+  <div class="csp-lightbox" (click)="closeLightbox()">
+    <button type="button" class="csp-lb-close" (click)="closeLightbox()" aria-label="Fermer"><i class="bi bi-x-lg"></i></button>
+    @if (photos.length > 1) {
+      <button type="button" class="csp-lb-nav csp-lb-prev" (click)="$event.stopPropagation(); move(-1)" aria-label="Précédente"><i class="bi bi-chevron-left"></i></button>
+      <button type="button" class="csp-lb-nav csp-lb-next" (click)="$event.stopPropagation(); move(1)" aria-label="Suivante"><i class="bi bi-chevron-right"></i></button>
+    }
+    <figure (click)="$event.stopPropagation()">
+      @if (lightboxUrl) {
+        <img [src]="lightboxUrl" [alt]="photo.legend || title">
+      } @else {
+        <div class="spinner-border text-light"></div>
+      }
+      <figcaption>{{ title }}@if (photo.legend) { — {{ photo.legend }} }</figcaption>
+    </figure>
+  </div>
+}

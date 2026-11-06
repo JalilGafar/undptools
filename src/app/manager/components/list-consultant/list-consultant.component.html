@@ -10,6 +10,11 @@
         </div>
     </div>
     }
+    @if ((userState$ | async)?.loading) {
+        <app-loading message="Chargement des consultants…" />
+    } @else if ((userState$ | async)?.error) {
+        <app-load-error message="Impossible de charger les consultants." />
+    } @else {
     <div class="row  row-cols-1 row-cols-sm-2 row-cols-md-4 justify-content-around">
         @if (user$ |async; as data) {
         @for (item of data; track $index) {
@@ -49,4 +54,5 @@
         }
         }
     </div>
+    }
 </div>
